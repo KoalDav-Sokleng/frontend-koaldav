@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Plus, X, ArrowLeft, Calendar, Clock, Edit2, Trash2,
-  TrendingUp, Compass, Wallet, Mountain, Briefcase, Heart, GraduationCap, Sparkles,
+  TrendingUp, Compass, Wallet, Briefcase, Heart, GraduationCap, Sparkles,
   ImagePlus, Link2, Upload
 } from "lucide-react";
 

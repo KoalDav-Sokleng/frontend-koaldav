@@ -1,52 +1,45 @@
 // src/api/client.js
-// Single place that knows how to talk to the backend.
-// Every feature's api/*.js file should import `apiFetch` from here
-// instead of calling fetch() directly.
+import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Points to your Spring Boot server on port 8081 with /api prefix
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8081/api";
 
-function getToken() {
-  return localStorage.getItem("accessToken");
-}
+const http = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
 
-/**
- * apiFetch("/goals", { method: "POST", body: { title: "Run 5k" } })
- */
+// Attach JWT token automatically
+http.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token && config.auth !== false) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Centralized error + 401 handling
+http.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("accessToken");
+    }
+    const message =
+      error.response?.data?.message || error.message || "Request failed";
+    return Promise.reject(new Error(message));
+  }
+);
+
 export async function apiFetch(path, { method = "GET", body, headers = {}, auth = true } = {}) {
-  const finalHeaders = {
-    "Content-Type": "application/json",
-    ...headers,
-  };
-
-  if (auth) {
-    const token = getToken();
-    if (token) finalHeaders.Authorization = `Bearer ${token}`;
-  }
-
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await http.request({
+    url: path,
     method,
-    headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
+    data: body,
+    headers,
+    auth,
   });
-
-  if (res.status === 401) {
-    // token expired / invalid - let AuthContext decide what to do
-    localStorage.removeItem("accessToken");
-  }
-
-  let data = null;
-  try {
-    data = await res.json();
-  } catch {
-    // no JSON body (e.g. 204 No Content)
-  }
-
-  if (!res.ok) {
-    const message = data?.message || `Request failed with status ${res.status}`;
-    throw new Error(message);
-  }
-
-  return data;
+  return res.data;
 }
 
 export default apiFetch;
