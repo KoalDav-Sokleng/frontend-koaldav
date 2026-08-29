@@ -22,6 +22,17 @@ export function useProjectGoals() {
     return goal;
   }, []);
 
+  const updateGoal = useCallback(async (goalId, payload) => {
+    const goal = await goalApi.updateProjectGoal(goalId, payload);
+    setGoals((prev) => prev.map((item) => item.id === goalId ? { ...item, ...goal, milestones: goal.milestones ?? item.milestones } : item));
+    return goal;
+  }, []);
+
+  const deleteGoal = useCallback(async (goalId) => {
+    await goalApi.deleteProjectGoal(goalId);
+    setGoals((prev) => prev.filter((goal) => goal.id !== goalId));
+  }, []);
+
   const addMilestone = useCallback(async (goalId, payload) => {
     const milestone = await goalApi.addMilestone(goalId, payload);
     setGoals((prev) =>
@@ -40,6 +51,23 @@ export function useProjectGoals() {
     );
   }, []);
 
+  const updateMilestone = useCallback(async (goalId, milestoneId, payload) => {
+    const milestone = await goalApi.updateMilestone(goalId, milestoneId, payload);
+    setGoals((prev) => prev.map((goal) => goal.id !== goalId ? goal : {
+      ...goal,
+      milestones: goal.milestones.map((item) => item.id === milestoneId ? { ...item, ...milestone } : item),
+    }));
+    return milestone;
+  }, []);
+
+  const deleteMilestone = useCallback(async (goalId, milestoneId) => {
+    await goalApi.deleteMilestone(goalId, milestoneId);
+    setGoals((prev) => prev.map((goal) => goal.id !== goalId ? goal : {
+      ...goal,
+      milestones: goal.milestones.filter((item) => item.id !== milestoneId),
+    }));
+  }, []);
+
   const logFocusSession = useCallback(async (goalId, milestoneId, payload) => {
     const session = await goalApi.logFocusSession(milestoneId, payload);
     setGoals((prev) =>
@@ -53,5 +81,5 @@ export function useProjectGoals() {
     return session;
   }, []);
 
-  return { goals, loading, error, refresh, createGoal, addMilestone, completeMilestone, logFocusSession };
+  return { goals, loading, error, refresh, createGoal, updateGoal, deleteGoal, addMilestone, updateMilestone, deleteMilestone, completeMilestone, logFocusSession };
 }

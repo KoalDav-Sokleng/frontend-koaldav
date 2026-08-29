@@ -1,5 +1,6 @@
-import { Search, Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import NotificationBell from "../features/notification/components/NotificationBell";
 
 const GOAL_SUB_LINKS = [
   { to: "/goal", label: "Project", end: true },
@@ -27,14 +28,14 @@ export default function TopMenu({ onMenuClick }) {
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="relative flex-1 max-w-[320px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        {/* <div className="relative flex-1 max-w-[320px]"> */}
+          {/* <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Search..."
             className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-700 placeholder:text-gray-400 shadow-sm transition-all duration-200 outline-none hover:border-gray-400 focus:border-gray-400 focus:ring-2 focus:ring-black/10"
           />
-        </div>
+        </div> */}
 
         {/* Goal sub-nav: desktop only, sits inline next to search */}
         {isGoalSection && (
@@ -47,7 +48,7 @@ export default function TopMenu({ onMenuClick }) {
           </nav>
         )}
 
-        <Bell className="w-5 h-5 text-gray-500 shrink-0 ml-auto" />
+        <NotificationBell />
       </div>
 
       {/* Goal sub-nav: mobile, wraps to its own row so it doesn't crowd search */}

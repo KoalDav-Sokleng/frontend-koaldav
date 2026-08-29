@@ -23,12 +23,24 @@ export function getProjectGoal(goalId) {
 export function createProjectGoal({ title, deadline }) {
   return apiFetch("/goals/projects", { method: "POST", body: { title, deadline } });
 }
+export function updateProjectGoal(goalId, { title, deadline }) {
+  return apiFetch(`/goals/projects/${goalId}`, { method: "PUT", body: { title, deadline } });
+}
+export function deleteProjectGoal(goalId) {
+  return apiFetch(`/goals/projects/${goalId}`, { method: "DELETE" });
+}
 export function addMilestone(goalId, { title }) {
   return apiFetch(`/goals/projects/${goalId}/milestones`, { method: "POST", body: { title } });
 }
 
 export function completeMilestone(goalId, milestoneId) {
   return apiFetch(`/goals/projects/${goalId}/milestones/${milestoneId}/complete`, { method: "PATCH" });
+}
+export function updateMilestone(goalId, milestoneId, { title }) {
+  return apiFetch(`/goals/projects/${goalId}/milestones/${milestoneId}`, { method: "PUT", body: { title } });
+}
+export function deleteMilestone(goalId, milestoneId) {
+  return apiFetch(`/goals/projects/${goalId}/milestones/${milestoneId}`, { method: "DELETE" });
 }
 
 export function logFocusSession(milestoneId, { durationMinutes }) {

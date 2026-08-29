@@ -14,6 +14,7 @@ import SavingTab from "../features/goal/components/SavingTab";
 
 import FinancePage from "../features/finance/FinancePage";
 import HabitPage from "../features/habit/HabitPage";
+import NotificationPage from "../features/notification/NotificationPage";
 
 function AppRoutes() {
   return (
@@ -34,6 +35,7 @@ function AppRoutes() {
 
         <Route path="finance" element={<FinancePage />} />
         <Route path="habit" element={<HabitPage />} />
+        <Route path="notification" element={<NotificationPage />} />
       </Route>
     </Routes>
   );

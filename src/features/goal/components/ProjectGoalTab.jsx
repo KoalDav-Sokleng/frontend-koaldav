@@ -17,7 +17,13 @@ import {
   PartyPopper,
   Check,
   Sparkles,
+  MoreVertical,
+  Pencil,
+  Trash2,
+  Search,
 } from "lucide-react";
+import Swal from "sweetalert2";
+import { useSearchParams } from "react-router-dom";
 import MilestoneRow from "./MilestoneRow";
 import { useProjectGoals } from "../hooks/useProjectGoals";
 import { useAmbientSound } from "../hooks/useAmbientSound";
@@ -50,19 +56,19 @@ function formatClock(totalSeconds) {
 
 /* ---------------- Goal card ---------------- */
 
-function GoalCard({ goal, onClick }) {
+function GoalCard({ goal, onClick, onEdit, onDelete }) {
   const progress = goalProgress(goal);
   const status = goalStatusLabel(goal);
   const isCompleted = status === "Completed";
   const milestoneCount = goal.milestones?.length ?? 0;
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <button
-      onClick={onClick}
+    <div
       className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
+        <button onClick={onClick} className="min-w-0 flex-1 text-left">
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isCompleted
@@ -87,8 +93,19 @@ function GoalCard({ goal, onClick }) {
               {formatDueDate(goal.deadline)}
             </span>
           </div>
-        </div>
+        </button>
         <div className="flex w-28 shrink-0 flex-col items-end">
+          <div className="relative -mt-2 -mr-2 self-end">
+            <button onClick={() => setMenuOpen((open) => !open)} aria-label="Goal actions" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+              <MoreVertical className="h-4 w-4" />
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-slate-100 bg-white py-1 shadow-lg">
+                <button onClick={() => { setMenuOpen(false); onEdit(); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><Pencil className="h-3.5 w-3.5" /> Edit</button>
+                <button onClick={() => { setMenuOpen(false); onDelete(); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
+              </div>
+            )}
+          </div>
           <span className="mb-2 text-xs text-slate-400">Overall Progress</span>
           <span
             className={`text-lg font-semibold ${isCompleted ? "text-emerald-600" : "text-indigo-600"}`}
@@ -103,15 +120,15 @@ function GoalCard({ goal, onClick }) {
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
 /* ---------------- New Goal modal ---------------- */
 
-function NewGoalModal({ onClose, onSave }) {
-  const [title, setTitle] = useState("");
-  const [deadline, setDeadline] = useState("");
+function NewGoalModal({ onClose, onSave, goal }) {
+  const [title, setTitle] = useState(goal?.title ?? "");
+  const [deadline, setDeadline] = useState(goal?.deadline ?? "");
   const [titleError, setTitleError] = useState("");
   const [dateError, setDateError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -148,10 +165,10 @@ function NewGoalModal({ onClose, onSave }) {
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
-                Create Goal
+                {goal ? "Edit Goal" : "Create Goal"}
               </h2>
               <p className="mt-0.5 text-xs text-slate-400">
-                Define your vision, then add milestones next.
+                {goal ? "Update your goal details." : "Define your vision, then add milestones next."}
               </p>
             </div>
             <button
@@ -229,7 +246,7 @@ function NewGoalModal({ onClose, onSave }) {
             disabled={saving}
             className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Save Goal"}{" "}
+            {saving ? "Saving..." : goal ? "Save Changes" : "Save Goal"}{" "}
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
@@ -240,8 +257,8 @@ function NewGoalModal({ onClose, onSave }) {
 
 /* ---------------- Add Milestone modal ---------------- */
 
-function AddMilestoneModal({ onClose, onSave }) {
-  const [title, setTitle] = useState("");
+function AddMilestoneModal({ onClose, onSave, milestone }) {
+  const [title, setTitle] = useState(milestone?.title ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -271,7 +288,7 @@ function AddMilestoneModal({ onClose, onSave }) {
       >
         <div className="flex items-start justify-between border-b border-slate-100 px-6 pt-5 pb-4">
           <h2 className="text-lg font-semibold text-slate-900">
-            Add Milestone
+            {milestone ? "Edit Milestone" : "Add Milestone"}
           </h2>
           <button
             onClick={onClose}
@@ -315,7 +332,7 @@ function AddMilestoneModal({ onClose, onSave }) {
             disabled={saving}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Save Milestone"}
+            {saving ? "Saving..." : milestone ? "Save Changes" : "Save Milestone"}
           </button>
         </div>
       </div>
@@ -327,6 +344,34 @@ function AddMilestoneModal({ onClose, onSave }) {
 
 function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
   const [minutes, setMinutes] = useState(25);
+  const [customMinutes, setCustomMinutes] = useState("");
+  const [error, setError] = useState("");
+
+  const selectPreset = (preset) => {
+    setMinutes(preset);
+    setCustomMinutes("");
+    setError("");
+  };
+
+  const handleCustomMinutes = (value) => {
+    setCustomMinutes(value);
+    const parsed = Number(value);
+    if (!value) {
+      setError("");
+      return;
+    }
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 480) {
+      setError("Enter a whole number from 1 to 480 minutes.");
+      return;
+    }
+    setMinutes(parsed);
+    setError("");
+  };
+
+  const handleStart = () => {
+    if (error || !minutes) return;
+    onStart(minutes * 60);
+  };
 
   return (
     <div
@@ -359,7 +404,7 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
             {DURATION_PRESETS.map((p) => (
               <button
                 key={p}
-                onClick={() => setMinutes(p)}
+                onClick={() => selectPreset(p)}
                 className={`rounded-full border px-3.5 py-1.5 text-sm font-medium ${
                   minutes === p
                     ? "border-indigo-500 bg-indigo-50 text-indigo-700"
@@ -369,6 +414,23 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
                 {p}m
               </button>
             ))}
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-slate-600">
+              Or set a custom duration (minutes)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="480"
+              step="1"
+              inputMode="numeric"
+              value={customMinutes}
+              onChange={(event) => handleCustomMinutes(event.target.value)}
+              placeholder="e.g. 90"
+              className={`w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${error ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}`}
+            />
+            {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
           </div>
           <div className="rounded-xl border border-slate-100 bg-slate-50 py-3 text-center">
             <span className="text-2xl font-semibold tabular-nums text-slate-900">
@@ -384,8 +446,9 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
             Cancel
           </button>
           <button
-            onClick={() => onStart(minutes * 60)}
-            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            onClick={handleStart}
+            disabled={Boolean(error)}
+            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Play className="h-4 w-4" /> Start Session
           </button>
@@ -423,7 +486,7 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
   const offset = circumference * (1 - fraction);
 
   return (
-    <div className="min-h-full bg-slate-50 px-8 py-8">
+    <div className="min-h-full bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-50 px-8 py-8">
       <div className="mx-auto max-w-xl">
         <button
           onClick={() => onExit(elapsed, false)}
@@ -431,11 +494,14 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
         >
           <ArrowLeft className="h-4 w-4" /> Leave Session
         </button>
-        <div className="rounded-3xl bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 p-10 text-center text-white shadow-xl">
-          <p className="text-xs font-medium uppercase tracking-widest text-indigo-300">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-600 p-10 text-center text-white shadow-[0_24px_60px_-20px_rgba(79,70,229,0.6)]">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-violet-300/20 blur-2xl" />
+          <div className="relative">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">
             Active Session
           </p>
-          <p className="mt-1 text-sm text-indigo-100">
+          <p className="mt-1 text-sm text-indigo-100/90">
             {goalTitle} &middot; {milestoneTitle}
           </p>
           <div className="relative mx-auto mt-8 h-56 w-56">
@@ -445,7 +511,7 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
                 cy="100"
                 r={radius}
                 fill="none"
-                stroke="rgba(255,255,255,0.12)"
+                stroke="rgba(255,255,255,0.2)"
                 strokeWidth="10"
               />
               <circle
@@ -453,7 +519,7 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
                 cy="100"
                 r={radius}
                 fill="none"
-                stroke="#818cf8"
+                stroke="#ffffff"
                 strokeWidth="10"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
@@ -465,7 +531,7 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
               <span className="text-4xl font-semibold tabular-nums">
                 {formatClock(remaining)}
               </span>
-              <span className="mt-1 text-[11px] uppercase tracking-widest text-indigo-300">
+              <span className="mt-1 text-[11px] uppercase tracking-widest text-indigo-100">
                 remaining
               </span>
             </div>
@@ -473,7 +539,7 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
           <div className="mt-8 flex items-center justify-center gap-3">
             <button
               onClick={() => setIsPaused((p) => !p)}
-              className="flex items-center gap-1.5 rounded-full bg-indigo-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-indigo-400"
+              className="flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-950/10 hover:bg-indigo-50"
             >
               {isPaused ? (
                 <>
@@ -489,13 +555,13 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
               onClick={() => onExit(elapsed, true)}
               aria-label="Finish session now"
               title="Finish session now"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20"
             >
               <Check className="h-4 w-4" />
             </button>
           </div>
           <div className="mt-8">
-            <p className="mb-3 text-[11px] uppercase tracking-widest text-indigo-300">
+            <p className="mb-3 text-[11px] uppercase tracking-widest text-indigo-100">
               Background sound
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -506,13 +572,14 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
                   className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${
                     activeSound === id
                       ? "bg-white text-indigo-900"
-                      : "bg-white/10 text-indigo-100 hover:bg-white/20"
+                      : "border border-white/10 bg-white/10 text-indigo-50 hover:bg-white/20"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" /> {label}
                 </button>
               ))}
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -561,6 +628,10 @@ function GoalDetailPage({
   onAddMilestone,
   onToggleMilestone,
   onStartFocus,
+  onEditMilestone,
+  onDeleteMilestone,
+  searchTerm,
+  onSearchChange,
 }) {
   const progress = goalProgress(goal);
   const status = goalStatusLabel(goal);
@@ -602,6 +673,11 @@ function GoalDetailPage({
           </button>
         </div>
 
+        <div className="relative mb-5">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search milestone title..." className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+        </div>
+
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="font-medium text-slate-700">Overall Progress</span>
@@ -626,15 +702,8 @@ function GoalDetailPage({
         {goal.milestones.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center">
             <ListChecks className="mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">
-              No milestones yet
-            </p>
-            <button
-              onClick={onAddMilestone}
-              className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              <Plus className="h-4 w-4" /> Add Milestone
-            </button>
+            <p className="text-sm font-medium text-slate-600">{searchTerm ? "No matching milestones" : "No milestones yet"}</p>
+            {!searchTerm && <button onClick={onAddMilestone} className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"><Plus className="h-4 w-4" /> Add Milestone</button>}
           </div>
         ) : (
           <div className="space-y-3">
@@ -644,6 +713,8 @@ function GoalDetailPage({
                 milestone={m}
                 onToggleComplete={() => onToggleMilestone(m.id)}
                 onStartFocus={() => onStartFocus(m.id)}
+                onEdit={() => onEditMilestone(m)}
+                onDelete={() => onDeleteMilestone(m)}
               />
             ))}
           </div>
@@ -661,7 +732,11 @@ export default function ProjectGoalTab() {
     loading,
     error,
     createGoal,
+    updateGoal,
+    deleteGoal,
     addMilestone,
+    updateMilestone,
+    deleteMilestone,
     completeMilestone,
     logFocusSession,
   } = useProjectGoals();
@@ -673,16 +748,45 @@ export default function ProjectGoalTab() {
 
   const [isNewGoalModalOpen, setIsNewGoalModalOpen] = useState(false);
   const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState(null);
+  const [editingMilestone, setEditingMilestone] = useState(null);
   const [isDurationModalOpen, setIsDurationModalOpen] = useState(false);
   const [congrats, setCongrats] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Deep-link support: arriving here with `?goal=<id>` (e.g. from a
+  // notification bell) opens that goal's detail once the list has loaded.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkGoalId = searchParams.get("goal");
+  const [appliedDeepLink, setAppliedDeepLink] = useState(false);
+  useEffect(() => {
+    if (loading || appliedDeepLink || !deepLinkGoalId) return;
+    const target = goals.find((g) => String(g.id) === deepLinkGoalId);
+    if (target) {
+      setSelectedGoalId(target.id);
+      setView("detail");
+      setSearchTerm("");
+      setSearchParams({}, { replace: true });
+    }
+    setAppliedDeepLink(true);
+  }, [loading, appliedDeepLink, deepLinkGoalId, goals, setSearchParams]);
 
   const selectedGoal = goals.find((g) => g.id === selectedGoalId) ?? null;
   const activeMilestone =
     selectedGoal?.milestones.find((m) => m.id === activeMilestoneId) ?? null;
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredGoals = normalizedSearch
+    ? goals.filter((goal) => goal.title.toLowerCase().includes(normalizedSearch))
+    : goals;
+  const filteredMilestones = selectedGoal?.milestones.filter((milestone) =>
+    milestone.title.toLowerCase().includes(normalizedSearch)
+  ) ?? [];
 
   const handleSaveGoal = async (payload) => {
-    const goal = await createGoal(payload);
+    const goal = editingGoal ? await updateGoal(editingGoal.id, payload) : await createGoal(payload);
     setIsNewGoalModalOpen(false);
+    setEditingGoal(null);
+    setSearchTerm("");
     setSelectedGoalId(goal.id);
     setView("detail");
   };
@@ -690,11 +794,43 @@ export default function ProjectGoalTab() {
   const backToList = () => {
     setView("list");
     setSelectedGoalId(null);
+    setSearchTerm("");
   };
 
   const handleAddMilestone = async (payload) => {
-    await addMilestone(selectedGoalId, payload);
+    if (editingMilestone) await updateMilestone(selectedGoalId, editingMilestone.id, payload);
+    else await addMilestone(selectedGoalId, payload);
     setIsMilestoneModalOpen(false);
+    setEditingMilestone(null);
+  };
+
+  const confirmDeleteGoal = async (goal) => {
+    const result = await Swal.fire({ title: "Delete this goal?", text: `“${goal.title}” and its milestones will be removed.`, icon: "warning", showCancelButton: true, confirmButtonText: "Yes, delete it", cancelButtonText: "Cancel", confirmButtonColor: "#e11d48" });
+    if (!result.isConfirmed) return;
+    try {
+      await deleteGoal(goal.id);
+      if (selectedGoalId === goal.id) backToList();
+      await Swal.fire({ title: "Deleted", text: "The goal was deleted.", icon: "success", timer: 1400, showConfirmButton: false });
+    } catch (err) { Swal.fire("Couldn't delete goal", err.message || "Please try again.", "error"); }
+  };
+
+  const confirmDeleteMilestone = async (milestone) => {
+    const result = await Swal.fire({ title: "Delete this milestone?", text: `“${milestone.title}” will be removed.`, icon: "warning", showCancelButton: true, confirmButtonText: "Yes, delete it", cancelButtonText: "Cancel", confirmButtonColor: "#e11d48" });
+    if (!result.isConfirmed) return;
+    try {
+      await deleteMilestone(selectedGoalId, milestone.id);
+      await Swal.fire({ title: "Deleted", text: "The milestone was deleted.", icon: "success", timer: 1400, showConfirmButton: false });
+    } catch (err) { Swal.fire("Couldn't delete milestone", err.message || "Please try again.", "error"); }
+  };
+
+  const confirmEditGoal = async (goal) => {
+    const result = await Swal.fire({ title: "Edit this goal?", text: `Update “${goal.title}” in the form that follows.`, icon: "question", showCancelButton: true, confirmButtonText: "Continue to edit", cancelButtonText: "Cancel", confirmButtonColor: "#4f46e5" });
+    if (result.isConfirmed) { setEditingGoal(goal); setIsNewGoalModalOpen(true); }
+  };
+
+  const confirmEditMilestone = async (milestone) => {
+    const result = await Swal.fire({ title: "Edit this milestone?", text: `Update “${milestone.title}” in the form that follows.`, icon: "question", showCancelButton: true, confirmButtonText: "Continue to edit", cancelButtonText: "Cancel", confirmButtonColor: "#4f46e5" });
+    if (result.isConfirmed) { setEditingMilestone(milestone); setIsMilestoneModalOpen(true); }
   };
 
   const handleToggleMilestone = (milestoneId) =>
@@ -759,16 +895,21 @@ export default function ProjectGoalTab() {
     return (
       <>
         <GoalDetailPage
-          goal={selectedGoal}
+          goal={{ ...selectedGoal, milestones: filteredMilestones }}
           onBack={backToList}
-          onAddMilestone={() => setIsMilestoneModalOpen(true)}
+          onAddMilestone={() => { setEditingMilestone(null); setIsMilestoneModalOpen(true); }}
           onToggleMilestone={handleToggleMilestone}
           onStartFocus={handleStartFocusClick}
+          onEditMilestone={confirmEditMilestone}
+          onDeleteMilestone={confirmDeleteMilestone}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
         />
         {isMilestoneModalOpen && (
           <AddMilestoneModal
-            onClose={() => setIsMilestoneModalOpen(false)}
+            onClose={() => { setIsMilestoneModalOpen(false); setEditingMilestone(null); }}
             onSave={handleAddMilestone}
+            milestone={editingMilestone}
           />
         )}
         {isDurationModalOpen && activeMilestone && (
@@ -805,31 +946,39 @@ export default function ProjectGoalTab() {
             </p>
           </div>
           <button
-            onClick={() => setIsNewGoalModalOpen(true)}
+            onClick={() => { setEditingGoal(null); setIsNewGoalModalOpen(true); }}
             className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" /> New Goal
           </button>
         </div>
 
-        {goals.length === 0 ? (
+        <div className="relative mb-5">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search goal title..." className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+        </div>
+
+        {filteredGoals.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
             <CheckCircle2 className="mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">No goals yet</p>
+            <p className="text-sm font-medium text-slate-600">{goals.length === 0 ? "No goals yet" : "No matching goals"}</p>
             <p className="mt-1 text-xs text-slate-400">
               Create your first goal to start tracking progress.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {goals.map((goal) => (
+            {filteredGoals.map((goal) => (
               <GoalCard
                 key={goal.id}
                 goal={goal}
                 onClick={() => {
+                  setSearchTerm("");
                   setSelectedGoalId(goal.id);
                   setView("detail");
                 }}
+                onEdit={() => confirmEditGoal(goal)}
+                onDelete={() => confirmDeleteGoal(goal)}
               />
             ))}
           </div>
@@ -838,8 +987,9 @@ export default function ProjectGoalTab() {
 
       {isNewGoalModalOpen && (
         <NewGoalModal
-          onClose={() => setIsNewGoalModalOpen(false)}
+          onClose={() => { setIsNewGoalModalOpen(false); setEditingGoal(null); }}
           onSave={handleSaveGoal}
+          goal={editingGoal}
         />
       )}
     </div>
