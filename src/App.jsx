@@ -8,7 +8,7 @@ import RegisterPage from "./features/auth/RegisterPage";
 
 // ទុកតែមួយ line នេះបានហើយ (លុប line ស្ទួនចេញ)
 import HabitPage from "./features/habit/HabitPage";
-=======
+
 //import DashboardPage from "./features/dashboard/DashboardPage";
 //import GoalPage from "./features/goal/GoalPage";ctGoalTab";
 //import TripTab from "./features/goal/components/TripTab";
@@ -16,7 +16,7 @@ import HabitPage from "./features/habit/HabitPage";
 //import SavingTab from "./features/goal/components/SavingTab";
 //import FinancePage from "./features/finance/FinancePage";
 //import HabitPage from "./features/habit/HabitPage";
->>>>>>> dbbb40c8e4484b1465daf503fe009f5339d135c6
+
 
 import FinancePage from "./features/finance/FinancePage";
 
@@ -27,14 +27,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
 
       <Route path="/" element={<Layout />}>
-<<<<<<< HEAD
-        <Route index element={<div>Dashboard Page (Coming Soon)</div>} />
-        <Route path="goal" element={<div>Goal Page (Coming Soon)</div>} />
-        <Route path="finance" element={<FinancePage />} />
-        <Route path="habit" element={<HabitPage />} />
-=======
         
->>>>>>> dbbb40c8e4484b1465daf503fe009f5339d135c6
       </Route>
     </Routes>
   );
