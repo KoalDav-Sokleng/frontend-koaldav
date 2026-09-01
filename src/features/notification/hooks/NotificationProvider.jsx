@@ -1,23 +1,19 @@
-import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as notificationApi from "../api/notificationApi";
 
 export const NotificationContext = createContext(null);
 
-const POLL_INTERVAL_MS = 10000;
+const POLL_INTERVAL_MS = 45000;
 const NOTIFICATIONS_UPDATED_EVENT = "goal-notifications-updated";
 
-function isWithinThreeDays(notification) {
-  const daysLeft = Number(notification.daysLeft);
-  if (Number.isFinite(daysLeft)) return daysLeft >= 0 && daysLeft <= 3;
-
-  if (!notification.deadline) return false;
-  const deadline = new Date(`${notification.deadline}T23:59:59`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return (deadline - today) / 86_400_000 >= 0 && (deadline - today) / 86_400_000 <= 3;
-}
-
-export function NotificationProvider({ children, userId = 1 }) {
+export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,31 +21,26 @@ export function NotificationProvider({ children, userId = 1 }) {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const data = await notificationApi.getAllNotifications(userId);
+      const data = await notificationApi.getAllNotifications();
       if (mountedRef.current) {
         setNotifications(Array.isArray(data) ? data : []);
         setError(null);
       }
     } catch (err) {
       if (mountedRef.current) setError(err);
+    } finally {
+      if (mountedRef.current) setLoading(false);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
 
     const init = async () => {
-      try {
-        await notificationApi.triggerCheck();
-      } catch {
-        /* backend may be unavailable */
-      }
-      if (mountedRef.current) {
-        setLoading(true);
-        await fetchNotifications();
-        if (mountedRef.current) setLoading(false);
-      }
+      setLoading(true);
+      await fetchNotifications();
     };
+
     init();
 
     const refreshWhenVisible = () => {
@@ -71,37 +62,50 @@ export function NotificationProvider({ children, userId = 1 }) {
     };
   }, [fetchNotifications]);
 
-  const markNotificationAsRead = useCallback(async (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
-    try {
-      await notificationApi.markAsRead(id);
-      window.dispatchEvent(new Event(NOTIFICATIONS_UPDATED_EVENT));
-    } catch (err) {
-      console.error("Error marking as read:", err);
-      fetchNotifications();
-    }
-  }, [fetchNotifications]);
+  const markNotificationAsRead = useCallback(
+    async (id) => {
+      if (!id) return;
 
-  const recentNotifications = useMemo(
-    () => notifications.filter(isWithinThreeDays),
-    [notifications]
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+      );
+
+      try {
+        await notificationApi.markAsRead(id);
+        window.dispatchEvent(new Event(NOTIFICATIONS_UPDATED_EVENT));
+      } catch (err) {
+        console.error("Error marking as read:", err);
+        fetchNotifications();
+      }
+    },
+    [fetchNotifications],
   );
 
-  const hasUnread = recentNotifications.some((n) => !n.isRead);
-  const unreadCount = recentNotifications.filter((n) => !n.isRead).length;
+  const unreadNotifications = useMemo(
+    () => notifications.filter((n) => n.isRead === false),
+    [notifications],
+  );
+
+  const hasUnread = unreadNotifications.length > 0;
+  const unreadCount = unreadNotifications.length;
 
   const value = useMemo(
     () => ({
-      notifications: recentNotifications,
+      notifications,
       unreadCount,
       hasUnread,
       loading,
       error,
       markNotificationAsRead,
     }),
-    [recentNotifications, unreadCount, hasUnread, loading, error, markNotificationAsRead]
+    [
+      notifications,
+      unreadCount,
+      hasUnread,
+      loading,
+      error,
+      markNotificationAsRead,
+    ],
   );
 
   return (

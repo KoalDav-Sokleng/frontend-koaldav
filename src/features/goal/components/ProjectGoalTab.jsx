@@ -21,13 +21,29 @@ import {
   Pencil,
   Trash2,
   Search,
+  AlertCircle,
+  AlertTriangle,
+  CalendarX,
+  Clock,
+  Lock,
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { useSearchParams } from "react-router-dom";
 import MilestoneRow from "./MilestoneRow";
 import { useProjectGoals } from "../hooks/useProjectGoals";
 import { useAmbientSound } from "../hooks/useAmbientSound";
-import { goalProgress, goalStatusLabel } from "../utils/goalHelpers";
+import {
+  goalProgress,
+  goalStatusLabel,
+  isGoalMissed,
+  isGoalCompleted,
+} from "../utils/goalHelpers";
+
+const STATUS_TABS = [
+  { id: "IN_PROGRESS", label: "Active", icon: Clock },
+  { id: "COMPLETED", label: "Completed", icon: CheckCircle2 },
+  { id: "MISSED", label: "Missed", icon: AlertCircle },
+];
 
 const DURATION_PRESETS = [15, 25, 30, 45, 60];
 const SOUND_OPTIONS = [
@@ -59,23 +75,34 @@ function formatClock(totalSeconds) {
 function GoalCard({ goal, onClick, onEdit, onDelete }) {
   const progress = goalProgress(goal);
   const status = goalStatusLabel(goal);
-  const isCompleted = status === "Completed";
+  const isCompleted = isGoalCompleted(goal);
+  const isMissed = isGoalMissed(goal);
   const milestoneCount = goal.milestones?.length ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div
-      className="w-full rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-md"
+      className={`w-full rounded-2xl border p-5 text-left shadow-sm transition-all hover:shadow-md ${
+        isMissed
+          ? "border-rose-200 bg-rose-50/20 hover:border-rose-300"
+          : isCompleted
+            ? "border-slate-200 bg-white hover:border-emerald-200"
+            : "border-slate-200 bg-white hover:border-indigo-200"
+      }`}
     >
       <div className="flex items-start justify-between gap-4">
         <button onClick={onClick} className="min-w-0 flex-1 text-left">
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isCompleted
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-indigo-50 text-indigo-600"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                : isMissed
+                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                  : "bg-indigo-50 text-indigo-700 border border-indigo-200"
             }`}
           >
+            {isMissed && <AlertCircle className="h-3 w-3" />}
+            {isCompleted && <CheckCircle2 className="h-3 w-3" />}
             {status}
           </span>
           <h3 className="mt-2 text-base font-semibold text-slate-900">
@@ -88,33 +115,70 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
                 ? "No milestones yet"
                 : `${milestoneCount} milestone${milestoneCount > 1 ? "s" : ""}`}
             </span>
-            <span className="flex items-center gap-1 text-xs text-slate-400">
+            <span
+              className={`flex items-center gap-1 text-xs ${
+                isMissed ? "font-medium text-rose-600" : "text-slate-400"
+              }`}
+            >
               <Calendar className="h-3.5 w-3.5" />
               {formatDueDate(goal.deadline)}
+              {isMissed && " (Passed)"}
             </span>
           </div>
         </button>
         <div className="flex w-28 shrink-0 flex-col items-end">
           <div className="relative -mt-2 -mr-2 self-end">
-            <button onClick={() => setMenuOpen((open) => !open)} aria-label="Goal actions" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+            <button
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label="Goal actions"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            >
               <MoreVertical className="h-4 w-4" />
             </button>
             {menuOpen && (
               <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-slate-100 bg-white py-1 shadow-lg">
-                <button onClick={() => { setMenuOpen(false); onEdit(); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><Pencil className="h-3.5 w-3.5" /> Edit</button>
-                <button onClick={() => { setMenuOpen(false); onDelete(); }} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"><Trash2 className="h-3.5 w-3.5" /> Delete</button>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onEdit();
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onDelete();
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                </button>
               </div>
             )}
           </div>
           <span className="mb-2 text-xs text-slate-400">Overall Progress</span>
           <span
-            className={`text-lg font-semibold ${isCompleted ? "text-emerald-600" : "text-indigo-600"}`}
+            className={`text-lg font-semibold ${
+              isCompleted
+                ? "text-emerald-600"
+                : isMissed
+                  ? "text-rose-600"
+                  : "text-indigo-600"
+            }`}
           >
             {progress}%
           </span>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
             <div
-              className={`h-full rounded-full ${isCompleted ? "bg-emerald-500" : "bg-indigo-500"}`}
+              className={`h-full rounded-full ${
+                isCompleted
+                  ? "bg-emerald-500"
+                  : isMissed
+                    ? "bg-rose-500"
+                    : "bg-indigo-500"
+              }`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -168,7 +232,9 @@ function NewGoalModal({ onClose, onSave, goal }) {
                 {goal ? "Edit Goal" : "Create Goal"}
               </h2>
               <p className="mt-0.5 text-xs text-slate-400">
-                {goal ? "Update your goal details." : "Define your vision, then add milestones next."}
+                {goal
+                  ? "Update your goal details."
+                  : "Define your vision, then add milestones next."}
               </p>
             </div>
             <button
@@ -231,6 +297,16 @@ function NewGoalModal({ onClose, onSave, goal }) {
             </p>
           </div>
 
+          {goal?.status === "MISSED" && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+              <p className="text-xs text-amber-800">
+                Extending this goal's deadline to a future date will
+                automatically reactivate it back into your Active goals.
+              </p>
+            </div>
+          )}
+
           {saveError && <p className="text-xs text-rose-500">{saveError}</p>}
         </div>
 
@@ -257,19 +333,37 @@ function NewGoalModal({ onClose, onSave, goal }) {
 
 /* ---------------- Add Milestone modal ---------------- */
 
-function AddMilestoneModal({ onClose, onSave, milestone }) {
+function AddMilestoneModal({
+  onClose,
+  onSave,
+  milestone,
+  existingMilestones = [],
+}) {
   const [title, setTitle] = useState(milestone?.title ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
       setError("Give the milestone a title to continue.");
       return;
     }
+
+    const isDuplicate = existingMilestones.some(
+      (m) =>
+        m.title?.trim().toLowerCase() === trimmedTitle.toLowerCase() &&
+        (!milestone || String(m.id) !== String(milestone.id)),
+    );
+
+    if (isDuplicate) {
+      setError("A milestone with this name already exists in this goal.");
+      return;
+    }
+
     setSaving(true);
     try {
-      await onSave({ title: title.trim() });
+      await onSave({ title: trimmedTitle });
     } catch (err) {
       setError(err.message || "Couldn't save this milestone.");
     } finally {
@@ -332,7 +426,11 @@ function AddMilestoneModal({ onClose, onSave, milestone }) {
             disabled={saving}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
           >
-            {saving ? "Saving..." : milestone ? "Save Changes" : "Save Milestone"}
+            {saving
+              ? "Saving..."
+              : milestone
+                ? "Save Changes"
+                : "Save Milestone"}
           </button>
         </div>
       </div>
@@ -498,88 +596,88 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-violet-300/20 blur-2xl" />
           <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">
-            Active Session
-          </p>
-          <p className="mt-1 text-sm text-indigo-100/90">
-            {goalTitle} &middot; {milestoneTitle}
-          </p>
-          <div className="relative mx-auto mt-8 h-56 w-56">
-            <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
-              <circle
-                cx="100"
-                cy="100"
-                r={radius}
-                fill="none"
-                stroke="rgba(255,255,255,0.2)"
-                strokeWidth="10"
-              />
-              <circle
-                cx="100"
-                cy="100"
-                r={radius}
-                fill="none"
-                stroke="#ffffff"
-                strokeWidth="10"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                style={{ transition: "stroke-dashoffset 1s linear" }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-semibold tabular-nums">
-                {formatClock(remaining)}
-              </span>
-              <span className="mt-1 text-[11px] uppercase tracking-widest text-indigo-100">
-                remaining
-              </span>
-            </div>
-          </div>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <button
-              onClick={() => setIsPaused((p) => !p)}
-              className="flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-950/10 hover:bg-indigo-50"
-            >
-              {isPaused ? (
-                <>
-                  <Play className="h-4 w-4" /> Resume
-                </>
-              ) : (
-                <>
-                  <Pause className="h-4 w-4" /> Pause Session
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => onExit(elapsed, true)}
-              aria-label="Finish session now"
-              title="Finish session now"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20"
-            >
-              <Check className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="mt-8">
-            <p className="mb-3 text-[11px] uppercase tracking-widest text-indigo-100">
-              Background sound
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">
+              Active Session
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {SOUND_OPTIONS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => playSound(id)}
-                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${
-                    activeSound === id
-                      ? "bg-white text-indigo-900"
-                      : "border border-white/10 bg-white/10 text-indigo-50 hover:bg-white/20"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" /> {label}
-                </button>
-              ))}
+            <p className="mt-1 text-sm text-indigo-100/90">
+              {goalTitle} &middot; {milestoneTitle}
+            </p>
+            <div className="relative mx-auto mt-8 h-56 w-56">
+              <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90">
+                <circle
+                  cx="100"
+                  cy="100"
+                  r={radius}
+                  fill="none"
+                  stroke="rgba(255,255,255,0.2)"
+                  strokeWidth="10"
+                />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r={radius}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={offset}
+                  style={{ transition: "stroke-dashoffset 1s linear" }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-semibold tabular-nums">
+                  {formatClock(remaining)}
+                </span>
+                <span className="mt-1 text-[11px] uppercase tracking-widest text-indigo-100">
+                  remaining
+                </span>
+              </div>
             </div>
-          </div>
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <button
+                onClick={() => setIsPaused((p) => !p)}
+                className="flex items-center gap-1.5 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-indigo-700 shadow-lg shadow-indigo-950/10 hover:bg-indigo-50"
+              >
+                {isPaused ? (
+                  <>
+                    <Play className="h-4 w-4" /> Resume
+                  </>
+                ) : (
+                  <>
+                    <Pause className="h-4 w-4" /> Pause Session
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => onExit(elapsed, true)}
+                aria-label="Finish session now"
+                title="Finish session now"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20"
+              >
+                <Check className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-8">
+              <p className="mb-3 text-[11px] uppercase tracking-widest text-indigo-100">
+                Background sound
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {SOUND_OPTIONS.map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => playSound(id)}
+                    className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium ${
+                      activeSound === id
+                        ? "bg-white text-indigo-900"
+                        : "border border-white/10 bg-white/10 text-indigo-50 hover:bg-white/20"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" /> {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -630,12 +728,14 @@ function GoalDetailPage({
   onStartFocus,
   onEditMilestone,
   onDeleteMilestone,
+  onExtendDeadline,
   searchTerm,
   onSearchChange,
 }) {
   const progress = goalProgress(goal);
   const status = goalStatusLabel(goal);
-  const isCompleted = status === "Completed";
+  const isCompleted = isGoalCompleted(goal);
+  const isMissed = isGoalMissed(goal);
 
   return (
     <div className="min-h-full bg-slate-50 px-8 py-8">
@@ -647,49 +747,141 @@ function GoalDetailPage({
           <ArrowLeft className="h-4 w-4" /> Back to Goals
         </button>
 
+        {isMissed && (
+          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="rounded-xl bg-rose-100 p-2 text-rose-600">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-rose-900">
+                    Goal Deadline Passed (Missed)
+                  </h3>
+                  <p className="mt-0.5 text-xs text-rose-700">
+                    This goal is locked because its target date has passed.
+                    Focus sessions and milestone completions are disabled.
+                    Extend the deadline to a future date to reactivate this
+                    goal.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onExtendDeadline}
+                className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-700 transition-colors"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Extend Deadline
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isCompleted && (
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-emerald-100 p-2 text-emerald-600">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-emerald-900">
+                  Goal Completed! 🎉
+                </h3>
+                <p className="mt-0.5 text-xs text-emerald-700">
+                  Congratulations! All milestones have been completed. This goal
+                  is preserved in read-only history mode.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                 isCompleted
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-indigo-50 text-indigo-600"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : isMissed
+                    ? "bg-rose-50 text-rose-700 border border-rose-200"
+                    : "bg-indigo-50 text-indigo-700 border border-indigo-200"
               }`}
             >
+              {isMissed && <AlertCircle className="h-3 w-3" />}
+              {isCompleted && <CheckCircle2 className="h-3 w-3" />}
               {status}
             </span>
             <h1 className="mt-2 text-2xl font-semibold text-slate-900">
               {goal.title}
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p
+              className={`mt-1 text-sm ${
+                isMissed ? "font-medium text-rose-600" : "text-slate-500"
+              }`}
+            >
               {formatDueDate(goal.deadline)}
+              {isMissed && " (Past Deadline)"}
             </p>
           </div>
-          <button
-            onClick={onAddMilestone}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            <Plus className="h-4 w-4" /> Add Milestone
-          </button>
+          {isCompleted ? (
+            <button
+              disabled
+              title="Goal is completed."
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 cursor-not-allowed"
+            >
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Completed
+            </button>
+          ) : isMissed ? (
+            <button
+              disabled
+              title="Goal deadline has passed. Extend deadline to add milestones."
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-400 cursor-not-allowed"
+            >
+              <Lock className="h-4 w-4" /> Add Milestone
+            </button>
+          ) : (
+            <button
+              onClick={onAddMilestone}
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 shadow-sm"
+            >
+              <Plus className="h-4 w-4" /> Add Milestone
+            </button>
+          )}
         </div>
 
         <div className="relative mb-5">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} placeholder="Search milestone title..." className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+          <input
+            value={searchTerm}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search milestone title..."
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          />
         </div>
 
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="font-medium text-slate-700">Overall Progress</span>
             <span
-              className={`font-semibold ${isCompleted ? "text-emerald-600" : "text-indigo-600"}`}
+              className={`font-semibold ${
+                isCompleted
+                  ? "text-emerald-600"
+                  : isMissed
+                    ? "text-rose-600"
+                    : "text-indigo-600"
+              }`}
             >
               {progress}%
             </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div
-              className={`h-full rounded-full ${isCompleted ? "bg-emerald-500" : "bg-indigo-500"}`}
+              className={`h-full rounded-full ${
+                isCompleted
+                  ? "bg-emerald-500"
+                  : isMissed
+                    ? "bg-rose-500"
+                    : "bg-indigo-500"
+              }`}
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -702,8 +894,17 @@ function GoalDetailPage({
         {goal.milestones.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center">
             <ListChecks className="mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">{searchTerm ? "No matching milestones" : "No milestones yet"}</p>
-            {!searchTerm && <button onClick={onAddMilestone} className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"><Plus className="h-4 w-4" /> Add Milestone</button>}
+            <p className="text-sm font-medium text-slate-600">
+              {searchTerm ? "No matching milestones" : "No milestones yet"}
+            </p>
+            {!searchTerm && !isMissed && !isCompleted && (
+              <button
+                onClick={onAddMilestone}
+                className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              >
+                <Plus className="h-4 w-4" /> Add Milestone
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -711,6 +912,8 @@ function GoalDetailPage({
               <MilestoneRow
                 key={m.id}
                 milestone={m}
+                isGoalMissed={isMissed}
+                isGoalCompleted={isCompleted}
                 onToggleComplete={() => onToggleMilestone(m.id)}
                 onStartFocus={() => onStartFocus(m.id)}
                 onEdit={() => onEditMilestone(m)}
@@ -729,8 +932,12 @@ function GoalDetailPage({
 export default function ProjectGoalTab() {
   const {
     goals,
+    allGoals,
+    counts,
     loading,
     error,
+    status,
+    setStatus,
     createGoal,
     updateGoal,
     deleteGoal,
@@ -739,7 +946,7 @@ export default function ProjectGoalTab() {
     deleteMilestone,
     completeMilestone,
     logFocusSession,
-  } = useProjectGoals();
+  } = useProjectGoals("IN_PROGRESS");
 
   const [view, setView] = useState("list");
   const [selectedGoalId, setSelectedGoalId] = useState(null);
@@ -761,7 +968,9 @@ export default function ProjectGoalTab() {
   const [appliedDeepLink, setAppliedDeepLink] = useState(false);
   useEffect(() => {
     if (loading || appliedDeepLink || !deepLinkGoalId) return;
-    const target = goals.find((g) => String(g.id) === deepLinkGoalId);
+    const target = (allGoals || goals).find(
+      (g) => String(g.id) === deepLinkGoalId,
+    );
     if (target) {
       setSelectedGoalId(target.id);
       setView("detail");
@@ -769,24 +978,50 @@ export default function ProjectGoalTab() {
       setSearchParams({}, { replace: true });
     }
     setAppliedDeepLink(true);
-  }, [loading, appliedDeepLink, deepLinkGoalId, goals, setSearchParams]);
+  }, [
+    loading,
+    appliedDeepLink,
+    deepLinkGoalId,
+    allGoals,
+    goals,
+    setSearchParams,
+  ]);
 
-  const selectedGoal = goals.find((g) => g.id === selectedGoalId) ?? null;
+  const selectedGoal =
+    (allGoals || goals).find((g) => g.id === selectedGoalId) ?? null;
   const activeMilestone =
     selectedGoal?.milestones.find((m) => m.id === activeMilestoneId) ?? null;
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredGoals = normalizedSearch
-    ? goals.filter((goal) => goal.title.toLowerCase().includes(normalizedSearch))
+    ? goals.filter((goal) =>
+        goal.title.toLowerCase().includes(normalizedSearch),
+      )
     : goals;
-  const filteredMilestones = selectedGoal?.milestones.filter((milestone) =>
-    milestone.title.toLowerCase().includes(normalizedSearch)
-  ) ?? [];
+  const filteredMilestones =
+    selectedGoal?.milestones.filter((milestone) =>
+      milestone.title.toLowerCase().includes(normalizedSearch),
+    ) ?? [];
 
   const handleSaveGoal = async (payload) => {
-    const goal = editingGoal ? await updateGoal(editingGoal.id, payload) : await createGoal(payload);
+    const isEditingMissed = isGoalMissed(editingGoal);
+    const goal = editingGoal
+      ? await updateGoal(editingGoal.id, payload)
+      : await createGoal(payload);
     setIsNewGoalModalOpen(false);
     setEditingGoal(null);
     setSearchTerm("");
+
+    if (isEditingMissed && !isGoalMissed(goal)) {
+      await Swal.fire({
+        title: "Goal Reactivated! 🎉",
+        text: `“${goal.title}” deadline extended. The goal is now Active again!`,
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      setStatus("IN_PROGRESS");
+    }
+
     setSelectedGoalId(goal.id);
     setView("detail");
   };
@@ -798,43 +1033,122 @@ export default function ProjectGoalTab() {
   };
 
   const handleAddMilestone = async (payload) => {
-    if (editingMilestone) await updateMilestone(selectedGoalId, editingMilestone.id, payload);
+    if (editingMilestone)
+      await updateMilestone(selectedGoalId, editingMilestone.id, payload);
     else await addMilestone(selectedGoalId, payload);
     setIsMilestoneModalOpen(false);
     setEditingMilestone(null);
   };
 
   const confirmDeleteGoal = async (goal) => {
-    const result = await Swal.fire({ title: "Delete this goal?", text: `“${goal.title}” and its milestones will be removed.`, icon: "warning", showCancelButton: true, confirmButtonText: "Yes, delete it", cancelButtonText: "Cancel", confirmButtonColor: "#e11d48" });
+    const result = await Swal.fire({
+      title: "Delete this goal?",
+      text: `“${goal.title}” and its milestones will be removed.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#e11d48",
+    });
     if (!result.isConfirmed) return;
     try {
       await deleteGoal(goal.id);
       if (selectedGoalId === goal.id) backToList();
-      await Swal.fire({ title: "Deleted", text: "The goal was deleted.", icon: "success", timer: 1400, showConfirmButton: false });
-    } catch (err) { Swal.fire("Couldn't delete goal", err.message || "Please try again.", "error"); }
+      await Swal.fire({
+        title: "Deleted",
+        text: "The goal was deleted.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      Swal.fire(
+        "Couldn't delete goal",
+        err.message || "Please try again.",
+        "error",
+      );
+    }
   };
 
   const confirmDeleteMilestone = async (milestone) => {
-    const result = await Swal.fire({ title: "Delete this milestone?", text: `“${milestone.title}” will be removed.`, icon: "warning", showCancelButton: true, confirmButtonText: "Yes, delete it", cancelButtonText: "Cancel", confirmButtonColor: "#e11d48" });
+    const result = await Swal.fire({
+      title: "Delete this milestone?",
+      text: `“${milestone.title}” will be removed.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#e11d48",
+    });
     if (!result.isConfirmed) return;
     try {
       await deleteMilestone(selectedGoalId, milestone.id);
-      await Swal.fire({ title: "Deleted", text: "The milestone was deleted.", icon: "success", timer: 1400, showConfirmButton: false });
-    } catch (err) { Swal.fire("Couldn't delete milestone", err.message || "Please try again.", "error"); }
+      await Swal.fire({
+        title: "Deleted",
+        text: "The milestone was deleted.",
+        icon: "success",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      Swal.fire(
+        "Couldn't delete milestone",
+        err.message || "Please try again.",
+        "error",
+      );
+    }
   };
 
   const confirmEditGoal = async (goal) => {
-    const result = await Swal.fire({ title: "Edit this goal?", text: `Update “${goal.title}” in the form that follows.`, icon: "question", showCancelButton: true, confirmButtonText: "Continue to edit", cancelButtonText: "Cancel", confirmButtonColor: "#4f46e5" });
-    if (result.isConfirmed) { setEditingGoal(goal); setIsNewGoalModalOpen(true); }
+    const result = await Swal.fire({
+      title: "Edit this goal?",
+      text: `Update “${goal.title}” in the form that follows.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Continue to edit",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#4f46e5",
+    });
+    if (result.isConfirmed) {
+      setEditingGoal(goal);
+      setIsNewGoalModalOpen(true);
+    }
   };
 
   const confirmEditMilestone = async (milestone) => {
-    const result = await Swal.fire({ title: "Edit this milestone?", text: `Update “${milestone.title}” in the form that follows.`, icon: "question", showCancelButton: true, confirmButtonText: "Continue to edit", cancelButtonText: "Cancel", confirmButtonColor: "#4f46e5" });
-    if (result.isConfirmed) { setEditingMilestone(milestone); setIsMilestoneModalOpen(true); }
+    const result = await Swal.fire({
+      title: "Edit this milestone?",
+      text: `Update “${milestone.title}” in the form that follows.`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Continue to edit",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#4f46e5",
+    });
+    if (result.isConfirmed) {
+      setEditingMilestone(milestone);
+      setIsMilestoneModalOpen(true);
+    }
   };
 
-  const handleToggleMilestone = (milestoneId) =>
-    completeMilestone(selectedGoalId, milestoneId);
+  const handleToggleMilestone = async (milestoneId) => {
+    if (!selectedGoalId || !selectedGoal) return;
+    await completeMilestone(selectedGoalId, milestoneId);
+    if (selectedGoal) {
+      const allDone = selectedGoal.milestones.every(
+        (m) => m.id === milestoneId || m.status === "COMPLETED",
+      );
+      if (allDone) {
+        await Swal.fire({
+          title: "Goal Completed! 🎉",
+          text: `Congratulations! You finished all milestones for “${selectedGoal.title}”.`,
+          icon: "success",
+          confirmButtonText: "Awesome!",
+          confirmButtonColor: "#10b981",
+        });
+      }
+    }
+  };
 
   const handleStartFocusClick = (milestoneId) => {
     setActiveMilestoneId(milestoneId);
@@ -851,7 +1165,7 @@ export default function ProjectGoalTab() {
     const milestoneTitle = activeMilestone?.title ?? "your milestone";
     const minutes = Math.max(1, Math.round(elapsedSeconds / 60));
 
-    if (elapsedSeconds > 0) {
+    if (elapsedSeconds > 0 && selectedGoalId && activeMilestoneId) {
       await logFocusSession(selectedGoalId, activeMilestoneId, {
         durationMinutes: minutes,
       });
@@ -897,19 +1211,27 @@ export default function ProjectGoalTab() {
         <GoalDetailPage
           goal={{ ...selectedGoal, milestones: filteredMilestones }}
           onBack={backToList}
-          onAddMilestone={() => { setEditingMilestone(null); setIsMilestoneModalOpen(true); }}
+          onAddMilestone={() => {
+            setEditingMilestone(null);
+            setIsMilestoneModalOpen(true);
+          }}
           onToggleMilestone={handleToggleMilestone}
           onStartFocus={handleStartFocusClick}
           onEditMilestone={confirmEditMilestone}
           onDeleteMilestone={confirmDeleteMilestone}
+          onExtendDeadline={() => confirmEditGoal(selectedGoal)}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
         {isMilestoneModalOpen && (
           <AddMilestoneModal
-            onClose={() => { setIsMilestoneModalOpen(false); setEditingMilestone(null); }}
+            onClose={() => {
+              setIsMilestoneModalOpen(false);
+              setEditingMilestone(null);
+            }}
             onSave={handleAddMilestone}
             milestone={editingMilestone}
+            existingMilestones={selectedGoal?.milestones || []}
           />
         )}
         {isDurationModalOpen && activeMilestone && (
@@ -936,35 +1258,113 @@ export default function ProjectGoalTab() {
   return (
     <div className="min-h-full bg-slate-50 px-8 py-8">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-6 flex items-start justify-between">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">
               Your Goals
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              Track and manage your active goals.
+              Track, focus, and manage your progress across active, completed,
+              and missed goals.
             </p>
           </div>
           <button
-            onClick={() => { setEditingGoal(null); setIsNewGoalModalOpen(true); }}
-            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            onClick={() => {
+              setEditingGoal(null);
+              setIsNewGoalModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
           >
             <Plus className="h-4 w-4" /> New Goal
           </button>
         </div>
 
+        {/* 3-Tab Status Navigation (Microsoft Teams style) */}
+        <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+          {STATUS_TABS.map((tab) => {
+            const isActive = status === tab.id;
+            const Icon = tab.icon;
+            const isMissedTab = tab.id === "MISSED";
+            const count = counts?.[tab.id] ?? 0;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatus(tab.id);
+                }}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                  isActive
+                    ? isMissedTab
+                      ? "bg-rose-600 text-white shadow-sm"
+                      : "bg-indigo-600 text-white shadow-sm"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    isActive
+                      ? "bg-white/20 text-white"
+                      : isMissedTab && count > 0
+                        ? "bg-rose-100 text-rose-700"
+                        : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="relative mb-5">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search goal title..." className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+          <input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search goal title..."
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          />
         </div>
 
         {filteredGoals.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
-            <CheckCircle2 className="mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">{goals.length === 0 ? "No goals yet" : "No matching goals"}</p>
-            <p className="mt-1 text-xs text-slate-400">
-              Create your first goal to start tracking progress.
+            {status === "MISSED" ? (
+              <CalendarX className="mb-3 h-8 w-8 text-rose-300" />
+            ) : (
+              <CheckCircle2 className="mb-3 h-8 w-8 text-slate-300" />
+            )}
+            <p className="text-sm font-medium text-slate-600">
+              {searchTerm
+                ? "No matching goals"
+                : status === "IN_PROGRESS"
+                  ? "No active goals in progress"
+                  : status === "COMPLETED"
+                    ? "No completed goals yet"
+                    : "No missed goals"}
             </p>
+            <p className="mt-1 text-xs text-slate-400">
+              {searchTerm
+                ? "Try changing your search keywords."
+                : status === "IN_PROGRESS"
+                  ? "Create your first goal to start tracking progress."
+                  : status === "COMPLETED"
+                    ? "Goals will appear here once all their milestones are finished."
+                    : "Great job! All your goals are on track or completed."}
+            </p>
+            {status === "IN_PROGRESS" && !searchTerm && (
+              <button
+                onClick={() => {
+                  setEditingGoal(null);
+                  setIsNewGoalModalOpen(true);
+                }}
+                className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              >
+                <Plus className="h-4 w-4" /> New Goal
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -987,7 +1387,10 @@ export default function ProjectGoalTab() {
 
       {isNewGoalModalOpen && (
         <NewGoalModal
-          onClose={() => { setIsNewGoalModalOpen(false); setEditingGoal(null); }}
+          onClose={() => {
+            setIsNewGoalModalOpen(false);
+            setEditingGoal(null);
+          }}
           onSave={handleSaveGoal}
           goal={editingGoal}
         />

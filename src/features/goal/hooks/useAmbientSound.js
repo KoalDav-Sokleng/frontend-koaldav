@@ -78,14 +78,11 @@ export function useAmbientSound() {
         gain.connect(ctx.destination);
         osc.start();
         lfo.start();
-
         nodesRef.current = [osc, lfo, lfoGain, gain];
       }
     },
     [stop]
   );
-
   useEffect(() => stop, [stop]);
-
   return { active, play, stop };
 }

@@ -37,7 +37,6 @@ export default function Layout() {
             </div>
           </div>
         )}
-
         <div className="flex flex-1 flex-col min-w-0 h-screen">
           <TopMenu onMenuClick={() => setMobileOpen(true)} />
           <div className="flex-1 overflow-y-auto">

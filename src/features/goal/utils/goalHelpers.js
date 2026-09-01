@@ -21,6 +21,53 @@ export function goalProgress(goal) {
   return Math.round(total / goal.milestones.length);
 }
 
+export function isDeadlinePassed(deadline) {
+  if (!deadline) return false;
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const todayStr = `${year}-${month}-${day}`;
+
+  let deadlineStr = "";
+  if (typeof deadline === "string") {
+    deadlineStr = deadline.split("T")[0].trim();
+  } else if (Array.isArray(deadline) && deadline.length >= 3) {
+    deadlineStr = `${deadline[0]}-${String(deadline[1]).padStart(2, "0")}-${String(deadline[2]).padStart(2, "0")}`;
+  }
+
+  if (!deadlineStr || deadlineStr.length < 10) return false;
+
+  return deadlineStr < todayStr;
+}
+
+export function getEffectiveGoalStatus(goal) {
+  if (!goal) return "IN_PROGRESS";
+  if (goal.status === "COMPLETED") return "COMPLETED";
+
+  const hasMilestones = Array.isArray(goal.milestones) && goal.milestones.length > 0;
+  if (hasMilestones && goal.milestones.every((m) => m.status === "COMPLETED")) {
+    return "COMPLETED";
+  }
+
+  if (goal.status === "MISSED" || isDeadlinePassed(goal.deadline)) {
+    return "MISSED";
+  }
+  return "IN_PROGRESS";
+}
+
 export function goalStatusLabel(goal) {
-  return goal.status === "COMPLETED" ? "Completed" : "In Progress";
+  const effective = getEffectiveGoalStatus(goal);
+  if (effective === "COMPLETED") return "Completed";
+  if (effective === "MISSED") return "Missed";
+  return "In Progress";
+}
+
+export function isGoalMissed(goal) {
+  return getEffectiveGoalStatus(goal) === "MISSED";
+}
+
+export function isGoalCompleted(goal) {
+  return getEffectiveGoalStatus(goal) === "COMPLETED";
 }

@@ -1,7 +1,6 @@
 // src/api/client.js
 import axios from "axios";
 
-// Points to your Spring Boot server on port 8081 with /api prefix
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8081/api";
 
 const http = axios.create({
@@ -12,7 +11,7 @@ const http = axios.create({
 // Attach JWT token automatically
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
-  if (token && config.auth !== false) {
+  if (token && config.requiresAuth !== false) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -32,12 +31,17 @@ http.interceptors.response.use(
 );
 
 export async function apiFetch(path, { method = "GET", body, headers = {}, auth = true } = {}) {
+  const reqHeaders = { ...headers };
+  if (body instanceof FormData) {
+    reqHeaders["Content-Type"] = "multipart/form-data";
+  }
+
   const res = await http.request({
     url: path,
     method,
     data: body,
-    headers,
-    auth,
+    headers: reqHeaders,
+    requiresAuth: auth,
   });
   return res.data;
 }

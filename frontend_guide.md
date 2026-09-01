@@ -1,9 +1,11 @@
 # Frontend Guide - Project Goal
+
 ## Overview
 
-A personal goal-tracking SPA called **KAOL DAV - Peak Performance**. Users manage goals, trips, savings, finances, and daily habits. Built with React 19 + Vite 8 + Tailwind CSS v4, talking to a **Spring Boot backend** (`http://localhost:8081/api`).
+A personal goal-tracking SPA called **KAOL DAV - Peak Performance**. Users manage goals, trips, savings, finances, and daily habits. Built with React 19 + Vite 8 + Tailwind CSS v4, talking to a **Spring Boot backend** (`http://localhost:8080/api`).
 
 ---
+
 ## Tech Stack
 
 - **React 19** (JSX, no TypeScript)
@@ -128,7 +130,7 @@ Every backend call follows the same chain. There are exactly **3 layers**, and o
 │       │  all of them call apiFetch(path, options)                    │
 │       ▼                                                              │
 │  4. src/api/client.js             (the ONLY place that knows Axios)  │
-│     apiFetch() → Axios instance → http://localhost:8081/api/...      │
+│     apiFetch() → Axios instance → http://localhost:8080/api/...      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -139,14 +141,14 @@ This is **the file responsible for talking to the backend**. Everything else goe
 ```js
 import { apiFetch } from "../api/client";
 
-const data = await apiFetch("/goals/projects");                       // GET (default)
+const data = await apiFetch("/goals/projects"); // GET (default)
 await apiFetch("/goals/projects", { method: "POST", body: payload }); // POST
 await apiFetch("/auth/login", { method: "POST", body: creds, auth: false }); // public
 ```
 
 What it does internally:
 
-1. Creates one shared **Axios instance** with `baseURL = VITE_API_URL` (falls back to `http://localhost:8081/api`)
+1. Creates one shared **Axios instance** with `baseURL = VITE_API_URL` (falls back to `http://localhost:8080/api`)
 2. **Request interceptor**: reads `accessToken` from `localStorage` and attaches `Authorization: Bearer <token>` — unless the call passed `auth: false`
 3. **Response interceptor**:
    - On **401** → removes the token from `localStorage` (session expired)
@@ -155,13 +157,13 @@ What it does internally:
 
 ### Which files talk to the backend (per feature)
 
-| Feature | API file (endpoints) | Hook (fetch + state) | Component using it | Status |
-|---|---|---|---|---|
-| **Goals / Milestones / Focus sessions** | `features/goal/api/goalApi.js` | `hooks/useProjectGoals.js` | `ProjectGoalTab.jsx`, `MilestoneRow.jsx` | ✅ Live (full CRUD + focus timer) |
-| **Auth** | `features/auth/api/authApi.js` | `context/AuthContext.jsx` + `hooks/useAuth.js` | `LoginForm`, `RegisterForm` | ✅ Live (mock flag currently off) |
-| Dashboard | `features/dashboard/api/dashboardApi.js` | `hooks/useDashboard.js` | `DashboardSummary.jsx` | Endpoint coded; needs `/dashboard/summary` on backend |
-| Finance | `features/finance/api/financeApi.js` | `hooks/useFinanceOverview.js` | `FinanceSummaryCard.jsx` | Endpoint coded; needs `/finance/overview` on backend |
-| Habits | `features/habit/api/habitApi.js` | `hooks/useHabits.js` | `HabitListItem.jsx` | Endpoints coded; needs `/habits/*` on backend |
+| Feature                                 | API file (endpoints)                     | Hook (fetch + state)                           | Component using it                       | Status                                                |
+| --------------------------------------- | ---------------------------------------- | ---------------------------------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| **Goals / Milestones / Focus sessions** | `features/goal/api/goalApi.js`           | `hooks/useProjectGoals.js`                     | `ProjectGoalTab.jsx`, `MilestoneRow.jsx` | ✅ Live (full CRUD + focus timer)                     |
+| **Auth**                                | `features/auth/api/authApi.js`           | `context/AuthContext.jsx` + `hooks/useAuth.js` | `LoginForm`, `RegisterForm`              | ✅ Live (mock flag currently off)                     |
+| Dashboard                               | `features/dashboard/api/dashboardApi.js` | `hooks/useDashboard.js`                        | `DashboardSummary.jsx`                   | Endpoint coded; needs `/dashboard/summary` on backend |
+| Finance                                 | `features/finance/api/financeApi.js`     | `hooks/useFinanceOverview.js`                  | `FinanceSummaryCard.jsx`                 | Endpoint coded; needs `/finance/overview` on backend  |
+| Habits                                  | `features/habit/api/habitApi.js`         | `hooks/useHabits.js`                           | `HabitListItem.jsx`                      | Endpoints coded; needs `/habits/*` on backend         |
 
 ### Request lifecycle example — logging a focus session
 
@@ -169,7 +171,7 @@ What it does internally:
 2. `ProjectGoalTab` navigates to `FocusPage` — a full-screen timer (SVG countdown ring) with pause/resume and ambient background sounds via `useAmbientSound`
 3. On exit, it calls `logFocusSession(goalId, milestoneId, { durationMinutes })` from `useProjectGoals()`
 4. The hook delegates to `goalApi.logFocusSession()` → `apiFetch("/milestones/:milestoneId/sessions", { method: "POST", body: { durationMinutes } })`
-5. `client.js` attaches the JWT and POSTs to `http://localhost:8081/api/milestones/:milestoneId/sessions`
+5. `client.js` attaches the JWT and POSTs to `http://localhost:8080/api/milestones/:milestoneId/sessions`
 6. On success, the hook appends the returned session into the milestone's `focusSessions` in local state — **the server response is the source of truth** — the goal re-renders with the newly logged minutes reflected
 7. Progress % is never fetched — it is derived locally in `utils/goalHelpers.js`
 
@@ -189,7 +191,7 @@ const createGoal = async (payload) => {
 
 ## API Layer — Endpoint Reference
 
-Base URL: `VITE_API_URL`, currently `http://localhost:8081/api`.
+Base URL: `VITE_API_URL`, currently `http://localhost:8080/api`.
 
 ### Goal endpoints (implemented, live)
 
@@ -273,6 +275,7 @@ features/<name>/
 ```
 
 When adding a new feature:
+
 1. Create `api/<name>Api.js` with one function per endpoint, each calling `apiFetch`
 2. Create `hooks/use<Name>.js` for stateful data fetching (follow `useProjectGoals.js` as the reference implementation)
 3. Create `components/` for presentational pieces
@@ -287,11 +290,11 @@ When adding a new feature:
 
 Current `.env`:
 
-| Variable | Current value | Description |
-|---|---|---|
-| `VITE_API_URL` | `http://localhost:8081/api` | Backend base URL (Spring Boot) |
-| `VITE_MOCK_AUTH` | commented out (= false) | Mock login bypass — real `/auth/*` is now live |
-| `VITE_MOCK_GOALS` | `false` | Legacy mock-goals flag |
+| Variable          | Current value               | Description                                    |
+| ----------------- | --------------------------- | ---------------------------------------------- |
+| `VITE_API_URL`    | `http://localhost:8080/api` | Backend base URL (Spring Boot)                 |
+| `VITE_MOCK_AUTH`  | commented out (= false)     | Mock login bypass — real `/auth/*` is now live |
+| `VITE_MOCK_GOALS` | `false`                     | Legacy mock-goals flag                         |
 
 ---
 
