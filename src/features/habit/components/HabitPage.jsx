@@ -1,6 +1,7 @@
 // src/features/habit/HabitPage.jsx
 import React, { useState } from "react";
 import confetti from "canvas-confetti";
+import { useHabits, todayStr } from "../hooks/useHabits";
 import {
   Plus,
   Check,
@@ -11,48 +12,301 @@ import {
   GraduationCap,
   MoreHorizontal,
   X,
-  Clock,
-  Calendar,
   Pencil,
   Trash2,
-  ChevronDown,
   Trophy,
   Sparkles,
+  Snowflake,
+  Info,
 } from "lucide-react";
 
 const HABIT_TYPES = [
   { id: "water", label: "Water", icon: Droplets, fg: "#6C63FF", bg: "#E7E2FF" },
-  { id: "workout", label: "Workout", icon: Dumbbell, fg: "#EA580C", bg: "#FFEDD5" },
+  {
+    id: "workout",
+    label: "Workout",
+    icon: Dumbbell,
+    fg: "#EA580C",
+    bg: "#FFEDD5",
+  },
   { id: "read", label: "Read", icon: BookOpen, fg: "#0D9488", bg: "#CCFBF1" },
-  { id: "study", label: "Study", icon: GraduationCap, fg: "#D97706", bg: "#FEF3C7" },
-  { id: "other", label: "Other", icon: MoreHorizontal, fg: "#64748B", bg: "#F1F5F9" },
+  {
+    id: "study",
+    label: "Study",
+    icon: GraduationCap,
+    fg: "#D97706",
+    bg: "#FEF3C7",
+  },
+  {
+    id: "other",
+    label: "Other",
+    icon: MoreHorizontal,
+    fg: "#64748B",
+    bg: "#F1F5F9",
+  },
 ];
 
-const TIME_OPTIONS = [
-  { value: "", label: "No reminder" },
-  { value: "06:00 AM", label: "06:00 AM" },
-  { value: "07:00 AM", label: "07:00 AM" },
-  { value: "08:00 AM", label: "08:00 AM" },
-  { value: "09:00 AM", label: "09:00 AM" },
-  { value: "10:00 AM", label: "10:00 AM" },
-  { value: "12:00 PM", label: "12:00 PM" },
-  { value: "02:00 PM", label: "02:00 PM" },
-  { value: "05:00 PM", label: "05:00 PM" },
-  { value: "08:00 PM", label: "08:00 PM" },
-  { value: "09:00 PM", label: "09:00 PM" },
+/* =========================================================================
+   GARDEN / STREAK / FREEZE SYSTEM
+   -------------------------------------------------------------------------
+   - "garden.streak"      : consecutive CALENDAR DAYS all habits in the list
+                             were completed (global, list-wide streak).
+   - "garden.bestStreak"  : highest streak ever reached (never decreases).
+   - "garden.growthStage" : 0-7, drives the sunflower visual. +1 on a
+                             completed day (capped at 7), -1 on a missed,
+                             unprotected day. This is intentionally more
+                             forgiving than the raw streak number.
+   - "garden.freezes"     : banked freeze tokens the user can spend.
+   - "garden.freezeUsedDates" / "garden.lastPerfectDate": date bookkeeping
+                             used to figure out, once per day, whether
+                             yesterday was covered (completed or frozen).
+   All date logic is gated by calendar date (YYYY-MM-DD), so re-toggling
+   checkboxes back and forth on the same day can never inflate anything —
+   only the FIRST time a day reaches 100%, or the first freeze click that
+   day, has any effect.
+   ========================================================================= */
+
+const GROWTH_STAGES = [
+  {
+    label: "Bare Soil",
+    desc: "Complete every habit today to plant your first seed.",
+  },
+  {
+    label: "Seed Planted",
+    desc: "Your seed is in the ground. Come back tomorrow.",
+  },
+  {
+    label: "Sprout",
+    desc: "A little green sprout just broke through the soil.",
+  },
+  { label: "Growing Stem", desc: "The stem is getting taller and stronger." },
+  { label: "Leafy Stem", desc: "Leaves are filling out nicely." },
+  { label: "Bud Forming", desc: "A bud has formed at the top of the stem." },
+  {
+    label: "Bud Opening",
+    desc: "Almost there — the bloom is starting to open.",
+  },
+  {
+    label: "Full Bloom 🌻",
+    desc: "Your sunflower is in full bloom. Keep showing up to keep it blooming.",
+  },
 ];
+
+/* ---------------- Sunflower growth SVG (stages 0-7) ---------------- */
+function FlowerSVG({ stage, size = 96 }) {
+  const s = Math.max(0, Math.min(7, stage));
+  const stemTopY = [128, 122, 104, 88, 72, 58, 46, 38][s];
+  const stemBaseY = 132;
+  const leafCount = [0, 0, 1, 2, 3, 3, 4, 4][s];
+  const showSeed = s === 1;
+  const showBud = s === 5 || s === 6;
+  const showBloom = s === 7;
+  const budScale = s === 5 ? 0.6 : 1;
+
+  const leaves = [];
+  for (let i = 0; i < leafCount; i++) {
+    const t = (i + 1) / (leafCount + 1);
+    const y = stemBaseY - (stemBaseY - stemTopY) * t;
+    const dir = i % 2 === 0 ? 1 : -1;
+    leaves.push(
+      <ellipse
+        key={i}
+        cx={60 + dir * 11}
+        cy={y}
+        rx="10"
+        ry="5.5"
+        fill="#4C9A63"
+        transform={`rotate(${dir * -30} ${60 + dir * 11} ${y})`}
+      />,
+    );
+  }
+
+  const petals = [];
+  if (showBloom) {
+    const petalCount = 12;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (360 / petalCount) * i;
+      petals.push(
+        <ellipse
+          key={i}
+          cx="60"
+          cy={stemTopY - 16}
+          rx="6.5"
+          ry="14"
+          fill="#FBBF24"
+          transform={`rotate(${angle} 60 ${stemTopY - 16}) translate(0 -14)`}
+        />,
+      );
+    }
+  }
+
+  return (
+    <svg
+      viewBox="0 0 120 150"
+      width={size}
+      height={size}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* soil */}
+      <ellipse cx="60" cy="136" rx="42" ry="9" fill="#B98354" />
+      <ellipse cx="60" cy="133" rx="42" ry="8" fill="#8B6239" />
+
+      {/* stem */}
+      {s > 0 && (
+        <path
+          d={`M60 ${stemBaseY} Q ${s % 2 === 0 ? 64 : 56} ${(stemBaseY + stemTopY) / 2} 60 ${stemTopY}`}
+          stroke="#4C9A63"
+          strokeWidth="4"
+          strokeLinecap="round"
+          fill="none"
+        />
+      )}
+
+      {/* seed marker */}
+      {showSeed && <circle cx="60" cy="130" r="3.5" fill="#7A4A24" />}
+
+      {/* leaves */}
+      {leaves}
+
+      {/* bud */}
+      {showBud && (
+        <g transform={`translate(60 ${stemTopY}) scale(${budScale})`}>
+          <ellipse
+            cx="0"
+            cy="-6"
+            rx="8"
+            ry="11"
+            fill={s === 6 ? "#F2C94C" : "#7CB342"}
+          />
+          <ellipse
+            cx="0"
+            cy="-6"
+            rx="4.5"
+            ry="9"
+            fill={s === 6 ? "#FBBF24" : "#66A650"}
+          />
+        </g>
+      )}
+
+      {/* full bloom */}
+      {showBloom && (
+        <g>
+          {petals}
+          <circle cx="60" cy={stemTopY - 16} r="11" fill="#7A4A24" />
+          <circle
+            cx="60"
+            cy={stemTopY - 16}
+            r="11"
+            fill="url(#seedPattern)"
+            opacity="0.25"
+          />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+/* ---------------- Flower growth detail modal ---------------- */
+function FlowerGrowthModal({ garden, onClose }) {
+  const stage = Math.max(0, Math.min(7, garden.growthStage));
+  const info = GROWTH_STAGES[stage];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl border border-amber-100 overflow-hidden">
+        <div className="absolute -top-14 -right-14 w-36 h-36 bg-amber-100/60 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-14 -left-14 w-36 h-36 bg-[#E7E2FF]/70 rounded-full blur-2xl pointer-events-none" />
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors z-10"
+          aria-label="Close"
+        >
+          <X size={18} />
+        </button>
+
+        <p className="relative text-xs font-semibold text-slate-400 tracking-wide">
+          Your Habit Garden
+        </p>
+
+        <div className="relative mx-auto my-3 flex items-center justify-center w-48 h-56 rounded-3xl bg-gradient-to-b from-sky-50 to-amber-50 border border-amber-100">
+          <FlowerSVG stage={stage} size={150} />
+        </div>
+
+        <h3 className="text-lg font-bold text-slate-900">{info.label}</h3>
+        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed px-2">
+          {info.desc}
+        </p>
+
+        {/* stage stepper */}
+        <div className="flex items-center justify-center gap-1.5 mt-5">
+          {GROWTH_STAGES.map((g, i) => (
+            <div
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i <= stage ? "w-5 bg-amber-400" : "w-3 bg-slate-200"
+              }`}
+              title={g.label}
+            />
+          ))}
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-2 bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
+          <div className="text-center">
+            <div className="text-[10px] text-slate-400 font-medium">Streak</div>
+            <div className="text-base font-bold text-orange-500">
+              {garden.streak}d
+            </div>
+          </div>
+          <div className="text-center border-l border-r border-slate-200">
+            <div className="text-[10px] text-slate-400 font-medium">Best</div>
+            <div className="text-base font-bold text-[#6C63FF]">
+              {garden.bestStreak}d
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-[10px] text-slate-400 font-medium">
+              Freezes
+            </div>
+            <div className="text-base font-bold text-sky-500">
+              {garden.freezes}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-4 flex items-start gap-1.5 text-left text-[11px] text-slate-400 leading-relaxed">
+          <Info size={13} className="shrink-0 mt-0.5" />
+          Missing a single day only wilts your flower one stage back — it
+          doesn't reset to soil. Use a freeze on a day you know you'll miss to
+          protect today's growth entirely.
+        </p>
+
+        <button
+          onClick={onClose}
+          className="mt-5 w-full py-3 rounded-xl text-sm font-semibold text-white bg-[#6C63FF] hover:bg-[#5B52E6] shadow-md shadow-[#6C63FF]/25 active:scale-95 transition-all cursor-pointer"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function fireGrandCelebrationConfetti() {
   try {
-    // Initial center burst
     confetti({
       particleCount: 90,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ["#6C63FF", "#5B52E6", "#E7E2FF", "#38BDF8", "#34D399", "#FBBF24"],
+      colors: [
+        "#6C63FF",
+        "#5B52E6",
+        "#E7E2FF",
+        "#38BDF8",
+        "#34D399",
+        "#FBBF24",
+      ],
     });
-
-    // Left cannon
     setTimeout(() => {
       confetti({
         particleCount: 60,
@@ -62,8 +316,6 @@ function fireGrandCelebrationConfetti() {
         colors: ["#6C63FF", "#E7E2FF", "#34D399", "#FBBF24"],
       });
     }, 200);
-
-    // Right cannon
     setTimeout(() => {
       confetti({
         particleCount: 60,
@@ -93,35 +345,35 @@ function fireSingleHabitConfetti() {
 
 function ProgressBar({ percent, completed, total }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-1.5 sm:space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-base font-semibold text-slate-800">
-          Today's progress
-        </p>
-        <span className="text-2xl font-bold text-[#6C63FF] tabular-nums">
+        <div className="flex items-center gap-2">
+          <p className="text-xs sm:text-sm font-semibold text-slate-800">
+            Today's progress
+          </p>
+          <span className="text-[11px] sm:text-xs text-slate-400 font-medium">
+            ({completed} of {total} complete)
+          </span>
+        </div>
+        <span className="text-sm sm:text-base font-bold text-[#6C63FF] tabular-nums">
           {percent}%
         </span>
       </div>
-      <div className="w-full h-3 rounded-full overflow-hidden bg-[#E7E2FF]">
+      <div className="w-full h-2 sm:h-2.5 rounded-full overflow-hidden bg-[#E7E2FF]">
         <div
           className="h-full rounded-full bg-[#6C63FF] transition-all duration-500"
           style={{ width: `${percent}%` }}
         />
       </div>
-      <p className="text-sm text-slate-500">
-        <span className="font-semibold text-slate-700">{completed}</span> of{" "}
-        <span className="font-semibold text-slate-700">{total}</span> habits complete
-      </p>
     </div>
   );
 }
 
 /* ---------------- 100% Celebration Modal ---------------- */
-function HabitCelebrationModal({ onClose, totalHabits, habitTitle }) {
+function HabitCelebrationModal({ onClose, totalHabits, habitTitle, streak }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl border border-purple-100 overflow-hidden">
-        {/* Glow backdrop decorative circles */}
         <div className="absolute -top-16 -left-16 w-36 h-36 bg-[#E7E2FF]/80 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-16 -right-16 w-36 h-36 bg-[#6C63FF]/20 rounded-full blur-2xl pointer-events-none" />
 
@@ -133,7 +385,6 @@ function HabitCelebrationModal({ onClose, totalHabits, habitTitle }) {
           <X size={18} />
         </button>
 
-        {/* Trophy icon */}
         <div className="relative mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#E7E2FF] text-[#6C63FF] shadow-inner ring-8 ring-[#F4F2FF]">
           <Trophy size={40} className="animate-bounce" />
           <Sparkles
@@ -153,26 +404,33 @@ function HabitCelebrationModal({ onClose, totalHabits, habitTitle }) {
         <p className="text-xs text-slate-500 mt-2 leading-relaxed">
           {habitTitle ? (
             <>
-              You just finished <strong className="text-slate-800">&ldquo;{habitTitle}&rdquo;</strong> and reached 100% completion for all habits today!
+              You just finished{" "}
+              <strong className="text-slate-800">
+                &ldquo;{habitTitle}&rdquo;
+              </strong>{" "}
+              and reached 100% completion for all habits today!
             </>
           ) : (
             <>
-              You completed all <strong className="text-slate-800">{totalHabits} habits</strong> scheduled for today. Keep building your consistency!
+              You completed all{" "}
+              <strong className="text-slate-800">{totalHabits} habits</strong>{" "}
+              scheduled for today. Your flower grew a little more.
             </>
           )}
         </p>
 
-        {/* Stats card */}
         <div className="mt-5 grid grid-cols-2 gap-3 bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
           <div className="text-center">
-            <div className="text-[11px] text-slate-400 font-medium">Daily Progress</div>
+            <div className="text-[11px] text-slate-400 font-medium">
+              Daily Progress
+            </div>
             <div className="text-lg font-bold text-[#6C63FF]">100%</div>
           </div>
           <div className="text-center border-l border-slate-200">
-            <div className="text-[11px] text-slate-400 font-medium">Completed</div>
-            <div className="text-lg font-bold text-emerald-600">
-              {totalHabits} / {totalHabits}
+            <div className="text-[11px] text-slate-400 font-medium">
+              Garden Streak
             </div>
+            <div className="text-lg font-bold text-emerald-600">{streak}d</div>
           </div>
         </div>
 
@@ -193,51 +451,71 @@ export default function HabitPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebrationHabitTitle, setCelebrationHabitTitle] = useState("");
+  const [showFlowerModal, setShowFlowerModal] = useState(false);
+  const [actionError, setActionError] = useState("");
 
-  const [habits, setHabits] = useState([
-    { id: 1, title: "Drink Water", target: "Daily goal: 8 glasses", type: "water", streak: 12, completed: false, reminder: "09:00 AM" },
-    { id: 2, title: "Read Book", target: "Daily goal: 30 mins", type: "read", streak: 5, completed: false, reminder: "09:00 PM" },
-    { id: 3, title: "Workout", target: "Daily goal: 45 mins", type: "workout", streak: 0, completed: true, reminder: "07:00 AM" },
-  ]);
+  const {
+    habits,
+    garden,
+    loading,
+    error,
+    reload,
+    addHabit,
+    editHabit,
+    removeHabit,
+    toggleHabit: toggleHabitApi,
+    useFreezeToday: useFreezeTodayApi,
+  } = useHabits();
 
-  const toggleHabit = (id) => {
-    setHabits((prev) => {
-      const nextHabits = prev.map((h) => {
-        if (h.id === id) {
-          const nextCompleted = !h.completed;
-          return {
-            ...h,
-            completed: nextCompleted,
-            streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
-          };
-        }
-        return h;
-      });
+  const completedCount = habits.filter((h) => h.completed).length;
+  const progressPercent =
+    habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
+  const today = todayStr();
+  const frozenToday = garden.freezeUsedDates?.includes(today);
+  const alreadyPerfectToday = garden.lastPerfectDate === today;
 
-      const toggledHabit = nextHabits.find((h) => h.id === id);
-      const total = nextHabits.length;
-      const completedCount = nextHabits.filter((h) => h.completed).length;
+  /* All streak / growth-stage / freeze math now lives on the server —
+     see habitApi.js and useHabits.js. This component only reacts to
+     what the API returns (habit + garden + justReachedPerfectDay). */
 
-      // If user checked this habit as complete
-      if (toggledHabit && toggledHabit.completed) {
-        if (total > 0 && completedCount === total) {
-          // Reached 100%!
+  const toggleHabit = async (id) => {
+    setActionError("");
+    try {
+      const res = await toggleHabitApi(id);
+      if (res.habit?.completed) {
+        if (res.justReachedPerfectDay) {
           fireGrandCelebrationConfetti();
-          setCelebrationHabitTitle(toggledHabit.title);
+          setCelebrationHabitTitle(res.habit.title);
           setShowCelebrationModal(true);
         } else {
-          // Mini celebration burst
           fireSingleHabitConfetti();
         }
       }
-
-      return nextHabits;
-    });
+    } catch (err) {
+      console.error("Failed to toggle habit", err);
+      setActionError("Couldn't update that habit. Please try again.");
+    }
   };
 
-  const confirmDelete = () => {
-    if (deletingId) {
-      setHabits((prev) => prev.filter((h) => h.id !== deletingId));
+  const useFreezeToday = async () => {
+    setActionError("");
+    try {
+      await useFreezeTodayApi();
+    } catch (err) {
+      console.error("Failed to use freeze", err);
+      setActionError("Couldn't use a freeze right now. Please try again.");
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingId) return;
+    setActionError("");
+    try {
+      await removeHabit(deletingId);
+    } catch (err) {
+      console.error("Failed to delete habit", err);
+      setActionError("Couldn't delete that habit. Please try again.");
+    } finally {
       setDeletingId(null);
     }
   };
@@ -247,13 +525,19 @@ export default function HabitPage() {
     setIsModalOpen(true);
   };
 
-  const handleSaveHabit = (habitData) => {
-    if (editingHabit) {
-      setHabits((prev) => prev.map((h) => (h.id === editingHabit.id ? { ...h, ...habitData } : h)));
-    } else {
-      setHabits((prev) => [...prev, { id: Date.now(), ...habitData, streak: 0, completed: false }]);
+  const handleSaveHabit = async (habitData) => {
+    setActionError("");
+    try {
+      if (editingHabit) {
+        await editHabit(editingHabit.id, habitData);
+      } else {
+        await addHabit(habitData);
+      }
+      handleCloseModal();
+    } catch (err) {
+      console.error("Failed to save habit", err);
+      setActionError("Couldn't save that habit. Please try again.");
     }
-    handleCloseModal();
   };
 
   const handleCloseModal = () => {
@@ -261,18 +545,50 @@ export default function HabitPage() {
     setEditingHabit(null);
   };
 
-  const completedCount = habits.filter((h) => h.completed).length;
-  const progressPercent = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
+  const freezeDisabled =
+    (garden.freezes ?? 0) <= 0 || frozenToday || alreadyPerfectToday;
+  const freezeLabel = alreadyPerfectToday
+    ? "Completed today"
+    : frozenToday
+      ? "Protected today"
+      : "Use freeze";
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-white">
+        <p className="text-sm text-slate-400">Loading your habits…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-white px-6 text-center">
+        <p className="text-sm text-slate-600 font-medium">
+          Couldn't load your habits.
+        </p>
+        <p className="text-xs text-slate-400">
+          {String(error.message || error)}
+        </p>
+        <button
+          onClick={reload}
+          className="mt-2 text-xs font-semibold px-4 py-2 rounded-xl text-white bg-[#6C63FF] hover:bg-[#5B52E6] transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-full flex flex-col px-6 sm:px-8 py-6 sm:py-7 space-y-6 overflow-hidden bg-white">
+    <div className="w-full h-full flex flex-col px-4 sm:px-8 py-3.5 sm:py-5 space-y-2.5 sm:space-y-3.5 overflow-hidden bg-white">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+      <div className="flex flex-row items-center justify-between gap-3 shrink-0">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 truncate">
             Your Habits
           </h1>
-          <p className="text-sm mt-1 text-slate-500">
+          <p className="hidden sm:block text-xs mt-0.5 text-slate-500">
             Small repeats, tracked honestly.
           </p>
         </div>
@@ -282,91 +598,189 @@ export default function HabitPage() {
             setEditingHabit(null);
             setIsModalOpen(true);
           }}
-          className="flex items-center justify-center gap-2 text-white text-sm font-semibold px-5 py-3 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] shadow-sm transition-all shrink-0 active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 text-white text-xs sm:text-sm font-semibold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] shadow-sm transition-all shrink-0 active:scale-95 cursor-pointer"
         >
-          <Plus size={18} />
+          <Plus size={16} />
           <span>New habit</span>
         </button>
       </div>
 
+      {actionError && (
+        <div className="shrink-0 flex items-center justify-between gap-2 text-xs font-medium text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-3.5 py-2">
+          <span>{actionError}</span>
+          <button
+            onClick={() => setActionError("")}
+            className="text-rose-400 hover:text-rose-600 shrink-0"
+            aria-label="Dismiss"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Garden / streak / freeze widget */}
+      <div className="rounded-2xl px-3 sm:px-5 py-2 sm:py-3 shrink-0 bg-gradient-to-br from-white to-[#FBF9FF] border border-slate-100 shadow-sm flex items-center gap-2.5 sm:gap-4">
+        <button
+          onClick={() => setShowFlowerModal(true)}
+          className="relative shrink-0 w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-100 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+          title="See your flower grow"
+        >
+          <FlowerSVG stage={garden.growthStage} size={24} />
+        </button>
+
+        <div className="flex-1 flex items-center justify-between sm:grid sm:grid-cols-3 gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-1 sm:block min-w-0">
+            <Flame size={13} className="text-orange-500 shrink-0" />
+            <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 ml-1">
+              Streak
+            </span>
+            <p className="text-xs sm:text-base font-bold text-slate-800 sm:mt-0.5 ml-1 sm:ml-0">
+              {garden.streak}
+              <span className="text-[10px] sm:text-xs font-medium text-slate-400">
+                d
+              </span>
+            </p>
+          </div>
+          <div className="flex items-center gap-1 sm:block min-w-0">
+            <Trophy size={13} className="text-[#6C63FF] shrink-0" />
+            <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 ml-1">
+              Best
+            </span>
+            <p className="text-xs sm:text-base font-bold text-slate-800 sm:mt-0.5 ml-1 sm:ml-0">
+              {garden.bestStreak}
+              <span className="text-[10px] sm:text-xs font-medium text-slate-400">
+                d
+              </span>
+            </p>
+          </div>
+          <div className="flex items-center gap-1 sm:block min-w-0">
+            <Snowflake size={13} className="text-sky-500 shrink-0" />
+            <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 ml-1">
+              Freezes
+            </span>
+            <p className="text-xs sm:text-base font-bold text-slate-800 sm:mt-0.5 ml-1 sm:ml-0">
+              {garden.freezes}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={useFreezeToday}
+          disabled={freezeDisabled}
+          title={freezeLabel}
+          className={`shrink-0 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-semibold w-8 h-8 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl transition-all ${
+            freezeDisabled
+              ? "bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed"
+              : "bg-sky-50 text-sky-600 border border-sky-100 hover:bg-sky-100 active:scale-95 cursor-pointer"
+          }`}
+        >
+          <Snowflake size={13} />
+          <span className="hidden sm:inline">{freezeLabel}</span>
+        </button>
+      </div>
+
       {/* Progress card */}
-      <div className="rounded-2xl px-6 sm:px-7 py-6 shrink-0 bg-white border border-slate-100 shadow-sm">
-        <ProgressBar percent={progressPercent} completed={completedCount} total={habits.length} />
+      <div className="rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3 shrink-0 bg-white border border-slate-100 shadow-sm">
+        <ProgressBar
+          percent={progressPercent}
+          completed={completedCount}
+          total={habits.length}
+        />
       </div>
 
       {/* Habits list */}
-      <div className="space-y-3.5 pr-0.5 flex-1 min-h-0 overflow-y-auto">
+      <div className="space-y-2 sm:space-y-2.5 pr-0.5 flex-1 min-h-0 overflow-y-auto">
         {habits.length === 0 && (
-          <div className="rounded-2xl px-6 py-14 text-center bg-white border border-dashed border-slate-200">
-            <p className="text-base font-medium text-slate-800">No habits yet</p>
-            <p className="text-sm mt-1 text-slate-400">Add one to start building your streak.</p>
+          <div className="rounded-2xl px-6 py-10 text-center bg-white border border-dashed border-slate-200">
+            <p className="text-sm font-medium text-slate-800">No habits yet</p>
+            <p className="text-xs mt-1 text-slate-400">
+              Add one to start building your streak.
+            </p>
           </div>
         )}
 
         {habits.map((habit) => {
-          const typeObj = HABIT_TYPES.find((t) => t.id === habit.type) || HABIT_TYPES[4];
+          const typeObj =
+            HABIT_TYPES.find((t) => t.id === habit.type) || HABIT_TYPES[4];
           const Icon = typeObj.icon;
 
           return (
             <div
               key={habit.id}
-              className="rounded-2xl px-6 py-4.5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between group transition-all bg-white border border-slate-100 shadow-sm hover:border-[#6C63FF]/30 hover:shadow-md"
+              className="rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3.5 flex flex-row items-center gap-3 sm:gap-4 justify-between group transition-all bg-white border border-slate-100 shadow-sm hover:border-[#6C63FF]/30 hover:shadow-md"
             >
-              <div className="flex items-center gap-4 min-w-0">
+              <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: typeObj.bg, color: typeObj.fg }}
                 >
-                  <Icon size={22} />
+                  <Icon size={18} className="sm:hidden" />
+                  <Icon size={20} className="hidden sm:block" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-base font-semibold text-slate-800 truncate">
+                  <h3 className="text-sm sm:text-base font-semibold text-slate-800 truncate">
                     {habit.title}
                   </h3>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">
+                  <p className="hidden sm:block text-xs text-slate-500 truncate mt-0.5">
                     {habit.target}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between sm:justify-end gap-3.5 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 {habit.completed ? (
-                  <span className="text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shrink-0 bg-[#E7E2FF] text-[#6C63FF]">
-                    <Check size={13} strokeWidth={3} /> Done today
+                  <span className="text-[10px] sm:text-xs font-semibold px-2.5 py-1 sm:px-3 sm:py-1 rounded-full flex items-center gap-1 sm:gap-1.5 shrink-0 bg-[#E7E2FF] text-[#6C63FF]">
+                    <Check size={11} strokeWidth={3} className="sm:hidden" />
+                    <Check
+                      size={13}
+                      strokeWidth={3}
+                      className="hidden sm:block"
+                    />
+                    <span className="hidden sm:inline">Done today</span>
                   </span>
                 ) : (
-                  <span className="text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shrink-0 bg-orange-50 text-orange-600">
-                    <Flame size={13} /> {habit.streak}d streak
+                  <span className="text-[10px] sm:text-xs font-semibold px-2.5 py-1 sm:px-3 sm:py-1 rounded-full flex items-center gap-1 sm:gap-1.5 shrink-0 bg-orange-50 text-orange-600">
+                    <Flame size={11} className="sm:hidden" />
+                    <Flame size={13} className="hidden sm:block" />
+                    {habit.streak}d
+                    <span className="hidden sm:inline">&nbsp;streak</span>
                   </span>
                 )}
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                  <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleOpenEdit(habit)}
-                      className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                       title="Edit habit"
                     >
-                      <Pencil size={16} />
+                      <Pencil size={14} className="sm:hidden" />
+                      <Pencil size={15} className="hidden sm:block" />
                     </button>
                     <button
                       onClick={() => setDeletingId(habit.id)}
-                      className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                       title="Delete habit"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} className="sm:hidden" />
+                      <Trash2 size={15} className="hidden sm:block" />
                     </button>
                   </div>
 
                   <button
                     onClick={() => toggleHabit(habit.id)}
-                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                       habit.completed
                         ? "bg-[#6C63FF] text-white shadow-sm"
                         : "bg-white text-slate-300 border border-slate-200 hover:border-[#6C63FF] hover:text-[#6C63FF]"
                     }`}
                   >
-                    <Check size={18} strokeWidth={2.5} />
+                    <Check size={15} strokeWidth={2.5} className="sm:hidden" />
+                    <Check
+                      size={17}
+                      strokeWidth={2.5}
+                      className="hidden sm:block"
+                    />
                   </button>
                 </div>
               </div>
@@ -375,11 +789,20 @@ export default function HabitPage() {
         })}
       </div>
 
+      {/* Flower growth modal */}
+      {showFlowerModal && (
+        <FlowerGrowthModal
+          garden={garden}
+          onClose={() => setShowFlowerModal(false)}
+        />
+      )}
+
       {/* 100% Celebration Modal */}
       {showCelebrationModal && (
         <HabitCelebrationModal
           totalHabits={habits.length}
           habitTitle={celebrationHabitTitle}
+          streak={garden.streak}
           onClose={() => setShowCelebrationModal(false)}
         />
       )}
@@ -402,8 +825,12 @@ export default function HabitPage() {
               <Trash2 size={22} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Delete habit?</h3>
-              <p className="text-xs text-slate-500 mt-1">This action cannot be undone.</p>
+              <h3 className="text-base font-bold text-slate-900">
+                Delete habit?
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                This action cannot be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
@@ -426,76 +853,23 @@ export default function HabitPage() {
   );
 }
 
-function CustomTimeSelect({ value, onChange }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectedOption = TIME_OPTIONS.find((opt) => opt.value === value) || TIME_OPTIONS[0];
-
-  return (
-    <div className="relative w-full">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm bg-white border transition-all ${
-          isOpen
-            ? "border-[#6C63FF] ring-2 ring-[#6C63FF]/20"
-            : "border-slate-200 text-slate-700"
-        }`}
-      >
-        <div className="flex items-center gap-2.5">
-          <Clock size={16} className="text-slate-400" />
-          <span className="font-medium text-slate-800">{selectedOption.label}</span>
-        </div>
-        <ChevronDown
-          size={16}
-          className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-[#6C63FF]" : ""}`}
-        />
-      </button>
-
-      {isOpen && (
-        <>
-          <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 right-0 top-full mt-1.5 z-30 max-h-52 overflow-y-auto rounded-xl p-1.5 space-y-0.5 bg-white border border-slate-100 shadow-lg">
-            {TIME_OPTIONS.map((option) => {
-              const isSelected = option.value === value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                    isSelected
-                      ? "bg-[#E7E2FF] text-[#6C63FF] font-semibold"
-                      : "text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  <span>{option.label}</span>
-                  {isSelected && <Check size={14} />}
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
 function HabitModal({ open, initialData, onClose, onSave }) {
   const [title, setTitle] = useState(initialData ? initialData.title : "");
-  const [selectedType, setSelectedType] = useState(initialData ? initialData.type : "water");
+  const [selectedType, setSelectedType] = useState(
+    initialData ? initialData.type : "water",
+  );
   const [target, setTarget] = useState(initialData ? initialData.target : "");
-  const [reminder, setReminder] = useState(initialData?.reminder || "08:00 AM");
-  const [startDate, setStartDate] = useState("2026-08-18");
 
   if (!open) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onSave({ title: title.trim(), type: selectedType, target: target.trim() || "Daily goal", reminder });
+    onSave({
+      title: title.trim(),
+      type: selectedType,
+      target: target.trim() || "Daily goal",
+    });
   };
 
   return (
@@ -506,7 +880,9 @@ function HabitModal({ open, initialData, onClose, onSave }) {
             <h2 className="text-lg font-bold text-slate-900">
               {initialData ? "Edit Habit" : "Create New Habit"}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Keep it small enough to repeat.</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Keep it small enough to repeat.
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -551,7 +927,9 @@ function HabitModal({ open, initialData, onClose, onSave }) {
                     }`}
                   >
                     <Icon size={18} className="mb-1" />
-                    <span className="text-[11px] leading-tight text-center">{type.label}</span>
+                    <span className="text-[11px] leading-tight text-center">
+                      {type.label}
+                    </span>
                   </button>
                 );
               })}
@@ -569,28 +947,6 @@ function HabitModal({ open, initialData, onClose, onSave }) {
               placeholder="e.g. 8 glasses of water every day"
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 resize-none"
             />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Reminder (Optional)
-            </label>
-            <CustomTimeSelect value={reminder} onChange={setReminder} />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Start Date
-            </label>
-            <div className="relative">
-              <Calendar size={16} className="absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20"
-              />
-            </div>
           </div>
 
           <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
