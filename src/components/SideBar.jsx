@@ -3,6 +3,7 @@ import Logo from "../assets/Koaldavpic.png";
 import { CiHome, CiTrophy, CiCalendar } from "react-icons/ci";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 import { useAuth } from "../features/auth/hooks/useAuth";
+import ThemeToggle from "./ThemeToggle";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: CiHome, end: true },
@@ -14,30 +15,33 @@ const NAV_ITEMS = [
 const linkClass = ({ isActive }) =>
   `flex items-center gap-3 rounded-lg px-4 py-3 cursor-pointer transition-colors ${
     isActive
-      ? "bg-[#E7E2FF] text-[#6C63FF] font-medium"
-      : "text-gray-600 hover:bg-gray-100"
+      ? "bg-[#E7E2FF] text-[#6C63FF] font-medium dark:bg-[#1E1B2E] dark:text-[#6C63FF]"
+      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#1A1A22]"
   }`;
 
 export default function SideBar({ onNavigate }) {
   const { user, logout } = useAuth();
 
   return (
-    <aside className="w-full h-full bg-[#F4F2FF] flex flex-col justify-between p-5 overflow-y-auto">
+    <aside className="w-full h-full bg-[#F4F2FF] dark:bg-[#0F0F14] flex flex-col justify-between p-5 overflow-y-auto transition-colors">
       <div>
-        <div className="flex items-center mb-10">
-          <img
-            src={Logo}
-            alt="Logo"
-            width="48"
-            height="48"
-            className="rounded-full w-12 h-12 object-cover"
-          />
-          <div className="ml-3">
-            <h1 className="font-bold text-lg text-[#6C63FF]">KAOL DAV</h1>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
-              Peak Performance
-            </p>
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center">
+            <img
+              src={Logo}
+              alt="Logo"
+              width="48"
+              height="48"
+              className="rounded-full w-12 h-12 object-cover"
+            />
+            <div className="ml-3">
+              <h1 className="font-bold text-lg text-[#6C63FF]">KAOL DAV</h1>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">
+                Peak Performance
+              </p>
+            </div>
           </div>
+          <ThemeToggle />
         </div>
 
         <nav>
@@ -55,7 +59,7 @@ export default function SideBar({ onNavigate }) {
       </div>
 
       <div>
-        <button className="w-full bg-[#6C63FF] text-white py-3 rounded-xl font-medium hover:bg-[#5B52E6] transition-colors">
+        <button className="w-full bg-[#6C63FF] text-white py-3 rounded-xl font-medium hover:bg-[#5B52E6] dark:hover:bg-[#7C73FF] transition-colors">
           Start Sprint
         </button>
 
@@ -66,7 +70,7 @@ export default function SideBar({ onNavigate }) {
             className="w-10 h-10 rounded-full"
           />
           <div className="min-w-0">
-            <h3 className="font-semibold text-sm truncate">
+            <h3 className="font-semibold text-sm truncate dark:text-white">
               {user?.name || "Guest"}
             </h3>
             <button
