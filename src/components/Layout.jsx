@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 import SideBar from "./SideBar";
 import TopMenu from "./TopMenu";
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  const isFinance = location.pathname.startsWith("/finance");
 
   return (
     <div className="w-full h-screen flex overflow-hidden bg-gray-50">
@@ -37,9 +40,9 @@ export default function Layout() {
       )}
 
       <div className="flex flex-1 flex-col min-w-0 h-screen">
-        <TopMenu onMenuClick={() => setMobileOpen(true)} />
-        <div className="flex-1 overflow-y-auto">
-          <Outlet />
+        {!isFinance && <TopMenu onMenuClick={() => setMobileOpen(true)} />}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <Outlet context={{ onMenuClick: () => setMobileOpen(true) }} />
         </div>
       </div>
     </div>

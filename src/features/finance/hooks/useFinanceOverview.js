@@ -1,80 +1,92 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  getFinanceOverview,
+  getExpenses,
+  createExpense as createExpenseApi,
+  deleteExpense as deleteExpenseApi,
+} from "../api/financeApi";
 
-// ---------------------------------------------------------------------------
-// Mock / seed data (replace with real API calls once backend is connected)
-// ---------------------------------------------------------------------------
-
-const SEED_EXPENSES = [
-  { id: 1, icon: "🍔", title: "Lunch", category: "Food", note: "Lunch with friends", date: "Aug 25, 2026", amount: 5.0 },
-  { id: 2, icon: "🚗", title: "Grab Ride", category: "Transportation", note: "", date: "Aug 24, 2026", amount: 12.0 },
-  { id: 3, icon: "🛍️", title: "New Shoes", category: "Shopping", note: "", date: "Aug 22, 2026", amount: 65.0 },
-  { id: 4, icon: "🎬", title: "Movie", category: "Entertainment", note: "", date: "Aug 20, 2026", amount: 15.0 },
+const DEFAULT_MONTHLY = [
+  { month: "Jan", amount: 0 },
+  { month: "Feb", amount: 0 },
+  { month: "Mar", amount: 0 },
+  { month: "Apr", amount: 0 },
+  { month: "May", amount: 0 },
+  { month: "Jun", amount: 0 },
+  { month: "Jul", amount: 0 },
+  { month: "Aug", amount: 0 },
+  { month: "Sep", amount: 0 },
+  { month: "Oct", amount: 0 },
+  { month: "Nov", amount: 0 },
+  { month: "Dec", amount: 0 },
 ];
 
-const SEED_MONTHLY = [
-  { month: "Jan", amount: 320 },
-  { month: "Feb", amount: 410 },
-  { month: "Mar", amount: 280 },
-  { month: "Apr", amount: 520 },
-  { month: "May", amount: 390 },
-  { month: "Jun", amount: 300 },
-  { month: "Jul", amount: 350 },
-  { month: "Aug", amount: 430 },
-];
+export function useFinanceOverview(year = 2026, categoryFilter = "All") {
+  const [expenses, setExpenses] = useState([]);
+  const [monthlyData, setMonthlyData] = useState(DEFAULT_MONTHLY);
+  const [categoryData, setCategoryData] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const SEED_CATEGORIES = [
-  { name: "Food",           value: 180, color: "#6C63FF", icon: "🍔" },
-  { name: "Shopping",       value: 120, color: "#9C8FFF", icon: "🛍️" },
-  { name: "Transportation", value: 70,  color: "#C4BEFF", icon: "🚗" },
-  { name: "Entertainment",  value: 40,  color: "#DDD9FF", icon: "🎬" },
-  { name: "Other",          value: 20,  color: "#EDE9FE", icon: "📦" },
-];
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [overviewRes, expensesRes] = await Promise.all([
+        getFinanceOverview(year),
+        getExpenses({ year, category: categoryFilter, limit: 100 }),
+      ]);
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+      if (overviewRes) {
+        setMonthlyData(overviewRes.monthlyData || DEFAULT_MONTHLY);
+        setCategoryData(overviewRes.categoryData || []);
+        setTotalAmount(overviewRes.totalAmount || 0);
+      }
 
-const CATEGORY_ICONS = {
-  Food: "🍔", Transportation: "🚗", Shopping: "🛍️",
-  Entertainment: "🎬", Bills: "💡", Education: "📚", Health: "💊", Other: "📦",
-};
+      if (expensesRes) {
+        setExpenses(Array.isArray(expensesRes.expenses) ? expensesRes.expenses : (Array.isArray(expensesRes) ? expensesRes : []));
+      }
+    } catch (err) {
+      console.error("Failed to load finance data:", err);
+      setError(err?.message || "Failed to load finance data");
+    } finally {
+      setLoading(false);
+    }
+  }, [year, categoryFilter]);
 
-function categoryIcon(cat) {
-  return CATEGORY_ICONS[cat] ?? "💸";
-}
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-function formatDisplayDate(iso) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (isNaN(d)) return iso;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
-
-export function useFinanceOverview() {
-  const [expenses, setExpenses] = useState(SEED_EXPENSES);
-  const monthlyData = SEED_MONTHLY;
-  const categoryData = SEED_CATEGORIES;
-
-  const addExpense = useCallback((form) => {
-    const next = {
-      id: Date.now(),
-      icon: categoryIcon(form.category),
+  const addExpense = useCallback(async (form) => {
+    const payload = {
       title: form.title,
-      category: form.category,
-      note: form.description || "",
-      date: formatDisplayDate(form.date),
       amount: parseFloat(form.amount) || 0,
+      category: form.category,
+      date: form.date,
+      note: form.description || form.note || "",
     };
-    setExpenses((prev) => [next, ...prev]);
-  }, []);
 
-  const removeExpense = useCallback((id) => {
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
-  }, []);
+    const created = await createExpenseApi(payload);
+    await loadData();
+    return created;
+  }, [loadData]);
 
-  return { expenses, monthlyData, categoryData, addExpense, removeExpense };
+  const removeExpense = useCallback(async (id) => {
+    await deleteExpenseApi(id);
+    await loadData();
+  }, [loadData]);
+
+  return {
+    expenses,
+    monthlyData,
+    categoryData,
+    totalAmount,
+    loading,
+    error,
+    reload: loadData,
+    addExpense,
+    removeExpense,
+  };
 }

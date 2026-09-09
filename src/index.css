@@ -1,4 +1,21 @@
 @import "tailwindcss";
+
+/* Remove focus outlines & borders from SVG/Recharts elements */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-wrapper *:focus,
+.recharts-surface *:focus,
+.recharts-layer:focus,
+.recharts-bar-rectangle:focus,
+.recharts-sector:focus,
+svg:focus,
+path:focus,
+rect:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
