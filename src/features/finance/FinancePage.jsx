@@ -15,6 +15,8 @@ import {
 import AddExpenseModal from "./components/AddExpenseModal";
 import { useFinanceOverview } from "./hooks/useFinanceOverview";
 
+import { useTheme } from "../../context/ThemeContext";
+
 const FILTER_PILLS = [
   "All",
   "Food",
@@ -45,11 +47,7 @@ function formatDisplayDate(iso) {
 function Card({ children, className = "" }) {
   return (
     <div
-      className={`bg-white rounded-2xl p-5 ${className}`}
-      style={{
-        border: "1px solid #ECEBF5",
-        boxShadow: "0 2px 16px rgba(108,99,255,0.06)",
-      }}
+      className={`bg-white dark:bg-[#12121A] rounded-2xl p-5 border border-[#ECEBF5] dark:border-[#1E1B2E] shadow-sm transition-colors ${className}`}
     >
       {children}
     </div>
@@ -82,15 +80,7 @@ function YearSelector({ value, onChange }) {
             setCustomMode(false);
           }
         }}
-        className="w-16 text-center rounded-lg text-xs outline-none"
-        style={{
-          background: "#EDE9FE",
-          color: "#6C63FF",
-          fontWeight: 600,
-          border: "1.5px solid #6C63FF",
-          padding: "3px 6px",
-          fontFamily: "inherit",
-        }}
+        className="w-16 text-center rounded-lg text-xs outline-none bg-[#EDE9FE] dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF] border border-[#6C63FF] dark:border-[#6C63FF] py-1 px-1.5 font-semibold font-inherit"
       />
     );
   }
@@ -105,26 +95,27 @@ function YearSelector({ value, onChange }) {
             setRaw(String(value));
           } else onChange(Number(e.target.value));
         }}
-        className="appearance-none pl-2.5 pr-6 py-1 rounded-lg text-xs cursor-pointer outline-none"
-        style={{
-          background: "#EDE9FE",
-          color: "#6C63FF",
-          fontWeight: 600,
-          border: "none",
-          fontFamily: "inherit",
-        }}
+        className="appearance-none pl-2.5 pr-6 py-1 rounded-lg text-xs cursor-pointer outline-none bg-[#EDE9FE] dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF] border-none font-semibold font-inherit"
       >
         {YEARS.map((y) => (
-          <option key={y} value={y}>
+          <option
+            key={y}
+            value={y}
+            className="bg-white dark:bg-[#1A1A24] text-slate-800 dark:text-slate-100"
+          >
             {y}
           </option>
         ))}
-        <option value="__custom__">Custom…</option>
+        <option
+          value="__custom__"
+          className="bg-white dark:bg-[#1A1A24] text-slate-800 dark:text-slate-100"
+        >
+          Custom…
+        </option>
       </select>
       <ChevronDown
         size={10}
-        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2"
-        style={{ color: "#6C63FF" }}
+        className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[#6C63FF] dark:text-[#A49DFF]"
       />
     </div>
   );
@@ -132,25 +123,22 @@ function YearSelector({ value, onChange }) {
 
 // ─── Charts ───────────────────────────────────────────────────────────────────
 
-function CategoryDonut({ data, year, total }) {
+function CategoryDonut({ data, year, total, isDark }) {
   const hasData = Array.isArray(data) && data.length > 0 && total > 0;
 
   return (
     <Card className="flex flex-col justify-between">
       <div className="mb-3">
-        <h2 className="text-base" style={{ fontWeight: 700, color: "#111827" }}>
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
           Spending by Category
         </h2>
-        <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>
+        <p className="text-xs mt-0.5 text-slate-400 dark:text-slate-400">
           {year} • Total: ${total.toFixed(2)}
         </p>
       </div>
 
       {!hasData ? (
-        <div
-          className="py-10 flex flex-col items-center justify-center text-center gap-1.5"
-          style={{ color: "#9CA3AF" }}
-        >
+        <div className="py-10 flex flex-col items-center justify-center text-center gap-1.5 text-slate-400 dark:text-slate-500">
           <span className="text-3xl">📊</span>
           <p className="text-xs font-medium">No expenses recorded for {year}</p>
         </div>
@@ -193,19 +181,27 @@ function CategoryDonut({ data, year, total }) {
                 <Tooltip
                   contentStyle={{
                     borderRadius: 10,
-                    border: "1px solid #ECEBF5",
+                    border: isDark ? "1px solid #262438" : "1px solid #ECEBF5",
+                    backgroundColor: isDark ? "#1A1A24" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#111827",
                     fontSize: 12,
                     fontFamily: "inherit",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  }}
+                  itemStyle={{
+                    color: isDark ? "#ffffff" : "#111827",
                   }}
                   formatter={(v, name) => [`$${Number(v).toFixed(2)}`, name]}
                 />
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <p className="text-base sm:text-lg font-extrabold text-slate-900">
+              <p className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
                 ${Number(total || 0).toFixed(2)}
               </p>
-              <p className="text-[10px] text-slate-400">Total</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                Total
+              </p>
             </div>
           </div>
           <div className="flex flex-col gap-2 flex-1 max-h-44 overflow-y-auto pr-1">
@@ -216,10 +212,7 @@ function CategoryDonut({ data, year, total }) {
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ background: cat.color || "#6C63FF" }}
                   />
-                  <span
-                    className="text-xs"
-                    style={{ color: "#374151", fontWeight: 500 }}
-                  >
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
                     {cat.icon || "💸"} {cat.name}
                   </span>
                 </div>
@@ -236,15 +229,7 @@ function CategoryDonut({ data, year, total }) {
                       opacity: 0.7,
                     }}
                   />
-                  <span
-                    className="text-xs tabular-nums"
-                    style={{
-                      fontWeight: 600,
-                      color: "#111827",
-                      minWidth: 40,
-                      textAlign: "right",
-                    }}
-                  >
+                  <span className="text-xs tabular-nums font-semibold text-slate-900 dark:text-white min-w-[40px] text-right">
                     ${cat.value.toFixed(2)}
                   </span>
                 </div>
@@ -262,36 +247,32 @@ function CategoryDonut({ data, year, total }) {
 function ExpenseRow({ expense }) {
   const displayDate = formatDisplayDate(expense.date);
   return (
-    <div className="flex items-center py-3.5 gap-4 group hover:bg-purple-50 -mx-5 px-5 transition-colors rounded-xl">
-      <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg"
-        style={{ background: "#F4F2FF" }}
-      >
+    <div className="flex items-center py-3.5 gap-4 group hover:bg-purple-50/70 dark:hover:bg-[#1A1A26] -mx-5 px-5 transition-colors rounded-xl">
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-[#F4F2FF] dark:bg-[#1A1A26] text-slate-800 dark:text-slate-200">
         {expense.icon || "💸"}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-slate-900 truncate">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
             {expense.title}
           </p>
-          <span
-            className="px-2 py-0.5 rounded-md text-[10px]"
-            style={{ background: "#EDE9FE", color: "#6C63FF", fontWeight: 600 }}
-          >
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[#EDE9FE] dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF]">
             {expense.category}
           </span>
         </div>
         {expense.note && (
           <p
-            className="text-xs mt-0.5 truncate text-slate-400"
+            className="text-xs mt-0.5 truncate text-slate-400 dark:text-slate-400"
             title={expense.note}
           >
             {expense.note}
           </p>
         )}
       </div>
-      <p className="text-xs shrink-0 text-slate-400">{displayDate}</p>
-      <p className="text-sm tabular-nums shrink-0 font-bold text-rose-500 min-w-[65px] text-right">
+      <p className="text-xs shrink-0 text-slate-400 dark:text-slate-400">
+        {displayDate}
+      </p>
+      <p className="text-sm tabular-nums shrink-0 font-bold text-rose-500 dark:text-rose-400 min-w-[65px] text-right">
         -${Number(expense.amount || 0).toFixed(2)}
       </p>
     </div>
@@ -311,14 +292,14 @@ function ExpenseRecords({ expenses, activeFilter, onFilterChange, loading }) {
     <Card>
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h2 className="text-base font-bold text-slate-900">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
             Recorded Expenses
           </h2>
-          <p className="text-xs mt-0.5 text-slate-400">
+          <p className="text-xs mt-0.5 text-slate-400 dark:text-slate-400">
             Your recent transactions
           </p>
         </div>
-        <span className="text-xs tabular-nums text-slate-400">
+        <span className="text-xs tabular-nums text-slate-400 dark:text-slate-400">
           {expenses.length} items
         </span>
       </div>
@@ -331,36 +312,31 @@ function ExpenseRecords({ expenses, activeFilter, onFilterChange, loading }) {
               onFilterChange(pill);
               setShowAll(false);
             }}
-            className="px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer"
-            style={{
-              background: activeFilter === pill ? "#6C63FF" : "#F4F2FF",
-              color: activeFilter === pill ? "#fff" : "#6C63FF",
-              fontWeight: 600,
-              border:
-                activeFilter === pill
-                  ? "1.5px solid #6C63FF"
-                  : "1.5px solid #EDE9FE",
-              fontFamily: "inherit",
-            }}
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer font-semibold ${
+              activeFilter === pill
+                ? "bg-[#6C63FF] text-white border border-[#6C63FF]"
+                : "bg-[#F4F2FF] dark:bg-[#1A1A26] text-[#6C63FF] dark:text-[#A49DFF] border border-[#EDE9FE] dark:border-[#262438] hover:bg-purple-100 dark:hover:bg-[#222033]"
+            }`}
+            style={{ fontFamily: "inherit" }}
           >
             {pill}
           </button>
         ))}
       </div>
 
-      <div className="flex flex-col divide-y divide-slate-50 min-h-[140px]">
+      <div className="flex flex-col divide-y divide-slate-100 dark:divide-[#1E1B2E] min-h-[140px]">
         {loading ? (
-          <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400">
+          <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500">
             <RefreshCw size={20} className="animate-spin text-[#6C63FF]" />
             <p className="text-xs">Loading expenses…</p>
           </div>
         ) : expenses.length === 0 ? (
-          <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400">
+          <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500">
             <span className="text-3xl">💸</span>
             <p className="text-sm font-medium">
               No expenses found in this category
             </p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 dark:text-slate-500">
               Add an expense to start tracking your spending.
             </p>
           </div>
@@ -373,7 +349,7 @@ function ExpenseRecords({ expenses, activeFilter, onFilterChange, loading }) {
               <div className="pt-3.5 pb-1 flex justify-center">
                 <button
                   onClick={() => setShowAll((prev) => !prev)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-[#6C63FF] hover:bg-purple-50 transition-all cursor-pointer border border-[#EDE9FE]"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-[#6C63FF] dark:text-[#A49DFF] hover:bg-purple-50 dark:hover:bg-[#1E1B2E] transition-all cursor-pointer border border-[#EDE9FE] dark:border-[#262438]"
                 >
                   <span>
                     {showAll
@@ -402,6 +378,8 @@ export default function FinancePage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [activeFilter, setActiveFilter] = useState("All");
   const outletContext = useOutletContext();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const {
     expenses,
@@ -424,29 +402,26 @@ export default function FinancePage() {
 
   return (
     <div
-      className="flex flex-col h-full overflow-hidden bg-[#F4F2FF]"
+      className="flex flex-col h-full overflow-hidden bg-[#F4F2FF] dark:bg-[#0D0D12] text-slate-900 dark:text-slate-100 transition-colors"
       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
       {/* ── Header ── */}
-      <div
-        className="flex items-center justify-between px-3.5 sm:px-8 py-3 sm:py-4 shrink-0 bg-white/80 backdrop-blur-md gap-2"
-        style={{ borderBottom: "1px solid #ECEBF5" }}
-      >
+      <div className="flex items-center justify-between px-3.5 sm:px-8 py-3 sm:py-4 shrink-0 bg-white/80 dark:bg-[#12121A]/90 backdrop-blur-md gap-2 border-b border-[#ECEBF5] dark:border-[#1E1B2E] transition-colors">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {outletContext?.onMenuClick && (
             <button
               onClick={outletContext.onMenuClick}
-              className="lg:hidden p-1.5 sm:p-2 rounded-xl bg-purple-50 text-[#6C63FF] hover:bg-purple-100 transition-colors shrink-0"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl bg-purple-50 dark:bg-[#1E1B2E] text-[#6C63FF] hover:bg-purple-100 dark:hover:bg-[#25223A] transition-colors shrink-0"
               title="Open menu"
             >
               <Menu size={18} />
             </button>
           )}
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 leading-tight truncate">
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight truncate">
               Finance
             </h1>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 truncate hidden sm:block">
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate hidden sm:block">
               Where am I actually spending my money? Track and analyze your real
               expenses.
             </p>
@@ -456,7 +431,7 @@ export default function FinancePage() {
           <button
             onClick={reload}
             title="Refresh data"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:bg-purple-50 bg-white border border-slate-200 text-slate-500 hover:text-[#6C63FF] cursor-pointer shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center transition-all hover:bg-purple-50 dark:hover:bg-[#1E1B2E] bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A38] text-slate-500 dark:text-slate-400 hover:text-[#6C63FF] dark:hover:text-[#6C63FF] cursor-pointer shrink-0"
           >
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           </button>
@@ -471,7 +446,7 @@ export default function FinancePage() {
       </div>
 
       {error && (
-        <div className="mx-4 sm:mx-8 mt-4 p-3 rounded-xl bg-rose-50 border border-rose-100 text-xs text-rose-600 flex items-center justify-between">
+        <div className="mx-4 sm:mx-8 mt-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 text-xs text-rose-600 dark:text-rose-400 flex items-center justify-between">
           <span>Failed to connect to backend: {String(error)}</span>
           <button onClick={reload} className="font-semibold underline ml-2">
             Retry
@@ -487,10 +462,10 @@ export default function FinancePage() {
           <Card>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white">
                   {selectedYear} Monthly Expenses
                 </h2>
-                <p className="text-xs mt-0.5 text-slate-400">
+                <p className="text-xs mt-0.5 text-slate-400 dark:text-slate-400">
                   Annual expense breakdown • Total: ${totalAmount.toFixed(2)}
                 </p>
               </div>
@@ -513,7 +488,7 @@ export default function FinancePage() {
                   axisLine={false}
                   tickLine={false}
                   tick={{
-                    fill: "#9CA3AF",
+                    fill: isDark ? "#6B7280" : "#9CA3AF",
                     fontSize: 11,
                     fontFamily: "inherit",
                   }}
@@ -523,18 +498,28 @@ export default function FinancePage() {
                   tickLine={false}
                   tickFormatter={(v) => `$${v}`}
                   tick={{
-                    fill: "#9CA3AF",
+                    fill: isDark ? "#6B7280" : "#9CA3AF",
                     fontSize: 11,
                     fontFamily: "inherit",
                   }}
                 />
                 <Tooltip
-                  cursor={{ fill: "#F4F2FF", radius: 8, stroke: "none" }}
+                  cursor={{
+                    fill: isDark ? "rgba(108, 99, 255, 0.15)" : "#F4F2FF",
+                    radius: 8,
+                    stroke: "none",
+                  }}
                   contentStyle={{
                     borderRadius: 12,
-                    border: "1px solid #ECEBF5",
+                    border: isDark ? "1px solid #262438" : "1px solid #ECEBF5",
+                    backgroundColor: isDark ? "#1A1A24" : "#ffffff",
+                    color: isDark ? "#ffffff" : "#111827",
                     fontFamily: "inherit",
                     fontSize: 12,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  }}
+                  itemStyle={{
+                    color: isDark ? "#ffffff" : "#111827",
                   }}
                   formatter={(v) => [`$${Number(v).toFixed(2)}`, "Expense"]}
                 />
@@ -546,7 +531,13 @@ export default function FinancePage() {
                   {monthlyData.map((entry, index) => (
                     <Cell
                       key={`bar-${index}`}
-                      fill={entry.amount > 0 ? "#6C63FF" : "#EDE9FE"}
+                      fill={
+                        entry.amount > 0
+                          ? "#6C63FF"
+                          : isDark
+                            ? "#1E1B2E"
+                            : "#EDE9FE"
+                      }
                       stroke="none"
                       className="outline-none focus:outline-none"
                     />
@@ -560,6 +551,7 @@ export default function FinancePage() {
             data={categoryData}
             year={selectedYear}
             total={totalAmount}
+            isDark={isDark}
           />
         </div>
 

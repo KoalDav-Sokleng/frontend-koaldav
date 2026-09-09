@@ -11,7 +11,7 @@ export default function Layout() {
   const isFinance = location.pathname.startsWith("/finance");
 
   return (
-    <div className="w-full h-screen flex overflow-hidden bg-gray-50">
+    <div className="w-full h-screen flex overflow-hidden bg-gray-50 dark:bg-[#0D0D12] text-gray-900 dark:text-gray-100 transition-colors">
       {/* Desktop sidebar */}
       <div className="hidden lg:block lg:w-[260px] xl:w-[280px] shrink-0 h-screen">
         <SideBar />
@@ -25,13 +25,13 @@ export default function Layout() {
             onClick={() => setMobileOpen(false)}
           />
           <div className="absolute inset-y-0 left-0 w-[80%] max-w-[300px] h-full shadow-xl">
-            <div className="flex justify-end p-3 bg-[#F4F2FF]">
+            <div className="flex justify-end p-3 bg-[#F4F2FF] dark:bg-[#1A1A22] transition-colors">
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
-                className="p-1 rounded-lg hover:bg-white/60"
+                className="p-1 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300"
               >
-                <X className="w-5 h-5 text-gray-600" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             <SideBar onNavigate={() => setMobileOpen(false)} />

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Remove focus outlines & borders from SVG/Recharts elements */
 .recharts-wrapper,
 .recharts-surface,
