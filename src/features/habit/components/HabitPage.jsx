@@ -1,5 +1,6 @@
 // src/features/habit/HabitPage.jsx
 import React, { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useHabits, todayStr } from "../hooks/useHabits";
 import {
@@ -18,6 +19,7 @@ import {
   Sparkles,
   Snowflake,
   Info,
+  Menu,
 } from "lucide-react";
 
 const HABIT_TYPES = [
@@ -213,13 +215,13 @@ function FlowerGrowthModal({ garden, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-2xl border border-amber-100 overflow-hidden">
+      <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-[#171720] p-6 text-center shadow-2xl border border-amber-100 dark:border-amber-900/60 overflow-hidden">
         <div className="absolute -top-14 -right-14 w-36 h-36 bg-amber-100/60 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-14 -left-14 w-36 h-36 bg-[#E7E2FF]/70 rounded-full blur-2xl pointer-events-none" />
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors z-10"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors z-10"
           aria-label="Close"
         >
           <X size={18} />
@@ -233,8 +235,10 @@ function FlowerGrowthModal({ garden, onClose }) {
           <FlowerSVG stage={stage} size={150} />
         </div>
 
-        <h3 className="text-lg font-bold text-slate-900">{info.label}</h3>
-        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed px-2">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          {info.label}
+        </h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed px-2">
           {info.desc}
         </p>
 
@@ -244,21 +248,23 @@ function FlowerGrowthModal({ garden, onClose }) {
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all ${
-                i <= stage ? "w-5 bg-amber-400" : "w-3 bg-slate-200"
+                i <= stage
+                  ? "w-5 bg-amber-400"
+                  : "w-3 bg-slate-200 dark:bg-slate-700"
               }`}
               title={g.label}
             />
           ))}
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-2 bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
+        <div className="mt-5 grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-slate-100 dark:border-slate-700">
           <div className="text-center">
             <div className="text-[10px] text-slate-400 font-medium">Streak</div>
             <div className="text-base font-bold text-orange-500">
               {garden.streak}d
             </div>
           </div>
-          <div className="text-center border-l border-r border-slate-200">
+          <div className="text-center border-l border-r border-slate-200 dark:border-slate-700">
             <div className="text-[10px] text-slate-400 font-medium">Best</div>
             <div className="text-base font-bold text-[#6C63FF]">
               {garden.bestStreak}d
@@ -274,7 +280,7 @@ function FlowerGrowthModal({ garden, onClose }) {
           </div>
         </div>
 
-        <p className="mt-4 flex items-start gap-1.5 text-left text-[11px] text-slate-400 leading-relaxed">
+        <p className="mt-4 flex items-start gap-1.5 text-left text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
           <Info size={13} className="shrink-0 mt-0.5" />
           Missing a single day only wilts your flower one stage back — it
           doesn't reset to soil. Use a freeze on a day you know you'll miss to
@@ -345,21 +351,21 @@ function fireSingleHabitConfetti() {
 
 function ProgressBar({ percent, completed, total }) {
   return (
-    <div className="space-y-1.5 sm:space-y-2">
+    <div className="space-y-2 sm:space-y-2.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-xs sm:text-sm font-semibold text-slate-800">
+          <p className="text-xs sm:text-base font-semibold text-slate-800 dark:text-slate-200">
             Today's progress
           </p>
-          <span className="text-[11px] sm:text-xs text-slate-400 font-medium">
+          <span className="text-[11px] sm:text-sm text-slate-400 font-medium">
             ({completed} of {total} complete)
           </span>
         </div>
-        <span className="text-sm sm:text-base font-bold text-[#6C63FF] tabular-nums">
+        <span className="text-base sm:text-lg font-bold text-[#6C63FF] tabular-nums">
           {percent}%
         </span>
       </div>
-      <div className="w-full h-2 sm:h-2.5 rounded-full overflow-hidden bg-[#E7E2FF]">
+      <div className="w-full h-3.5 sm:h-4 rounded-full overflow-hidden bg-[#E7E2FF] dark:bg-[#2b2742]">
         <div
           className="h-full rounded-full bg-[#6C63FF] transition-all duration-500"
           style={{ width: `${percent}%` }}
@@ -373,13 +379,13 @@ function ProgressBar({ percent, completed, total }) {
 function HabitCelebrationModal({ onClose, totalHabits, habitTitle, streak }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl border border-purple-100 overflow-hidden">
+      <div className="relative w-full max-w-sm rounded-3xl bg-white dark:bg-[#171720] p-7 text-center shadow-2xl border border-purple-100 dark:border-purple-900/60 overflow-hidden">
         <div className="absolute -top-16 -left-16 w-36 h-36 bg-[#E7E2FF]/80 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-16 -right-16 w-36 h-36 bg-[#6C63FF]/20 rounded-full blur-2xl pointer-events-none" />
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           aria-label="Close"
         >
           <X size={18} />
@@ -397,15 +403,15 @@ function HabitCelebrationModal({ onClose, totalHabits, habitTitle, streak }) {
           <Sparkles size={13} /> 100% Completed Today!
         </span>
 
-        <h3 className="text-xl font-bold text-slate-900">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
           Awesome Work Today! 🎉
         </h3>
 
-        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
           {habitTitle ? (
             <>
               You just finished{" "}
-              <strong className="text-slate-800">
+              <strong className="text-slate-800 dark:text-slate-200">
                 &ldquo;{habitTitle}&rdquo;
               </strong>{" "}
               and reached 100% completion for all habits today!
@@ -413,20 +419,22 @@ function HabitCelebrationModal({ onClose, totalHabits, habitTitle, streak }) {
           ) : (
             <>
               You completed all{" "}
-              <strong className="text-slate-800">{totalHabits} habits</strong>{" "}
+              <strong className="text-slate-800 dark:text-slate-200">
+                {totalHabits} habits
+              </strong>{" "}
               scheduled for today. Your flower grew a little more.
             </>
           )}
         </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-3 bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
+        <div className="mt-5 grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-3.5 border border-slate-100 dark:border-slate-700">
           <div className="text-center">
             <div className="text-[11px] text-slate-400 font-medium">
               Daily Progress
             </div>
             <div className="text-lg font-bold text-[#6C63FF]">100%</div>
           </div>
-          <div className="text-center border-l border-slate-200">
+          <div className="text-center border-l border-slate-200 dark:border-slate-700">
             <div className="text-[11px] text-slate-400 font-medium">
               Garden Streak
             </div>
@@ -446,6 +454,7 @@ function HabitCelebrationModal({ onClose, totalHabits, habitTitle, streak }) {
 }
 
 export default function HabitPage() {
+  const { onOpenMobileMenu } = useOutletContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -555,7 +564,7 @@ export default function HabitPage() {
 
   if (loading) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-white">
+      <div className="w-full h-full flex items-center justify-center bg-white dark:bg-[#101016]">
         <p className="text-sm text-slate-400">Loading your habits…</p>
       </div>
     );
@@ -563,8 +572,8 @@ export default function HabitPage() {
 
   if (error) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-white px-6 text-center">
-        <p className="text-sm text-slate-600 font-medium">
+      <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-white dark:bg-[#101016] px-6 text-center">
+        <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
           Couldn't load your habits.
         </p>
         <p className="text-xs text-slate-400">
@@ -581,14 +590,21 @@ export default function HabitPage() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col px-4 sm:px-8 py-3.5 sm:py-5 space-y-2.5 sm:space-y-3.5 overflow-hidden bg-white">
+    <div className="w-full min-h-full flex flex-col px-3 sm:px-8 py-2 sm:py-5 space-y-2 sm:space-y-3.5 overflow-visible bg-white dark:bg-[#101016]">
       {/* Header */}
-      <div className="flex flex-row items-center justify-between gap-3 shrink-0">
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 truncate">
+      <div className="flex flex-row items-center justify-between gap-2 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <button
+            onClick={onOpenMobileMenu}
+            aria-label="Open menu"
+            className="lg:hidden shrink-0 p-1.5 -ml-1.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#242430]"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 truncate">
             Your Habits
           </h1>
-          <p className="hidden sm:block text-xs mt-0.5 text-slate-500">
+          <p className="hidden sm:block text-xs mt-0.5 text-slate-500 dark:text-slate-400">
             Small repeats, tracked honestly.
           </p>
         </div>
@@ -598,7 +614,7 @@ export default function HabitPage() {
             setEditingHabit(null);
             setIsModalOpen(true);
           }}
-          className="flex items-center justify-center gap-1.5 text-white text-xs sm:text-sm font-semibold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] shadow-sm transition-all shrink-0 active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 text-white text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] shadow-sm transition-all shrink-0 active:scale-95 cursor-pointer"
         >
           <Plus size={16} />
           <span>New habit</span>
@@ -619,13 +635,13 @@ export default function HabitPage() {
       )}
 
       {/* Garden / streak / freeze widget */}
-      <div className="rounded-2xl px-3 sm:px-5 py-2 sm:py-3 shrink-0 bg-gradient-to-br from-white to-[#FBF9FF] border border-slate-100 shadow-sm flex items-center gap-2.5 sm:gap-4">
+      <div className="rounded-2xl min-h-[92px] sm:min-h-[108px] px-3 sm:px-5 py-2 sm:py-2.5 lg:py-2 shrink-0 bg-gradient-to-br from-white to-[#FBF9FF] dark:from-[#171720] dark:to-[#1d1b2b] border border-slate-100 dark:border-slate-700 shadow-sm flex items-center gap-2.5 sm:gap-4">
         <button
           onClick={() => setShowFlowerModal(true)}
-          className="relative shrink-0 w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-100 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+          className="relative shrink-0 w-9 h-9 sm:w-11 sm:h-11 lg:w-10 lg:h-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-100 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform cursor-pointer"
           title="See your flower grow"
         >
-          <FlowerSVG stage={garden.growthStage} size={24} />
+          <FlowerSVG stage={garden.growthStage} size={20} />
         </button>
 
         <div className="flex-1 flex items-center justify-between sm:grid sm:grid-cols-3 gap-2 sm:gap-3 min-w-0">
@@ -634,7 +650,7 @@ export default function HabitPage() {
             <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 ml-1">
               Streak
             </span>
-            <p className="text-xs sm:text-base font-bold text-slate-800 sm:mt-0.5 ml-1 sm:ml-0">
+            <p className="text-xs sm:text-base font-bold text-slate-800 dark:text-slate-200 sm:mt-0.5 ml-1 sm:ml-0">
               {garden.streak}
               <span className="text-[10px] sm:text-xs font-medium text-slate-400">
                 d
@@ -646,7 +662,7 @@ export default function HabitPage() {
             <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 ml-1">
               Best
             </span>
-            <p className="text-xs sm:text-base font-bold text-slate-800 sm:mt-0.5 ml-1 sm:ml-0">
+            <p className="text-xs sm:text-base font-bold text-slate-800 dark:text-slate-200 sm:mt-0.5 ml-1 sm:ml-0">
               {garden.bestStreak}
               <span className="text-[10px] sm:text-xs font-medium text-slate-400">
                 d
@@ -658,7 +674,7 @@ export default function HabitPage() {
             <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 ml-1">
               Freezes
             </span>
-            <p className="text-xs sm:text-base font-bold text-slate-800 sm:mt-0.5 ml-1 sm:ml-0">
+            <p className="text-xs sm:text-base font-bold text-slate-800 dark:text-slate-200 sm:mt-0.5 ml-1 sm:ml-0">
               {garden.freezes}
             </p>
           </div>
@@ -670,8 +686,8 @@ export default function HabitPage() {
           title={freezeLabel}
           className={`shrink-0 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-semibold w-8 h-8 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl transition-all ${
             freezeDisabled
-              ? "bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed"
-              : "bg-sky-50 text-sky-600 border border-sky-100 hover:bg-sky-100 active:scale-95 cursor-pointer"
+              ? "bg-slate-50 dark:bg-slate-800 text-slate-300 border border-slate-100 dark:border-slate-700 cursor-not-allowed"
+              : "bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-300 border border-sky-100 dark:border-sky-800 hover:bg-sky-100 dark:hover:bg-sky-900/60 active:scale-95 cursor-pointer"
           }`}
         >
           <Snowflake size={13} />
@@ -680,7 +696,7 @@ export default function HabitPage() {
       </div>
 
       {/* Progress card */}
-      <div className="rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3 shrink-0 bg-white border border-slate-100 shadow-sm">
+      <div className="rounded-2xl min-h-[92px] sm:min-h-[108px] px-4 sm:px-5 py-4 sm:py-5 shrink-0 bg-white dark:bg-[#171720] border border-slate-100 dark:border-slate-700 shadow-sm">
         <ProgressBar
           percent={progressPercent}
           completed={completedCount}
@@ -689,10 +705,12 @@ export default function HabitPage() {
       </div>
 
       {/* Habits list */}
-      <div className="space-y-2 sm:space-y-2.5 pr-0.5 flex-1 min-h-0 overflow-y-auto">
+      <div className="space-y-1.5 sm:space-y-2.5 pr-0.5 flex-none">
         {habits.length === 0 && (
-          <div className="rounded-2xl px-6 py-10 text-center bg-white border border-dashed border-slate-200">
-            <p className="text-sm font-medium text-slate-800">No habits yet</p>
+          <div className="rounded-2xl px-6 py-10 text-center bg-white dark:bg-[#171720] border border-dashed border-slate-200 dark:border-slate-700">
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+              No habits yet
+            </p>
             <p className="text-xs mt-1 text-slate-400">
               Add one to start building your streak.
             </p>
@@ -707,7 +725,7 @@ export default function HabitPage() {
           return (
             <div
               key={habit.id}
-              className="rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3.5 flex flex-row items-center gap-3 sm:gap-4 justify-between group transition-all bg-white border border-slate-100 shadow-sm hover:border-[#6C63FF]/30 hover:shadow-md"
+              className="rounded-2xl min-h-[62px] sm:min-h-[78px] px-3 sm:px-5 py-2 sm:py-3.5 flex flex-row items-center gap-2.5 sm:gap-4 justify-between group transition-all bg-white dark:bg-[#171720] border border-slate-100 dark:border-slate-700 shadow-sm hover:border-[#6C63FF]/30 hover:shadow-md"
             >
               <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
                 <div
@@ -718,7 +736,7 @@ export default function HabitPage() {
                   <Icon size={20} className="hidden sm:block" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm sm:text-base font-semibold text-slate-800 truncate">
+                  <h3 className="text-sm sm:text-base font-semibold text-slate-800 dark:text-slate-200 truncate">
                     {habit.title}
                   </h3>
                   <p className="hidden sm:block text-xs text-slate-500 truncate mt-0.5">
@@ -751,7 +769,7 @@ export default function HabitPage() {
                   <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleOpenEdit(habit)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       title="Edit habit"
                     >
                       <Pencil size={14} className="sm:hidden" />
@@ -772,7 +790,7 @@ export default function HabitPage() {
                     className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                       habit.completed
                         ? "bg-[#6C63FF] text-white shadow-sm"
-                        : "bg-white text-slate-300 border border-slate-200 hover:border-[#6C63FF] hover:text-[#6C63FF]"
+                        : "bg-white dark:bg-slate-800 text-slate-300 border border-slate-200 dark:border-slate-600 hover:border-[#6C63FF] hover:text-[#6C63FF]"
                     }`}
                   >
                     <Check size={15} strokeWidth={2.5} className="sm:hidden" />
@@ -820,12 +838,12 @@ export default function HabitPage() {
       {/* Delete confirmation */}
       {deletingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl p-6 text-center space-y-4 bg-white shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl p-6 text-center space-y-4 bg-white dark:bg-[#171720] shadow-xl">
             <div className="w-12 h-12 rounded-xl mx-auto flex items-center justify-center bg-rose-50 text-rose-600">
               <Trash2 size={22} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
                 Delete habit?
               </h3>
               <p className="text-xs text-slate-500 mt-1">
@@ -835,7 +853,7 @@ export default function HabitPage() {
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setDeletingId(null)}
-                className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+                className="w-full py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors"
               >
                 Cancel
               </button>
@@ -874,10 +892,10 @@ function HabitModal({ open, initialData, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-md my-auto rounded-2xl p-6 space-y-4 bg-white shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+      <div className="w-full max-w-md my-auto rounded-2xl p-6 space-y-4 bg-white dark:bg-[#171720] shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-3.5">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {initialData ? "Edit Habit" : "Create New Habit"}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -886,7 +904,7 @@ function HabitModal({ open, initialData, onClose, onSave }) {
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-200"
           >
             <X size={18} />
           </button>
@@ -894,7 +912,7 @@ function HabitModal({ open, initialData, onClose, onSave }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Habit Title *
             </label>
             <input
@@ -903,12 +921,12 @@ function HabitModal({ open, initialData, onClose, onSave }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Drink water"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Habit Category
             </label>
             <div className="grid grid-cols-5 gap-2">
@@ -923,7 +941,7 @@ function HabitModal({ open, initialData, onClose, onSave }) {
                     className={`flex flex-col items-center justify-center py-2.5 rounded-xl border transition-all ${
                       isSelected
                         ? "border-[#6C63FF] bg-[#E7E2FF] text-[#6C63FF] font-semibold"
-                        : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                        : "border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
                     <Icon size={18} className="mb-1" />
@@ -937,7 +955,7 @@ function HabitModal({ open, initialData, onClose, onSave }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
               Target / Description
             </label>
             <textarea
@@ -945,15 +963,15 @@ function HabitModal({ open, initialData, onClose, onSave }) {
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               placeholder="e.g. 8 glasses of water every day"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 resize-none"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               Cancel
             </button>

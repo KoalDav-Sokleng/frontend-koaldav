@@ -9,7 +9,9 @@ const GOAL_SUB_LINKS = [
 
 const subLinkClass = ({ isActive }) =>
   `cursor-pointer whitespace-nowrap text-sm ${
-    isActive ? "font-semibold text-black" : "text-gray-500"
+    isActive
+      ? "font-semibold text-black dark:text-white"
+      : "text-gray-500 dark:text-gray-400"
   }`;
 
 export default function TopMenu({ onMenuClick }) {
@@ -18,10 +20,10 @@ export default function TopMenu({ onMenuClick }) {
   const isHabitSection = location.pathname.startsWith("/habit");
 
   return (
-    <div className="w-full bg-white shadow-sm flex flex-col">
+    <div className="w-full bg-white dark:bg-[#171720] shadow-sm flex flex-col transition-colors">
       <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
         <button
-          className="lg:hidden shrink-0 p-2 -ml-2 rounded-lg hover:bg-gray-100"
+          className="lg:hidden shrink-0 p-2 -ml-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#242430]"
           onClick={onMenuClick}
           aria-label="Open menu"
         >
@@ -34,7 +36,7 @@ export default function TopMenu({ onMenuClick }) {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-700 placeholder:text-gray-400 shadow-sm transition-all duration-200 outline-none hover:border-gray-400 focus:border-gray-400 focus:ring-2 focus:ring-black/10"
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#101016] py-2 pl-10 pr-4 text-sm text-gray-700 dark:text-gray-200 placeholder:text-gray-400 shadow-sm transition-all duration-200 outline-none hover:border-gray-400 dark:hover:border-gray-500 focus:border-gray-400 focus:ring-2 focus:ring-black/10"
             />
           </div>
         )}
@@ -43,7 +45,12 @@ export default function TopMenu({ onMenuClick }) {
         {isGoalSection && (
           <nav className="hidden md:flex items-center gap-4 ml-2">
             {GOAL_SUB_LINKS.map((link) => (
-              <NavLink key={link.to} to={link.to} end={link.end} className={subLinkClass}>
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={subLinkClass}
+              >
                 {link.label}
               </NavLink>
             ))}
@@ -54,10 +61,10 @@ export default function TopMenu({ onMenuClick }) {
           <button
             type="button"
             aria-label="Notifications"
-            className="relative shrink-0 ml-auto p-2 rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+            className="relative shrink-0 ml-auto p-2 rounded-full text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-[#242430] hover:text-gray-700 dark:hover:text-gray-200"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#171720]" />
           </button>
         )}
       </div>
@@ -66,7 +73,12 @@ export default function TopMenu({ onMenuClick }) {
       {isGoalSection && (
         <nav className="md:hidden flex items-center gap-4 px-4 pb-3 sm:px-6 overflow-x-auto no-scrollbar">
           {GOAL_SUB_LINKS.map((link) => (
-            <NavLink key={link.to} to={link.to} end={link.end} className={subLinkClass}>
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              className={subLinkClass}
+            >
               {link.label}
             </NavLink>
           ))}
