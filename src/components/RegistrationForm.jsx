@@ -1,75 +1,53 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
 
-export default function RegisterForm() {
-  const { register } = useAuth();
-  const navigate = useNavigate();
+export default function RegistrationForm() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
+    acceptTerms: false,
   });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleChange = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleChange = (event) => {
+    const { name, type, checked, value } = event.target;
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: type === "checkbox" ? checked : value,
+    }));
     setError("");
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
-    if (!acceptTerms) {
-      setError("You must accept the terms and conditions.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const payload = {
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        email: form.email.trim(),
-        password: form.password,
-      };
-      await register(payload);
-
-      // NOTE: if your backend sends an OTP on register and requires
-      // verification before login works, don't navigate to "/" here.
-      // Instead navigate to a "verify OTP" page, e.g.:
-      // navigate("/verify-otp", { state: { email: form.email } });
-      navigate("/", { replace: true });
-    } catch (err) {
-      setError(err.message || "Unable to create account.");
-    } finally {
-      setLoading(false);
-    }
+    setError("");
+    console.log(form);
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-[380px] rounded-3xl border-2 border-[#6C63FF] bg-white p-8 shadow-lg"
+      className="w-full max-w-[380px] rounded-3xl border-2 border-[#4C63F0] bg-white p-8 shadow-lg"
     >
       <h1 className="text-left text-2xl font-bold text-gray-900">Registration</h1>
-      <div className="mt-3 h-1 w-8 rounded-full bg-[#6C63FF]" />
+      <div className="mt-3 h-1 w-8 rounded-full bg-[#4C63F0]" />
 
       <div className="mt-8 space-y-6">
-        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#6C63FF]">
+        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#4C63F0]">
           <User size={19} className="shrink-0 text-gray-400" aria-hidden="true" />
           <input
-            id="first-name"
+            id="registration-first-name"
             type="text"
             name="firstName"
             required
@@ -82,10 +60,10 @@ export default function RegisterForm() {
           />
         </div>
 
-        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#6C63FF]">
+        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#4C63F0]">
           <User size={19} className="shrink-0 text-gray-400" aria-hidden="true" />
           <input
-            id="last-name"
+            id="registration-last-name"
             type="text"
             name="lastName"
             required
@@ -98,10 +76,10 @@ export default function RegisterForm() {
           />
         </div>
 
-        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#6C63FF]">
+        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#4C63F0]">
           <Mail size={19} className="shrink-0 text-gray-400" aria-hidden="true" />
           <input
-            id="email"
+            id="registration-email"
             type="email"
             name="email"
             required
@@ -114,10 +92,10 @@ export default function RegisterForm() {
           />
         </div>
 
-        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#6C63FF]">
+        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#4C63F0]">
           <Lock size={19} className="shrink-0 text-gray-400" aria-hidden="true" />
           <input
-            id="password"
+            id="registration-password"
             type={showPassword ? "text" : "password"}
             name="password"
             required
@@ -131,10 +109,10 @@ export default function RegisterForm() {
           />
         </div>
 
-        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#6C63FF]">
+        <div className="flex items-center gap-3 border-b border-gray-200 pb-3 focus-within:border-[#4C63F0]">
           <Lock size={19} className="shrink-0 text-gray-400" aria-hidden="true" />
           <input
-            id="confirm-password"
+            id="registration-confirm-password"
             type={showPassword ? "text" : "password"}
             name="confirmPassword"
             required
@@ -151,7 +129,7 @@ export default function RegisterForm() {
             onClick={() => setShowPassword((currentValue) => !currentValue)}
             aria-label={showPassword ? "Hide passwords" : "Show passwords"}
             title={showPassword ? "Hide passwords" : "Show passwords"}
-            className="shrink-0 text-gray-400 transition-colors hover:text-[#6C63FF]"
+            className="shrink-0 text-gray-400 transition-colors hover:text-[#4C63F0]"
           >
             {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
           </button>
@@ -160,29 +138,30 @@ export default function RegisterForm() {
         <label className="flex items-center gap-2 text-sm text-gray-500">
           <input
             type="checkbox"
-            checked={acceptTerms}
-            onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="h-4 w-4 accent-[#6C63FF]"
+            name="acceptTerms"
+            checked={form.acceptTerms}
+            onChange={handleChange}
+            required
+            className="h-4 w-4 accent-[#4C63F0]"
           />
           I accept all terms &amp; conditions
         </label>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-xl bg-[#6C63FF] py-3 font-bold text-white transition-colors hover:bg-[#5B52E6] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {loading ? "Creating account..." : "Register Now"}
-      </button>
+        <button
+          type="submit"
+          className="w-full rounded-xl bg-[#4C63F0] py-3 font-bold text-white transition-colors hover:bg-[#3d52d6]"
+        >
+          Register Now
+        </button>
 
-      <p className="text-center text-sm text-gray-500">
-        Already have an account?{" "}
-        <Link to="/login" className="font-medium text-[#6C63FF] hover:underline">
-          Login now
-        </Link>
-      </p>
+        <p className="text-center text-sm text-gray-500">
+          Already have an account?{" "}
+          <Link to="/login" className="font-medium text-[#4C63F0] hover:underline">
+            Login now
+          </Link>
+        </p>
       </div>
     </form>
   );

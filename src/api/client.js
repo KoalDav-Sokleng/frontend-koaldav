@@ -3,8 +3,10 @@
 // Every feature's api/*.js file should import `apiFetch` from here
 // instead of calling fetch() directly.
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8081/api";
+
+//const res = await fetch(`${BASE_URL}${path}`, ...)
 function getToken() {
   return localStorage.getItem("accessToken");
 }
@@ -23,11 +25,18 @@ export async function apiFetch(path, { method = "GET", body, headers = {}, auth 
     if (token) finalHeaders.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers: finalHeaders,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new Error(
+      `Unable to connect to the API at ${BASE_URL}. Start the backend or enable mock auth with VITE_MOCK_AUTH=true.`
+    );
+  }
 
   if (res.status === 401) {
     // token expired / invalid - let AuthContext decide what to do
