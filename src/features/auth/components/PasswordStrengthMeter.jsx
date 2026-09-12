@@ -1,9 +1,9 @@
 import { Check, X } from "lucide-react";
 
-export const getPasswordCriteria = (password = "") => {
+function getPasswordCriteria(password = "") {
   const hasLength = password.length >= 8;
   const hasNumber = /\d/.test(password);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
   const hasLetter = /[a-zA-Z]/.test(password);
 
   const criteria = [
@@ -17,7 +17,7 @@ export const getPasswordCriteria = (password = "") => {
   const isStrong = hasLength && hasNumber && hasSpecial;
 
   return { criteria, passedCount, isStrong };
-};
+}
 
 export default function PasswordStrengthMeter({ password = "" }) {
   if (!password) return null;

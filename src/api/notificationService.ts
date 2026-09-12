@@ -24,7 +24,10 @@ export const notificationService = {
       const frame = String(event.data);
       const separator = frame.indexOf("\n\n");
       if (!frame.startsWith("MESSAGE") || separator < 0) return;
-      const body = frame.slice(separator + 2).replace(/\0$/, "");
+      let body = frame.slice(separator + 2);
+      if (body.endsWith("\0")) {
+        body = body.slice(0, -1);
+      }
       try {
         onNotification(JSON.parse(body) as NotificationResponse);
       } catch {

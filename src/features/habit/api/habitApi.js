@@ -1,7 +1,8 @@
-import { apiFetch } from "../../../api/client";
+import habitGardenService from "../../../api/habitGardenService";
 
-export const getHabits = () => apiFetch("/api/habits");
-export const createHabit = (payload) =>
-  apiFetch("/api/habits", { method: "POST", body: payload });
-export const toggleHabitDone = (id, date) =>
-  apiFetch(`/api/habits/${id}/toggle`, { method: "POST", body: { date } });
+export const getHabits = () => habitGardenService.listHabits();
+export const createHabit = (payload) => habitGardenService.createHabit(payload);
+export const toggleHabitDone = (id, date) => habitGardenService.toggleHabit(id, { date });
+export const deleteHabit = (id) => habitGardenService.deleteHabit(id);
+export const getGarden = () => habitGardenService.getGarden();
+export const useFreeze = (date) => habitGardenService.useFreeze({ date });

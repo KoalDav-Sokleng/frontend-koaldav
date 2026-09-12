@@ -19,7 +19,7 @@ export default function ResetPasswordPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState(
+  const [email] = useState(
     location.state?.email || sessionStorage.getItem("resetEmail") || "",
   );
   const [otpCode, setOtpCode] = useState(location.state?.otpCode || "");
