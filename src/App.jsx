@@ -1,22 +1,26 @@
-import { Routes, Route } from "react-router-dom";
-//import "./App.css";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import Layout from "./components/Layout";
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
 import ForgotPasswordPage from "./features/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./features/auth/ResetPasswordPage";
+import VerifyOtpPage from "./features/auth/VerifyOtpPage";
+import { useAuth } from "./features/auth/hooks/useAuth";
 
-// ទុកតែមួយ line នេះបានហើយ (លុប line ស្ទួនចេញ)
-//import HabitPage from "./features/habit/HabitPage";
+function ProtectedLayout() {
+  const { isAuthenticated, loading } = useAuth();
 
-//import DashboardPage from "./features/dashboard/DashboardPage";
-//import GoalPage from "./features/goal/GoalPage";
-//import TripTab from "./features/goal/components/TripTab";
-//import ProjectGoalTab from "./features/goal/components/ProjectGoalTab";
-//import SavingTab from "./features/goal/components/SavingTab";
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
-//import FinancePage from "./features/finance/FinancePage";
-import VerifyOtpForm from "./features/auth/VerifyOtpForm";
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+}
 
 function App() {
   return (
@@ -24,11 +28,17 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
-      <Route path="/" element={<Layout />}>
-        <Route index element={<div>Dashboard Page (Coming Soon)</div>} />
-        <Route path="goal" element={<div>Goal Page (Coming Soon)</div>} />
+      <Route element={<ProtectedLayout />}>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<div>Dashboard Page (Coming Soon)</div>} />
+          <Route path="goal" element={<div>Goal Page (Coming Soon)</div>} />
+        </Route>
       </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

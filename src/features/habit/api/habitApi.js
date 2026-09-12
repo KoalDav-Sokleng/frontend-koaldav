@@ -1,7 +1,7 @@
 import { apiFetch } from "../../../api/client";
 
-export const getHabits = () => apiFetch("/habits");
+export const getHabits = () => apiFetch("/api/habits");
 export const createHabit = (payload) =>
-  apiFetch("/habits", { method: "POST", body: payload });
+  apiFetch("/api/habits", { method: "POST", body: payload });
 export const toggleHabitDone = (id, date) =>
-  apiFetch(`/habits/${id}/toggle`, { method: "POST", body: { date } });
+  apiFetch(`/api/habits/${id}/toggle`, { method: "POST", body: { date } });

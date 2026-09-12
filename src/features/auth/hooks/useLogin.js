@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./useAuth";
+import { isValidGmail } from "../utils/authValidation";
 
 export function useLogin() {
   const { login } = useAuth();
@@ -24,18 +25,36 @@ export function useLogin() {
       e.preventDefault();
       if (loading) return;
 
+      const normalizedEmail = form.email.trim();
+      if (!isValidGmail(normalizedEmail)) {
+        setError("Please enter a valid @gmail.com address (e.g. example@gmail.com).");
+        return;
+      }
+
+      if (!form.password) {
+        setError("Password is required.");
+        return;
+      }
+
       setError("");
       setLoading(true);
 
       try {
-        await login({
-          email: form.email.trim(),
+        const result = await login({
+          email: normalizedEmail,
           password: form.password,
         });
-        navigate("/", { replace: true });
+
+        if (result?.otpRequired) {
+          navigate("/verify-otp", {
+            state: { email: normalizedEmail, flow: "login" },
+          });
+        } else {
+          navigate("/", { replace: true });
+        }
       } catch (err) {
         setError(
-          err?.message || "Unable to sign in. Please check your email and password."
+          err?.message || "Invalid email or password."
         );
       } finally {
         setLoading(false);

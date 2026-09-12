@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import Swal from "sweetalert2";
 import Logo from "../assets/Koaldavpic.png";
 import { CiHome, CiTrophy, CiCalendar } from "react-icons/ci";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
@@ -20,6 +21,24 @@ const linkClass = ({ isActive }) =>
 
 export default function SideBar({ onNavigate }) {
   const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Log out?",
+      text: "Are you sure you want to sign out?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, log out",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#6C63FF",
+      cancelButtonColor: "#d1d5db",
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      logout();
+    }
+  };
 
   return (
     <aside className="w-full h-full bg-[#F4F2FF] flex flex-col justify-between p-5 overflow-y-auto">
@@ -44,7 +63,12 @@ export default function SideBar({ onNavigate }) {
           <ul className="space-y-2">
             {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
               <li key={to}>
-                <NavLink to={to} end={end} className={linkClass} onClick={onNavigate}>
+                <NavLink
+                  to={to}
+                  end={end}
+                  className={linkClass}
+                  onClick={onNavigate}
+                >
                   <Icon size={22} />
                   <span>{label}</span>
                 </NavLink>
@@ -70,7 +94,7 @@ export default function SideBar({ onNavigate }) {
               {user?.name || "Guest"}
             </h3>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="text-xs text-gray-500 hover:text-[#6C63FF]"
             >
               Log out
