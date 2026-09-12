@@ -99,8 +99,8 @@ export default function OtpInput({
           onPaste={handlePaste}
           className={`h-13 w-11 sm:h-14 sm:w-12 md:h-15 md:w-13 rounded-2xl border-2 text-center text-xl sm:text-2xl font-black transition-all duration-200 outline-none select-none ${
             digits[index]
-              ? "border-[#6C63FF] bg-white text-slate-900 shadow-md ring-4 ring-[#6C63FF]/15 scale-102"
-              : "border-slate-200 bg-[#FAFAFC] text-slate-700 hover:border-[#6C63FF]/40 focus:border-[#6C63FF] focus:bg-white focus:ring-4 focus:ring-[#6C63FF]/15"
+              ? "border-[#6C63FF] bg-white text-slate-900 dark:border-[#6C63FF] dark:bg-[#151C2C] dark:text-white shadow-md ring-4 ring-[#6C63FF]/15 scale-102"
+              : "border-slate-200 bg-[#FAFAFC] text-slate-700 hover:border-[#6C63FF]/40 dark:border-slate-800 dark:bg-[#151C2C] dark:text-slate-200 dark:hover:border-slate-700 focus:border-[#6C63FF] focus:bg-white dark:focus:bg-[#1E293B] focus:ring-4 focus:ring-[#6C63FF]/15"
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         />
       ))}

@@ -11,10 +11,10 @@ import {
 export default function AuthLayout({ children }) {
   return (
     <div
-      className="flex min-h-screen w-full items-center justify-center bg-[radial-gradient(ellipse_at_top,_#ede9fe_0%,_#f8f7ff_40%,_#eef2ff_100%)] p-4 sm:p-6 lg:p-8"
+      className="flex min-h-screen w-full items-center justify-center bg-[radial-gradient(ellipse_at_top,_#ede9fe_0%,_#f8f7ff_40%,_#eef2ff_100%)] dark:bg-[radial-gradient(ellipse_at_top,_#1e1b4b_0%,_#0b0f19_50%,_#020617_100%)] p-4 sm:p-6 lg:p-8 transition-colors duration-300"
       style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
     >
-      <div className="animate-auth-card mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/80 bg-white shadow-[0_25px_70px_rgba(108,99,255,0.14)] backdrop-blur-xl lg:grid-cols-[1.1fr_0.9fr] transition-all duration-300">
+      <div className="animate-auth-card mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/80 bg-white shadow-[0_25px_70px_rgba(108,99,255,0.14)] dark:border-slate-800/90 dark:bg-[#0F172A] dark:shadow-[0_25px_70px_rgba(0,0,0,0.6)] backdrop-blur-xl lg:grid-cols-[1.1fr_0.9fr] transition-all duration-300">
         {/* ── Left column: Hero Showcase ── */}
         <div className="relative hidden overflow-hidden bg-gradient-to-br from-[#4F46E5] via-[#6366F1] to-[#38BDF8] p-8 text-white lg:flex lg:flex-col lg:justify-between">
           {/* Ambient Breathing Glow Orbs */}
@@ -46,7 +46,7 @@ export default function AuthLayout({ children }) {
                 <span>Your Life, Organized</span>
               </div>
               <h3 className="text-2xl xl:text-3xl font-extrabold leading-snug text-white">
-                Build moment with goals, money &amp; daily habits.
+                Build momentum with goals, money &amp; daily habits.
               </h3>
               <p className="text-xs text-white/85 max-w-sm leading-relaxed">
                 Stay consistent with smart trackers, clear milestone visuals,
@@ -149,7 +149,7 @@ export default function AuthLayout({ children }) {
         </div>
 
         {/* ── Right column: Form View ── */}
-        <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10 bg-white">
+        <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10 bg-white dark:bg-[#0F172A] transition-colors duration-300">
           <div className="w-full max-w-sm">{children}</div>
         </div>
       </div>
