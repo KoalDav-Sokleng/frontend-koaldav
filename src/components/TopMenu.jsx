@@ -18,7 +18,6 @@ const subLinkClass = ({ isActive }) =>
 export default function TopMenu({ onMenuClick }) {
   const location = useLocation();
   const isGoalSection = location.pathname.startsWith("/goal");
-  const isHabitSection = location.pathname.startsWith("/habit");
 
   return (
     <div className="w-full bg-white shadow-sm flex flex-col">

@@ -1,22 +1,17 @@
-
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
-
-
-
 
 import Layout from "../components/Layout";
 
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
 import DashboardPage from "../features/dashboard/DashboardPage";
-import HabitPage from "../features/habit/components/HabitPage";
 import GoalPage from "../features/goal/GoalPage";
 import ProjectGoalTab from "../features/goal/components/ProjectGoalTab";
 import TripTab from "../features/goal/components/TripTab";
 import SavingTab from "../features/goal/components/SavingTab";
 
 import FinancePage from "../features/finance/FinancePage";
-import HabitPage from "../features/habit/HabitPage";
+import HabitPage from "../features/habit/components/HabitPage";
 import NotificationPage from "../features/notification/NotificationPage";
 
 function GoalRedirect({ baseRoute }) {
@@ -44,15 +39,23 @@ function AppRoutes() {
         {/* Alias routes for direct deep-linking */}
         <Route path="goals" element={<Navigate to="/goal" replace />} />
         <Route path="goals/:id" element={<GoalRedirect baseRoute="/goal" />} />
-        <Route path="saving-goals" element={<Navigate to="/goal/saving" replace />} />
-        <Route path="saving-goals/:id" element={<GoalRedirect baseRoute="/goal/saving" />} />
+        <Route
+          path="saving-goals"
+          element={<Navigate to="/goal/saving" replace />}
+        />
+        <Route
+          path="saving-goals/:id"
+          element={<GoalRedirect baseRoute="/goal/saving" />}
+        />
         <Route path="trips" element={<Navigate to="/goal/trip" replace />} />
-        <Route path="trips/:id" element={<GoalRedirect baseRoute="/goal/trip" />} />
+        <Route
+          path="trips/:id"
+          element={<GoalRedirect baseRoute="/goal/trip" />}
+        />
 
         <Route path="finance" element={<FinancePage />} />
         <Route path="habit" element={<HabitPage />} />
-        <Route path="notification" element={<NotificationPage />} />       
-        <Route path="habit" element={<HabitPage />} />
+        <Route path="notification" element={<NotificationPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

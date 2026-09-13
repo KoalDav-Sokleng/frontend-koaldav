@@ -35,7 +35,7 @@ export default function RegisterForm() {
     setLoading(true);
     try {
       // Drop confirmPassword before sending to the API
-      const { confirmPassword, ...payload } = form;
+      const { confirmPassword: _confirmPassword, ...payload } = form;
       await register(payload);
       navigate("/", { replace: true });
     } catch (err) {
@@ -48,7 +48,9 @@ export default function RegisterForm() {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Full Name
+        </label>
         <input
           type="text"
           name="fullName"
@@ -61,7 +63,9 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Last Name
+        </label>
         <input
           type="text"
           name="lastName"
@@ -74,7 +78,9 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Email
+        </label>
         <input
           type="email"
           name="email"
@@ -87,7 +93,9 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Gender
+        </label>
         <select
           name="gender"
           required
@@ -106,7 +114,9 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Password
+        </label>
         <input
           type="password"
           name="password"
@@ -120,7 +130,9 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Re-type Password</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Re-type Password
+        </label>
         <input
           type="password"
           name="confirmPassword"

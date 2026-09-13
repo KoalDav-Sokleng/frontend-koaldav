@@ -473,7 +473,7 @@ export default function HabitPage() {
     editHabit,
     removeHabit,
     toggleHabit: toggleHabitApi,
-    useFreezeToday: useFreezeTodayApi,
+    useFreezeToday: triggerFreezeToday,
   } = useHabits();
 
   const completedCount = habits.filter((h) => h.completed).length;
@@ -509,7 +509,7 @@ export default function HabitPage() {
   const useFreezeToday = async () => {
     setActionError("");
     try {
-      await useFreezeTodayApi();
+      await triggerFreezeToday();
     } catch (err) {
       console.error("Failed to use freeze", err);
       setActionError("Couldn't use a freeze right now. Please try again.");

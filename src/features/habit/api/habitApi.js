@@ -72,5 +72,7 @@ export const getGarden = () => apiFetch("/garden");
  *
  * Returns the updated garden object.
  */
-export const useGardenFreeze = (date) =>
+export const applyGardenFreeze = (date) =>
   apiFetch("/garden/freeze", { method: "POST", body: { date } });
+
+export const useGardenFreeze = applyGardenFreeze;

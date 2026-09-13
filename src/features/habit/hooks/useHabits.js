@@ -7,7 +7,7 @@ import {
   deleteHabit,
   toggleHabitDone,
   getGarden,
-  useGardenFreeze,
+  applyGardenFreeze,
 } from "../api/habitApi";
 
 const DEFAULT_GARDEN = {
@@ -91,7 +91,7 @@ export function useHabits() {
 
   const useFreezeToday = useCallback(async () => {
     const date = todayStr();
-    const updatedGarden = await useGardenFreeze(date);
+    const updatedGarden = await applyGardenFreeze(date);
     setGarden(updatedGarden);
     return updatedGarden;
   }, []);

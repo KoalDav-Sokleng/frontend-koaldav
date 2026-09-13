@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import { apiFetch } from "../../../api/client";
 
 export async function getFinanceOverview(year) {
@@ -36,4 +34,3 @@ export async function createExpense(data) {
 export async function deleteExpense(id) {
   return apiFetch(`/finance/expenses/${id}`, { method: "DELETE" });
 }
->>>>>>> 7a463c620f9e3ac26408504e5418a29b68b13b05

@@ -5,7 +5,6 @@ import "./index.css";
 import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
@@ -15,5 +14,5 @@ createRoot(document.getElementById("root")).render(
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );
