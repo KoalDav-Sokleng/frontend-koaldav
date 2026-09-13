@@ -10,12 +10,15 @@ const GOAL_SUB_LINKS = [
 
 const subLinkClass = ({ isActive }) =>
   `cursor-pointer whitespace-nowrap text-sm ${
-    isActive ? "font-semibold text-black" : "text-gray-500"
+    isActive
+      ? "font-semibold text-black dark:text-white"
+      : "text-gray-500 dark:text-gray-400"
   }`;
 
 export default function TopMenu({ onMenuClick }) {
   const location = useLocation();
   const isGoalSection = location.pathname.startsWith("/goal");
+  const isHabitSection = location.pathname.startsWith("/habit");
 
   return (
     <div className="w-full bg-white shadow-sm flex flex-col">

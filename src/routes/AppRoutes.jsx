@@ -1,12 +1,15 @@
+
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
+
+
+
 
 import Layout from "../components/Layout";
 
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
-
 import DashboardPage from "../features/dashboard/DashboardPage";
-
+import HabitPage from "../features/habit/components/HabitPage";
 import GoalPage from "../features/goal/GoalPage";
 import ProjectGoalTab from "../features/goal/components/ProjectGoalTab";
 import TripTab from "../features/goal/components/TripTab";
@@ -48,7 +51,9 @@ function AppRoutes() {
 
         <Route path="finance" element={<FinancePage />} />
         <Route path="habit" element={<HabitPage />} />
-        <Route path="notification" element={<NotificationPage />} />
+        <Route path="notification" element={<NotificationPage />} />       
+        <Route path="habit" element={<HabitPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   );
