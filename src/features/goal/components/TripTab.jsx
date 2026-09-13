@@ -34,11 +34,11 @@ const STATUS_TABS = [
 const GOAL_TYPES = [{ id: "trip", label: "Trip", icon: Compass }];
 
 const GRADIENTS = [
-  "from-violet-600 via-purple-600 to-fuchsia-500",
+  "from-indigo-600 via-indigo-500 to-blue-500",
   "from-sky-600 via-blue-600 to-cyan-400",
   "from-emerald-600 via-teal-500 to-cyan-400",
   "from-orange-500 via-amber-500 to-yellow-400",
-  "from-indigo-700 via-violet-600 to-purple-500",
+  "from-indigo-700 via-indigo-600 to-blue-500",
 ];
 
 function daysLeft(dateStr) {
@@ -81,7 +81,7 @@ function ProgressBar({ percent, size = "md" }) {
   return (
     <div className={`w-full bg-slate-100 rounded-full ${h} overflow-hidden`}>
       <div
-        className={`bg-gradient-to-r from-violet-500 to-fuchsia-500 ${h} rounded-full transition-all duration-500`}
+        className={`bg-gradient-to-r from-indigo-500 to-blue-500 ${h} rounded-full transition-all duration-500`}
         style={{ width: `${capped}%` }}
       />
     </div>
@@ -166,10 +166,10 @@ function GoalModal({ initial, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white w-full max-w-lg my-auto rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="bg-white w-full max-w-lg my-auto rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col dark:bg-[#17171F]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
               ✈️
             </div>
             <h2 className="font-bold text-slate-800 text-lg">
@@ -204,7 +204,7 @@ function GoalModal({ initial, onClose, onSave }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Tokyo Sakura Season"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
@@ -221,7 +221,7 @@ function GoalModal({ initial, onClose, onSave }) {
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
                 placeholder="2500"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
             <div>
@@ -233,7 +233,7 @@ function GoalModal({ initial, onClose, onSave }) {
                 required
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ function GoalModal({ initial, onClose, onSave }) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Flights, hotels, pocket money notes..."
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
@@ -262,7 +262,7 @@ function GoalModal({ initial, onClose, onSave }) {
                   onClick={() => setImageMode("file")}
                   className={`px-2 py-0.5 rounded-md ${
                     imageMode === "file"
-                      ? "bg-violet-100 text-violet-700 font-medium"
+                      ? "bg-indigo-100 text-indigo-700 font-medium"
                       : "text-slate-400 hover:text-slate-600"
                   }`}
                 >
@@ -273,7 +273,7 @@ function GoalModal({ initial, onClose, onSave }) {
                   onClick={() => setImageMode("url")}
                   className={`px-2 py-0.5 rounded-md ${
                     imageMode === "url"
-                      ? "bg-violet-100 text-violet-700 font-medium"
+                      ? "bg-indigo-100 text-indigo-700 font-medium"
                       : "text-slate-400 hover:text-slate-600"
                   }`}
                 >
@@ -283,7 +283,7 @@ function GoalModal({ initial, onClose, onSave }) {
             </div>
 
             {imageMode === "file" ? (
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-4 cursor-pointer hover:border-violet-400 hover:bg-violet-50/20 transition-colors">
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-4 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition-colors">
                 <Upload className="w-6 h-6 text-slate-400 mb-1" />
                 <span className="text-xs text-slate-500 font-medium">
                   {imageFile ? imageFile.name : "Click to select a photo"}
@@ -306,7 +306,7 @@ function GoalModal({ initial, onClose, onSave }) {
                   onChange={(e) => setImageUrl(e.target.value)}
                   onBlur={handleUrlBlur}
                   placeholder="https://images.unsplash.com/..."
-                  className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+                  className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
               </div>
             )}
@@ -346,7 +346,7 @@ function GoalModal({ initial, onClose, onSave }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 rounded-xl transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {initial ? "Save Changes" : "Create Trip"}
@@ -363,7 +363,7 @@ function GoalModal({ initial, onClose, onSave }) {
 function ConfirmDelete({ goalName, onCancel, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-4">
+      <div className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-4 dark:bg-[#17171F]">
         <h3 className="text-base font-bold text-slate-800">
           Delete Trip Goal?
         </h3>
@@ -403,7 +403,7 @@ function GoalCard({ goal, onOpen }) {
   return (
     <div
       onClick={() => onOpen(goal.id)}
-      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-slate-100 flex flex-col cursor-pointer"
+      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-slate-100 flex flex-col cursor-pointer dark:border-slate-700 dark:bg-[#17171F]"
     >
       <div
         className={`h-36 relative bg-gradient-to-br ${gradient} flex items-end p-4 overflow-hidden`}
@@ -487,9 +487,9 @@ function NewGoalCard({ onClick }) {
   return (
     <div
       onClick={onClick}
-      className="border-2 border-dashed border-slate-200 hover:border-violet-400 hover:bg-violet-50/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors min-h-[220px]"
+      className="border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors min-h-[220px]"
     >
-      <div className="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
         <Plus className="w-5 h-5" />
       </div>
       <p className="font-semibold text-slate-700 text-sm">Add New Trip</p>
@@ -596,7 +596,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden dark:border-slate-700 dark:bg-[#17171F]">
         <div
           className={`relative h-48 bg-gradient-to-br ${gradient} flex items-end p-6 overflow-hidden`}
         >
@@ -662,19 +662,19 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
           )}
 
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-slate-50 rounded-xl p-4">
+            <div className="bg-slate-50 rounded-xl p-4 dark:bg-[#242430]">
               <div className="text-xs text-slate-400">Target</div>
               <div className="text-lg font-bold text-slate-900 mt-1">
                 ${fmtMoney(goal.target)}
               </div>
             </div>
-            <div className="bg-violet-50 rounded-xl p-4">
-              <div className="text-xs text-violet-400">Saved</div>
-              <div className="text-lg font-bold text-violet-700 mt-1">
+            <div className="bg-indigo-50 rounded-xl p-4">
+              <div className="text-xs text-indigo-400">Saved</div>
+              <div className="text-lg font-bold text-indigo-700 mt-1">
                 ${fmtMoney(goal.saved)}
               </div>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4">
+            <div className="bg-slate-50 rounded-xl p-4 dark:bg-[#242430]">
               <div className="text-xs text-slate-400">Remaining</div>
               <div className="text-lg font-bold text-slate-900 mt-1">
                 ${fmtMoney(remaining)}
@@ -691,7 +691,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
                     ? "text-emerald-600"
                     : isMissed
                       ? "text-rose-600"
-                      : "text-violet-600"
+                      : "text-indigo-600"
                 }`}
               >
                 {pct}%
@@ -717,7 +717,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
           {!isReadOnly ? (
             <div className="border-t border-slate-100 pt-5">
               <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-violet-600" />
+                <TrendingUp className="w-4 h-4 text-indigo-600" />
                 <h3 className="font-semibold text-slate-800 text-sm">
                   Deposit Money
                 </h3>
@@ -734,13 +734,13 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder={`Amount to add (max $${fmtMoney(remaining)})`}
-                    className="w-full rounded-lg border border-slate-200 pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+                    className="w-full rounded-lg border border-slate-200 pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
                 <button
                   onClick={handleDeposit}
                   disabled={depositing}
-                  className="text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
+                  className="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
                 >
                   {depositing && <Loader2 className="w-4 h-4 animate-spin" />}
                   Add Funds
@@ -860,7 +860,7 @@ export default function TripTab() {
   }
 
   return (
-    <div className="p-6 sm:p-10">
+    <div className="min-h-full bg-slate-50 p-6 sm:p-10 dark:bg-[#0F0F14]">
       {error && (
         <div className="max-w-5xl mx-auto mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-sm">
           {error}
@@ -871,16 +871,16 @@ export default function TripTab() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <p className="text-xs font-semibold text-violet-600 tracking-wide flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-indigo-600 tracking-wide flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> ADVENTURE AWAITS
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 dark:text-white">
                 Your Trip Savings
               </h1>
             </div>
             <button
               onClick={openCreate}
-              className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shrink-0 self-start md:self-auto"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shrink-0 self-start md:self-auto"
             >
               <Plus className="w-4 h-4" /> Create Trip Goal
             </button>
@@ -901,8 +901,8 @@ export default function TripTab() {
                     isActive
                       ? isMissedTab
                         ? "bg-rose-600 text-white shadow-sm"
-                        : "bg-violet-600 text-white shadow-sm"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        : "bg-indigo-600 text-white shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-[#17171F] dark:text-slate-300 dark:hover:bg-[#242430] dark:hover:text-white"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -928,7 +928,7 @@ export default function TripTab() {
               {status === "ACTIVE" ? (
                 <NewGoalCard onClick={openCreate} />
               ) : (
-                <div className="py-12 px-6 rounded-2xl border border-dashed border-slate-200 bg-white text-slate-400">
+                <div className="py-12 px-6 rounded-2xl border border-dashed border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-[#17171F]">
                   <Compass className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                   <p className="text-sm font-medium text-slate-600">
                     No {status.toLowerCase()} trip goals

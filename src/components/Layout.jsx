@@ -14,7 +14,7 @@ export default function Layout() {
 
   return (
     <NotificationProvider>
-      <div className="w-full h-screen flex overflow-hidden bg-gray-50 dark:bg-[#101016] text-gray-900 dark:text-gray-100 transition-colors">
+      <div className="w-full h-screen flex overflow-hidden bg-gray-50 dark:bg-[#0F0F14] text-gray-900 dark:text-gray-100 transition-colors">
         {/* Desktop sidebar */}
         <div className="hidden lg:block lg:w-[260px] xl:w-[280px] shrink-0 h-screen">
           <SideBar />
@@ -28,7 +28,7 @@ export default function Layout() {
               onClick={() => setMobileOpen(false)}
             />
             <div className="absolute inset-y-0 left-0 w-[80%] max-w-[300px] h-full shadow-xl">
-              <div className="flex justify-end p-3 bg-[#F4F2FF] dark:bg-[#1A1A22] transition-colors">
+              <div className="flex justify-end p-3 bg-[#F4F2FF] dark:bg-[#0F0F14] transition-colors">
                 <button
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close menu"
@@ -42,9 +42,9 @@ export default function Layout() {
           </div>
         )}
 
-        <div className="flex flex-1 flex-col min-w-0 h-screen">
+        <div className="flex flex-1 flex-col min-w-0 h-screen bg-gray-50 dark:bg-[#0F0F14] transition-colors">
           {!hideTopMenu && <TopMenu onMenuClick={() => setMobileOpen(true)} />}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="flex-1 overflow-y-auto min-h-0 bg-gray-50 dark:bg-[#0F0F14] transition-colors">
             <Outlet
               context={{
                 onMenuClick: () => setMobileOpen(true),

@@ -20,15 +20,15 @@ export default function TopMenu({ onMenuClick }) {
   const isGoalSection = location.pathname.startsWith("/goal");
 
   return (
-    <div className="w-full bg-white shadow-sm flex flex-col">
+    <div className="flex w-full flex-col bg-white shadow-sm transition-colors border-b border-gray-100 dark:border-[#242430] dark:bg-[#0F0F14]">
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
           <button
-            className="lg:hidden shrink-0 p-2 -ml-2 rounded-lg hover:bg-gray-100"
+            className="-ml-2 shrink-0 rounded-lg p-2 hover:bg-gray-100 text-gray-600 dark:text-gray-300 dark:hover:bg-[#1A1A22] lg:hidden"
             onClick={onMenuClick}
             aria-label="Open menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="h-5 w-5" />
           </button>
 
           {/* Goal sub-nav: desktop only */}

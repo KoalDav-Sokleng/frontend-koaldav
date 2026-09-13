@@ -87,7 +87,7 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
           ? "border-rose-200 bg-rose-50/20 hover:border-rose-300"
           : isCompleted
             ? "border-slate-200 bg-white hover:border-emerald-200"
-            : "border-slate-200 bg-white hover:border-indigo-200"
+            : "border-slate-200 bg-white hover:border-indigo-200 dark:border-slate-700 dark:bg-[#17171F] dark:hover:border-indigo-400"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -105,7 +105,7 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
             {isCompleted && <CheckCircle2 className="h-3 w-3" />}
             {status}
           </span>
-          <h3 className="mt-2 text-base font-semibold text-slate-900">
+          <h3 className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
             {goal.title}
           </h3>
           <div className="mt-4 flex items-center gap-3">
@@ -222,10 +222,10 @@ function NewGoalModal({ onClose, onSave, goal }) {
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-xl"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-xl dark:bg-[#17171F]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 pt-5 pb-4">
+        <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 pt-5 pb-4 dark:border-slate-700 dark:bg-[#17171F]">
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
@@ -310,7 +310,7 @@ function NewGoalModal({ onClose, onSave, goal }) {
           {saveError && <p className="text-xs text-rose-500">{saveError}</p>}
         </div>
 
-        <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
+        <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4 dark:border-slate-700 dark:bg-[#17171F]">
           <button
             onClick={onClose}
             className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700"
@@ -377,7 +377,7 @@ function AddMilestoneModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white shadow-xl"
+        className="w-full max-w-sm rounded-2xl bg-white shadow-xl dark:bg-[#17171F]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between border-b border-slate-100 px-6 pt-5 pb-4">
@@ -477,7 +477,7 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white shadow-xl"
+        className="w-full max-w-sm rounded-2xl bg-white shadow-xl dark:bg-[#17171F]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between border-b border-slate-100 px-6 pt-5 pb-4">
@@ -584,7 +584,7 @@ function FocusPage({ goalTitle, milestoneTitle, durationSeconds, onExit }) {
   const offset = circumference * (1 - fraction);
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-50 px-8 py-8">
+    <div className="min-h-full bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-50 px-8 py-8 dark:from-[#0F0F14] dark:via-[#14141C] dark:to-[#1B1830]">
       <div className="mx-auto max-w-xl">
         <button
           onClick={() => onExit(elapsed, false)}
@@ -738,7 +738,7 @@ function GoalDetailPage({
   const isMissed = isGoalMissed(goal);
 
   return (
-    <div className="min-h-full bg-slate-50 px-8 py-8">
+    <div className="min-h-full bg-slate-50 px-8 py-8 dark:bg-[#0F0F14]">
       <div className="mx-auto max-w-3xl">
         <button
           onClick={onBack}
@@ -1256,11 +1256,11 @@ export default function ProjectGoalTab() {
   }
 
   return (
-    <div className="min-h-full bg-slate-50 px-8 py-8">
+    <div className="min-h-full bg-slate-50 px-8 py-8 dark:bg-[#0F0F14]">
       <div className="mx-auto max-w-3xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">
+            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
               Your Goals
             </h1>
             <p className="mt-1 text-sm text-slate-500">
@@ -1298,7 +1298,7 @@ export default function ProjectGoalTab() {
                     ? isMissedTab
                       ? "bg-rose-600 text-white shadow-sm"
                       : "bg-indigo-600 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-[#17171F] dark:text-slate-300 dark:hover:bg-[#242430] dark:hover:text-white"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -1325,12 +1325,12 @@ export default function ProjectGoalTab() {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search goal title..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white"
           />
         </div>
 
         {filteredGoals.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center dark:border-slate-700 dark:bg-[#17171F]">
             {status === "MISSED" ? (
               <CalendarX className="mb-3 h-8 w-8 text-rose-300" />
             ) : (

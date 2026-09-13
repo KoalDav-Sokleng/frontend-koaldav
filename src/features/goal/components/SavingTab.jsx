@@ -330,7 +330,7 @@ function Modal({ open, onClose, children, maxWidth = 480 }) {
       }}
     >
       <div
-        className="w-full bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="w-full bg-white rounded-3xl shadow-2xl overflow-hidden dark:bg-[#17171F]"
         style={{
           maxWidth,
           animation: "svg-modal-in 0.22s cubic-bezier(0.16,1,0.3,1)",
@@ -389,7 +389,7 @@ function SavingGoalCard({ goal, onOpen, index }) {
           ? "border border-rose-200 bg-rose-50/20 hover:border-rose-300"
           : isCompleted
             ? "border border-emerald-200 bg-emerald-50/10 hover:border-emerald-300"
-            : "border border-slate-200 bg-white hover:border-indigo-200"
+            : "border border-slate-200 bg-white hover:border-indigo-200 dark:border-slate-700 dark:bg-[#17171F] dark:hover:border-indigo-400"
       }`}
       style={{
         boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
@@ -430,7 +430,7 @@ function SavingGoalCard({ goal, onOpen, index }) {
             />
           </div>
           <div className="min-w-0">
-            <p className="font-semibold truncate text-slate-900">
+            <p className="font-semibold truncate text-slate-900 dark:text-white">
               {goal.title}
             </p>
             <p className="text-xs mt-0.5 text-slate-500">
@@ -1439,7 +1439,7 @@ export default function SavingsPage() {
   }
 
   return (
-    <div className="min-h-screen w-full" style={{ backgroundColor: COLORS.bg }}>
+    <div className="goal-saving-page min-h-screen w-full bg-[#F8F7FC] dark:bg-[#0F0F14]">
       <div className="max-w-5xl mx-auto px-6 py-10">
         {selectedGoal ? (
           <SavingGoalDetail
@@ -1454,7 +1454,7 @@ export default function SavingsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                   Savings Goals
                 </h1>
                 <p className="text-sm mt-1 text-slate-500">
@@ -1488,7 +1488,7 @@ export default function SavingsPage() {
                         ? isMissedTab
                           ? "bg-rose-600 text-white shadow-sm"
                           : "bg-indigo-600 text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-[#17171F] dark:text-slate-300 dark:hover:bg-[#242430] dark:hover:text-white"
                     }`}
                   >
                     <Icon size={16} />
@@ -1516,7 +1516,7 @@ export default function SavingsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search saving goal title..."
-                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white"
               />
             </div>
 
@@ -1525,7 +1525,7 @@ export default function SavingsPage() {
             {/* List / Loading / Empty */}
             {loading ? (
               <div
-                className="bg-white rounded-3xl"
+                className="bg-white rounded-3xl dark:bg-[#17171F]"
                 style={{
                   boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
                   border: `1px solid ${COLORS.border}`,
@@ -1535,7 +1535,7 @@ export default function SavingsPage() {
               </div>
             ) : filteredGoals.length === 0 ? (
               <div
-                className="bg-white rounded-3xl"
+                className="bg-white rounded-3xl dark:bg-[#17171F]"
                 style={{
                   boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
                   border: `1px solid ${COLORS.border}`,

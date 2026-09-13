@@ -20,8 +20,8 @@ export default function NotificationCard({ notification, onOpen, onMarkRead }) {
       onClick={handleClick}
       className={`group w-full rounded-2xl border p-4 text-left transition-all duration-200 ${
         isUnread
-          ? "border-rose-100 bg-white shadow-sm hover:border-rose-200 hover:bg-slate-50/70"
-          : "border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50/70"
+          ? "border-rose-100 bg-white shadow-sm hover:border-rose-200 hover:bg-slate-50/70 dark:border-rose-900/40 dark:bg-[#17171F] dark:hover:bg-[#20202B]"
+          : "border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50/70 dark:border-slate-700 dark:bg-[#17171F] dark:hover:bg-[#20202B]"
       }`}
     >
       <div className="flex items-start gap-3.5">
@@ -43,7 +43,9 @@ export default function NotificationCard({ notification, onOpen, onMarkRead }) {
               </span>
               <span
                 className={`truncate text-sm font-semibold ${
-                  isUnread ? "text-slate-900" : "text-slate-700"
+                  isUnread
+                    ? "text-slate-900 dark:text-white"
+                    : "text-slate-700 dark:text-slate-300"
                 }`}
               >
                 {notification.goalTitle}
@@ -55,7 +57,7 @@ export default function NotificationCard({ notification, onOpen, onMarkRead }) {
           </div>
 
           {notification.warningMessage && (
-            <p className="mt-1.5 text-xs text-slate-600 line-clamp-2">
+            <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 line-clamp-2">
               {notification.warningMessage}
             </p>
           )}
