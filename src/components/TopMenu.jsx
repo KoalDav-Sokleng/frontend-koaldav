@@ -9,10 +9,10 @@ const GOAL_SUB_LINKS = [
 ];
 
 const subLinkClass = ({ isActive }) =>
-  `cursor-pointer whitespace-nowrap text-sm ${
+  `cursor-pointer whitespace-nowrap text-sm transition-colors ${
     isActive
       ? "font-semibold text-black dark:text-white"
-      : "text-gray-500 dark:text-gray-400"
+      : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
   }`;
 
 export default function TopMenu({ onMenuClick }) {
