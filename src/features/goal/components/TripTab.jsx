@@ -168,17 +168,21 @@ function GoalModal({ initial, onClose, onSave }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
       <div className="bg-white w-full max-w-lg my-auto rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col dark:bg-[#17171F]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-[#1E1B2E] text-indigo-600 dark:text-[#A49DFF] flex items-center justify-center font-bold">
               ✈️
             </div>
             <h2 className="font-bold text-slate-800 text-lg">
+            <h2 className="font-bold text-slate-800 dark:text-white text-lg">
               {initial ? "Edit Trip Goal" : "New Trip Goal"}
             </h2>
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -190,12 +194,14 @@ function GoalModal({ initial, onClose, onSave }) {
         >
           {error && (
             <div className="p-3 text-xs text-rose-600 bg-rose-50 rounded-xl border border-rose-100">
+            <div className="p-3 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 rounded-xl border border-rose-100 dark:border-rose-900/50">
               {error}
             </div>
           )}
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-200 mb-1">
               Destination / Goal Name *
             </label>
             <input
@@ -205,12 +211,14 @@ function GoalModal({ initial, onClose, onSave }) {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Tokyo Sakura Season"
               className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242430] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-200 mb-1">
                 Target Budget ($) *
               </label>
               <input
@@ -222,10 +230,12 @@ function GoalModal({ initial, onClose, onSave }) {
                 onChange={(e) => setTarget(e.target.value)}
                 placeholder="2500"
                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242430] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-200 mb-1">
                 Target Date *
               </label>
               <input
@@ -234,12 +244,14 @@ function GoalModal({ initial, onClose, onSave }) {
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242430] text-slate-900 dark:text-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1">
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-200 mb-1">
               Description / Itinerary Notes
             </label>
             <textarea
@@ -248,12 +260,14 @@ function GoalModal({ initial, onClose, onSave }) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Flights, hotels, pocket money notes..."
               className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242430] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-semibold text-slate-600">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-200">
                 Cover Photo
               </label>
               <div className="flex gap-1 text-[11px]">
@@ -264,6 +278,8 @@ function GoalModal({ initial, onClose, onSave }) {
                     imageMode === "file"
                       ? "bg-indigo-100 text-indigo-700 font-medium"
                       : "text-slate-400 hover:text-slate-600"
+                      ? "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-[#A49DFF] font-medium"
+                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   }`}
                 >
                   Upload File
@@ -275,6 +291,8 @@ function GoalModal({ initial, onClose, onSave }) {
                     imageMode === "url"
                       ? "bg-indigo-100 text-indigo-700 font-medium"
                       : "text-slate-400 hover:text-slate-600"
+                      ? "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-[#A49DFF] font-medium"
+                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   }`}
                 >
                   Image URL
@@ -284,11 +302,14 @@ function GoalModal({ initial, onClose, onSave }) {
 
             {imageMode === "file" ? (
               <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-4 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition-colors">
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4 cursor-pointer hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/30 transition-colors">
                 <Upload className="w-6 h-6 text-slate-400 mb-1" />
                 <span className="text-xs text-slate-500 font-medium">
+                <span className="text-xs text-slate-500 dark:text-slate-300 font-medium">
                   {imageFile ? imageFile.name : "Click to select a photo"}
                 </span>
                 <span className="text-[10px] text-slate-400 mt-0.5">
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                   PNG, JPG, WebP up to 10MB
                 </span>
                 <input
@@ -307,12 +328,14 @@ function GoalModal({ initial, onClose, onSave }) {
                   onBlur={handleUrlBlur}
                   placeholder="https://images.unsplash.com/..."
                   className="flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242430] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500"
                 />
               </div>
             )}
 
             {preview && (
               <div className="mt-2 relative rounded-xl overflow-hidden h-28 border border-slate-100">
+              <div className="mt-2 relative rounded-xl overflow-hidden h-28 border border-slate-100 dark:border-slate-700">
                 <img
                   src={preview}
                   alt="Preview"
@@ -335,11 +358,13 @@ function GoalModal({ initial, onClose, onSave }) {
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
             >
               Cancel
             </button>
@@ -365,9 +390,12 @@ function ConfirmDelete({ goalName, onCancel, onConfirm }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-4 dark:bg-[#17171F]">
         <h3 className="text-base font-bold text-slate-800">
+      <div className="bg-white dark:bg-[#17171F] dark:border dark:border-slate-700 max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-4">
+        <h3 className="text-base font-bold text-slate-800 dark:text-white">
           Delete Trip Goal?
         </h3>
         <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-slate-300">
           Are you sure you want to delete &ldquo;{goalName}&rdquo;? All saved
           progress for this trip will be removed.
         </p>
@@ -375,6 +403,7 @@ function ConfirmDelete({ goalName, onCancel, onConfirm }) {
           <button
             onClick={onCancel}
             className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
           >
             Cancel
           </button>
@@ -449,9 +478,11 @@ function GoalCard({ goal, onOpen }) {
         <div>
           <div className="flex justify-between items-baseline mb-1">
             <span className="text-xs font-semibold text-slate-700">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
               ${fmtMoney(goal.saved)}
             </span>
             <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400 dark:text-slate-400">
               of ${fmtMoney(goal.target)}
             </span>
           </div>
@@ -459,6 +490,7 @@ function GoalCard({ goal, onOpen }) {
         </div>
 
         <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-50">
+        <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-400 pt-1 border-t border-slate-50 dark:border-slate-800">
           <span className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
             {fmtDate(goal.deadline)}
@@ -467,9 +499,12 @@ function GoalCard({ goal, onOpen }) {
             className={`flex items-center gap-1 font-medium ${
               isMissed
                 ? "text-rose-500"
+                ? "text-rose-500 dark:text-rose-400"
                 : isCompleted
                   ? "text-emerald-600"
                   : "text-slate-600"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-slate-600 dark:text-slate-300"
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -488,12 +523,18 @@ function NewGoalCard({ onClick }) {
     <div
       onClick={onClick}
       className="border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors min-h-[220px]"
+      className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:bg-indigo-50/20 dark:hover:bg-indigo-900/10 dark:bg-[#17171F] rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors min-h-[220px]"
     >
       <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
         <Plus className="w-5 h-5" />
       </div>
       <p className="font-semibold text-slate-700 text-sm">Add New Trip</p>
       <p className="text-xs text-slate-400 text-center max-w-[160px]">
+      <p className="font-semibold text-slate-700 dark:text-white text-sm">
+        Add New Trip
+      </p>
+      <p className="text-xs text-slate-400 dark:text-slate-400 text-center max-w-[160px]">
         Set budget, target date, and upload cover photo.
       </p>
     </div>
@@ -546,22 +587,27 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 mb-4"
+        className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white mb-4"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Trip Savings
       </button>
 
       {isMissed && (
         <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 sm:p-5">
+        <div className="mb-4 rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/30 p-4 sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <div className="rounded-xl bg-rose-100 p-2 text-rose-600">
+              <div className="rounded-xl bg-rose-100 dark:bg-rose-900/50 p-2 text-rose-600 dark:text-rose-400">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-rose-900">
+                <h3 className="text-sm font-semibold text-rose-900 dark:text-rose-200">
                   Trip Goal Deadline Passed (Missed)
                 </h3>
                 <p className="mt-0.5 text-xs text-rose-700">
+                <p className="mt-0.5 text-xs text-rose-700 dark:text-rose-300">
                   This trip goal is locked because its target date has passed.
                   Deposits are disabled. Extend the deadline to reactivate.
                 </p>
@@ -579,15 +625,19 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
 
       {isCompleted && (
         <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 sm:p-5">
+        <div className="mb-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/30 p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <div className="rounded-xl bg-emerald-100 p-2 text-emerald-600">
+            <div className="rounded-xl bg-emerald-100 dark:bg-emerald-900/50 p-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
               <h3 className="text-sm font-semibold text-emerald-900">
+              <h3 className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
                 Trip Goal Completed! 🎉
               </h3>
               <p className="mt-0.5 text-xs text-emerald-700">
+              <p className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-300">
                 Congratulations! You saved the full budget for this trip. This
                 goal is preserved in read-only history mode.
               </p>
@@ -635,6 +685,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
                   : "In Progress"}
             </span>
             <h1 className="text-2xl font-bold mt-2">{goal.name}</h1>
+            <h1 className="text-2xl font-bold mt-2 text-white">{goal.name}</h1>
           </div>
           <div className="relative ml-auto flex gap-2">
             {!isCompleted && (
@@ -642,6 +693,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
                 onClick={() => onEdit(goal)}
                 title={isMissed ? "Extend deadline" : "Edit goal"}
                 className="w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-slate-700 transition-colors"
+                className="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 transition-colors"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
@@ -650,6 +702,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
               onClick={() => setConfirmingDelete(true)}
               title="Delete goal"
               className="w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-rose-500 transition-colors"
+              className="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 flex items-center justify-center text-rose-500 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -659,24 +712,40 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
         <div className="p-6 flex flex-col gap-6">
           {goal.description && (
             <p className="text-sm text-slate-500">{goal.description}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-300">
+              {goal.description}
+            </p>
           )}
 
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-slate-50 rounded-xl p-4 dark:bg-[#242430]">
               <div className="text-xs text-slate-400">Target</div>
               <div className="text-lg font-bold text-slate-900 mt-1">
+              <div className="text-xs text-slate-400 dark:text-slate-400">
+                Target
+              </div>
+              <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">
                 ${fmtMoney(goal.target)}
               </div>
             </div>
             <div className="bg-indigo-50 rounded-xl p-4">
               <div className="text-xs text-indigo-400">Saved</div>
               <div className="text-lg font-bold text-indigo-700 mt-1">
+            <div className="bg-indigo-50 rounded-xl p-4 dark:bg-[#242430]">
+              <div className="text-xs text-indigo-400 dark:text-indigo-300">
+                Saved
+              </div>
+              <div className="text-lg font-bold text-indigo-700 dark:text-indigo-300 mt-1">
                 ${fmtMoney(goal.saved)}
               </div>
             </div>
             <div className="bg-slate-50 rounded-xl p-4 dark:bg-[#242430]">
               <div className="text-xs text-slate-400">Remaining</div>
               <div className="text-lg font-bold text-slate-900 mt-1">
+              <div className="text-xs text-slate-400 dark:text-slate-400">
+                Remaining
+              </div>
+              <div className="text-lg font-bold text-slate-900 dark:text-white mt-1">
                 ${fmtMoney(remaining)}
               </div>
             </div>
@@ -685,13 +754,19 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
           <div>
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="font-medium text-slate-700">Progress</span>
+              <span className="font-medium text-slate-700 dark:text-slate-200">
+                Progress
+              </span>
               <span
                 className={`font-semibold ${
                   isCompleted
                     ? "text-emerald-600"
+                    ? "text-emerald-600 dark:text-emerald-400"
                     : isMissed
                       ? "text-rose-600"
                       : "text-indigo-600"
+                      ? "text-rose-600 dark:text-rose-400"
+                      : "text-indigo-600 dark:text-indigo-400"
                 }`}
               >
                 {pct}%
@@ -699,6 +774,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
             </div>
             <ProgressBar percent={pct} size="lg" />
             <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
+            <div className="flex items-center gap-4 mt-3 text-xs text-slate-400 dark:text-slate-400">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" /> {fmtDate(goal.deadline)}
               </span>
@@ -716,9 +792,12 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
           {/* Deposit section */}
           {!isReadOnly ? (
             <div className="border-t border-slate-100 pt-5">
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-indigo-600" />
                 <h3 className="font-semibold text-slate-800 text-sm">
+                <TrendingUp className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="font-semibold text-slate-800 dark:text-white text-sm">
                   Deposit Money
                 </h3>
               </div>
@@ -735,6 +814,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder={`Amount to add (max $${fmtMoney(remaining)})`}
                     className="w-full rounded-lg border border-slate-200 pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#242430] text-slate-900 dark:text-white pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                   />
                 </div>
                 <button
@@ -752,6 +832,7 @@ function GoalDetail({ goal, onBack, onEdit, onDelete, onDeposit }) {
             </div>
           ) : (
             <div className="border-t border-slate-100 pt-4 text-xs text-slate-400 flex items-center gap-2">
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 text-xs text-slate-400 dark:text-slate-400 flex items-center gap-2">
               <Lock className="w-4 h-4 text-slate-400" />
               <span>
                 {isCompleted
@@ -931,9 +1012,12 @@ export default function TripTab() {
                 <div className="py-12 px-6 rounded-2xl border border-dashed border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-[#17171F]">
                   <Compass className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                   <p className="text-sm font-medium text-slate-600">
+                  <Compass className="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-slate-500" />
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-200">
                     No {status.toLowerCase()} trip goals
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-400 dark:text-slate-400 mt-1">
                     {status === "COMPLETED"
                       ? "Trips you reach 100% savings for will appear here."
                       : "Trips past their deadline will appear here."}

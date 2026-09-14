@@ -14,6 +14,12 @@ http.interceptors.request.use((config) => {
   if (token && config.requiresAuth !== false) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // If config.url starts with /api/, strip it since baseURL already includes /api
+  if (config.url?.startsWith("/api/")) {
+    config.url = config.url.substring(4);
+  } else if (config.url === "/api") {
+    config.url = "";
+  }
   return config;
 });
 
