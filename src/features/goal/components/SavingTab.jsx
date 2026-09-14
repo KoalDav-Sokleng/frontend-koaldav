@@ -221,14 +221,11 @@ function SecondaryButton({ children, onClick, className = "", disabled }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
       className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-[#EFECFC] dark:bg-[#242430] text-[#6C4DFF] dark:text-[#A49DFF] ${
         disabled
           ? "opacity-50 cursor-not-allowed"
-          : "hover:-translate-y-0.5 active:translate-y-0"
           : "hover:-translate-y-0.5 active:translate-y-0 hover:bg-purple-100 dark:hover:bg-[#2D2A3E]"
       } ${className}`}
-      style={{ backgroundColor: "#EFECFC", color: COLORS.primary }}
     >
       {children}
     </button>
@@ -241,14 +238,11 @@ function DangerButton({ children, onClick, className = "", disabled }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
       className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 bg-[#FCEAE8] dark:bg-rose-950/40 text-[#E0483C] dark:text-rose-400 border border-transparent dark:border-rose-900/50 ${
         disabled
           ? "opacity-50 cursor-not-allowed"
-          : "hover:-translate-y-0.5 active:translate-y-0"
           : "hover:-translate-y-0.5 active:translate-y-0 hover:bg-rose-100 dark:hover:bg-rose-900/60"
       } ${className}`}
-      style={{ backgroundColor: COLORS.redBg, color: COLORS.red }}
     >
       {children}
     </button>
@@ -261,7 +255,6 @@ function GhostButton({ children, onClick, className = "", disabled }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-500 transition-all duration-200 hover:bg-gray-100 ${className}`}
       className={`rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-500 dark:text-slate-400 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-slate-800 dark:hover:text-slate-200 ${className}`}
     >
       {children}
@@ -272,10 +265,6 @@ function GhostButton({ children, onClick, className = "", disabled }) {
 function Field({ label, children }) {
   return (
     <label className="block mb-4">
-      <span
-        className="block text-sm font-medium mb-1.5"
-        style={{ color: COLORS.text }}
-      >
       <span className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-200">
         {label}
       </span>
@@ -285,22 +274,10 @@ function Field({ label, children }) {
 }
 
 const inputClass =
-  "w-full rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors duration-150 border";
   "w-full rounded-xl px-3.5 py-2.5 text-sm outline-none transition-colors duration-150 border border-slate-200 dark:border-slate-700 bg-[#FBFAFE] dark:bg-[#242430] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-[#6C4DFF] dark:focus:border-[#6C4DFF]";
 
 function TextInput(props) {
   return (
-    <input
-      {...props}
-      className={inputClass}
-      style={{
-        borderColor: COLORS.border,
-        backgroundColor: "#FBFAFE",
-        ...(props.style || {}),
-      }}
-      onFocus={(e) => (e.target.style.borderColor = COLORS.primary)}
-      onBlur={(e) => (e.target.style.borderColor = COLORS.border)}
-    />
     <input {...props} className={`${inputClass} ${props.className || ""}`} />
   );
 }
@@ -309,14 +286,6 @@ function TextArea(props) {
   return (
     <textarea
       {...props}
-      className={inputClass + " resize-none"}
-      style={{
-        borderColor: COLORS.border,
-        backgroundColor: "#FBFAFE",
-        ...(props.style || {}),
-      }}
-      onFocus={(e) => (e.target.style.borderColor = COLORS.primary)}
-      onBlur={(e) => (e.target.style.borderColor = COLORS.border)}
       className={`${inputClass} resize-none ${props.className || ""}`}
     />
   );
@@ -329,10 +298,8 @@ function Modal({ open, onClose, children, maxWidth = 480 }) {
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 dark:bg-black/75 backdrop-blur-sm"
       style={{
-        backgroundColor: "rgba(31,27,46,0.45)",
         animation: "svg-fade-in 0.18s ease-out",
       }}
       onMouseDown={(e) => {
@@ -340,7 +307,6 @@ function Modal({ open, onClose, children, maxWidth = 480 }) {
       }}
     >
       <div
-        className="w-full bg-white rounded-3xl shadow-2xl overflow-hidden dark:bg-[#17171F]"
         className="w-full bg-white dark:bg-[#17171F] dark:border dark:border-slate-700 rounded-3xl shadow-2xl overflow-hidden"
         style={{
           maxWidth,
@@ -361,15 +327,12 @@ function Modal({ open, onClose, children, maxWidth = 480 }) {
 
 function ModalHeader({ title, subtitle, onClose }) {
   return (
-    <div className="flex items-start justify-between px-7 pt-6 pb-2">
     <div className="flex items-start justify-between px-7 pt-6 pb-2 border-b border-slate-100 dark:border-slate-800">
       <div>
-        <h2 className="text-lg font-bold" style={{ color: COLORS.text }}>
         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
           {title}
         </h2>
         {subtitle && (
-          <p className="text-sm mt-0.5" style={{ color: COLORS.subtext }}>
           <p className="text-sm mt-0.5 text-slate-500 dark:text-slate-400">
             {subtitle}
           </p>
@@ -377,8 +340,6 @@ function ModalHeader({ title, subtitle, onClose }) {
       </div>
       <button
         onClick={onClose}
-        className="rounded-lg p-1.5 transition-colors duration-150 hover:bg-gray-100"
-        style={{ color: COLORS.subtext }}
         className="rounded-lg p-1.5 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
       >
         <X size={18} />
@@ -536,7 +497,6 @@ function EmptyState({ status, onCreate, searchTerm }) {
           <PiggyBank size={36} color={COLORS.primary} strokeWidth={1.6} />
         )}
       </div>
-      <h3 className="text-lg font-bold mb-1.5 text-slate-900">
       <h3 className="text-lg font-bold mb-1.5 text-slate-900 dark:text-white">
         {searchTerm
           ? "No matching saving goals"
@@ -546,7 +506,6 @@ function EmptyState({ status, onCreate, searchTerm }) {
               ? "No completed saving goals yet"
               : "No active saving goals"}
       </h3>
-      <p className="text-sm mb-6 max-w-sm text-slate-500">
       <p className="text-sm mb-6 max-w-sm text-slate-500 dark:text-slate-400">
         {searchTerm
           ? "Try adjusting your search keywords."
@@ -571,11 +530,9 @@ function LoadingState() {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
       <Loader2 size={36} className="animate-spin mb-3 text-indigo-600" />
-      <p className="text-sm font-medium text-slate-800">
       <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
         Loading saving goals...
       </p>
-      <p className="text-xs mt-1 text-slate-400">
       <p className="text-xs mt-1 text-slate-400 dark:text-slate-400">
         Fetching latest data from server
       </p>
@@ -710,8 +667,6 @@ function CreateSavingGoalModal({ open, onClose, onCreate }) {
                   title={opt.label}
                   className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
                     isSelected
-                      ? "border-indigo-600 bg-indigo-50/70 text-indigo-600 shadow-sm"
-                      : "border-slate-200 bg-[#FBFAFE] text-slate-500 hover:bg-slate-100"
                       ? "border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-600 dark:text-[#A49DFF] shadow-sm"
                       : "border-slate-200 dark:border-slate-700 bg-[#FBFAFE] dark:bg-[#242430] text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
@@ -752,19 +707,11 @@ function CreateSavingGoalModal({ open, onClose, onCreate }) {
           />
         </Field>
         <Field label="Goal Type">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold cursor-not-allowed"
-            style={{ backgroundColor: COLORS.primary, color: "white" }}
-          >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold cursor-not-allowed bg-[#6C4DFF] text-white">
             <Wallet size={15} /> Saving Goal
           </div>
         </Field>
       </div>
-      <div
-        className="flex items-center justify-end gap-3 px-7 py-5"
-        style={{ borderTop: `1px solid ${COLORS.border}` }}
-      >
       <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-slate-100 dark:border-slate-800">
         <GhostButton onClick={handleClose} disabled={submitting}>
           Cancel
@@ -863,7 +810,6 @@ function EditSavingGoalModal({ open, goal, onClose, onSave }) {
       />
       <div className="px-7 pb-2 pt-3">
         {validationError && (
-          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
           <div className="mb-4 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-400">
             {validationError}
           </div>
@@ -886,8 +832,6 @@ function EditSavingGoalModal({ open, goal, onClose, onSave }) {
                   title={opt.label}
                   className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
                     isSelected
-                      ? "border-indigo-600 bg-indigo-50/70 text-indigo-600 shadow-sm"
-                      : "border-slate-200 bg-[#FBFAFE] text-slate-500 hover:bg-slate-100"
                       ? "border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/50 text-indigo-600 dark:text-[#A49DFF] shadow-sm"
                       : "border-slate-200 dark:border-slate-700 bg-[#FBFAFE] dark:bg-[#242430] text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
                   }`}
@@ -926,10 +870,6 @@ function EditSavingGoalModal({ open, goal, onClose, onSave }) {
           />
         </Field>
       </div>
-      <div
-        className="flex items-center justify-end gap-3 px-7 py-5"
-        style={{ borderTop: `1px solid ${COLORS.border}` }}
-      >
       <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-slate-100 dark:border-slate-800">
         <GhostButton onClick={onClose} disabled={submitting}>
           Cancel
@@ -1019,20 +959,16 @@ function DepositModal({ open, goal, onClose, onSave }) {
       />
       <div className="px-7 pb-2 pt-3">
         {/* Remaining amount banner */}
-        <div className="mb-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 p-3.5 flex items-center justify-between text-xs">
-          <span className="text-slate-600 font-medium">
         <div className="mb-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 p-3.5 flex items-center justify-between text-xs">
           <span className="text-slate-600 dark:text-slate-300 font-medium">
             Remaining to complete:
           </span>
-          <span className="text-indigo-700 font-bold text-sm">
           <span className="text-indigo-700 dark:text-[#A49DFF] font-bold text-sm">
             {formatCurrency(remaining)}
           </span>
         </div>
 
         {validationError && (
-          <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
           <div className="mb-4 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-700 dark:text-rose-400">
             {validationError}
           </div>
@@ -1051,7 +987,6 @@ function DepositModal({ open, goal, onClose, onSave }) {
               setValidationError("");
             }}
           />
-          <span className="block mt-1 text-[11px] text-slate-400">
           <span className="block mt-1 text-[11px] text-slate-400 dark:text-slate-500">
             Must be &gt; $0 and &le; {formatCurrency(remaining)} (No overflow).
           </span>
@@ -1082,10 +1017,6 @@ function DepositModal({ open, goal, onClose, onSave }) {
           />
         </Field>
       </div>
-      <div
-        className="flex items-center justify-end gap-3 px-7 py-5"
-        style={{ borderTop: `1px solid ${COLORS.border}` }}
-      >
       <div className="flex items-center justify-end gap-3 px-7 py-5 border-t border-slate-100 dark:border-slate-800">
         <GhostButton onClick={handleClose} disabled={submitting}>
           Cancel
@@ -1117,26 +1048,16 @@ function DepositHistory({ deposits = [] }) {
   );
 
   return (
-    <div
-      className="bg-white rounded-3xl p-6"
-      style={{
-        boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
-        border: `1px solid ${COLORS.border}`,
-      }}
-    >
-      <h3 className="font-bold mb-4 text-slate-900">
     <div className="bg-white dark:bg-[#17171F] rounded-3xl p-6 border border-[#ECE9F7] dark:border-slate-700 shadow-sm">
       <h3 className="font-bold mb-4 text-slate-900 dark:text-white">
         Deposit History ({sorted.length})
       </h3>
       {sorted.length === 0 ? (
-        <p className="text-sm py-8 text-center text-slate-400">
         <p className="text-sm py-8 text-center text-slate-400 dark:text-slate-500">
           No deposits recorded yet. Make a deposit to see your transaction
           history here.
         </p>
       ) : (
-        <div className="flex flex-col divide-y divide-slate-100">
         <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
           {sorted.map((dep, i) => (
             <div
@@ -1148,28 +1069,23 @@ function DepositHistory({ deposits = [] }) {
               }}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-[#EFEAFF]">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-[#EFEAFF] dark:bg-[#242430]">
                   <CreditCard size={16} color={COLORS.primary} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate text-slate-800">
                   <p className="text-sm font-semibold truncate text-slate-800 dark:text-slate-100">
                     {dep.title || "Deposit"}
                   </p>
-                  <p className="text-xs text-slate-400">
                   <p className="text-xs text-slate-400 dark:text-slate-400">
                     {formatDate(dep.date)} &middot; {dep.source || "Deposit"}
                   </p>
                   {dep.notes && (
-                    <p className="text-xs flex items-center gap-1 mt-0.5 text-slate-400">
                     <p className="text-xs flex items-center gap-1 mt-0.5 text-slate-400 dark:text-slate-500">
                       <StickyNote size={10} /> {dep.notes}
                     </p>
                   )}
                 </div>
               </div>
-              <span className="text-sm font-bold shrink-0 text-emerald-600">
               <span className="text-sm font-bold shrink-0 text-emerald-600 dark:text-emerald-400">
                 +{formatCurrency(dep.amount)}
               </span>
@@ -1226,7 +1142,6 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
       <div className="flex items-center justify-between mb-5">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold transition-transform duration-150 hover:-translate-x-0.5 text-slate-500 hover:text-slate-700"
           className="inline-flex items-center gap-1.5 text-sm font-semibold transition-transform duration-150 hover:-translate-x-0.5 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
         >
           <ArrowLeft size={16} /> Back to Saving Goals
@@ -1238,19 +1153,15 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
 
       {/* History Mode Alerts */}
       {isMissed && (
-        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 sm:p-5">
         <div className="mb-6 rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/80 dark:bg-rose-950/40 p-4 sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-rose-100 p-2 text-rose-600">
             <div className="rounded-xl bg-rose-100 dark:bg-rose-900/60 p-2 text-rose-600 dark:text-rose-400">
               <AlertTriangle size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-rose-900">
               <h3 className="text-sm font-semibold text-rose-900 dark:text-rose-200">
                 Saving Goal Missed (History / Read-Only Mode)
               </h3>
-              <p className="mt-0.5 text-xs text-rose-700">
               <p className="mt-0.5 text-xs text-rose-700 dark:text-rose-400">
                 This goal reached its deadline before meeting the target savings
                 amount. It is now closed and in read-only mode. Deposits and
@@ -1262,19 +1173,15 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
       )}
 
       {isCompleted && (
-        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 sm:p-5">
         <div className="mb-6 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/80 dark:bg-emerald-950/40 p-4 sm:p-5">
           <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-emerald-100 p-2 text-emerald-600">
             <div className="rounded-xl bg-emerald-100 dark:bg-emerald-900/60 p-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-emerald-900">
               <h3 className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
                 Saving Goal Completed! 🎉
               </h3>
-              <p className="mt-0.5 text-xs text-emerald-700">
               <p className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-400">
                 Congratulations! You fully funded this goal. It is archived in
                 history mode. Deposits and editing are closed.
@@ -1286,18 +1193,10 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
 
       {/* Summary card */}
       <div
-        className={`rounded-3xl p-8 mb-6 bg-white ${
         className={`rounded-3xl p-8 mb-6 bg-white dark:bg-[#17171F] ${
           isMissed
-            ? "border border-rose-200"
             ? "border border-rose-200 dark:border-rose-900/50"
             : isCompleted
-              ? "border border-emerald-200"
-              : "border border-slate-200"
-        }`}
-        style={{
-          boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
-        }}
               ? "border border-emerald-200 dark:border-emerald-900/50"
               : "border border-slate-200 dark:border-slate-700"
         } shadow-sm`}
@@ -1327,13 +1226,11 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
               />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">{goal.title}</h2>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 {goal.title}
               </h2>
               <p
                 className={`text-sm mt-0.5 flex items-center gap-1 ${
-                  isMissed ? "font-medium text-rose-600" : "text-slate-500"
                   isMissed
                     ? "font-medium text-rose-600 dark:text-rose-400"
                     : "text-slate-500 dark:text-slate-400"
@@ -1349,11 +1246,8 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
             <span
               className={`text-3xl font-extrabold ${
                 isMissed
-                  ? "text-rose-600"
                   ? "text-rose-600 dark:text-rose-400"
                   : isCompleted
-                    ? "text-emerald-600"
-                    : "text-indigo-600"
                     ? "text-emerald-600 dark:text-emerald-400"
                     : "text-indigo-600 dark:text-[#A49DFF]"
               }`}
@@ -1364,7 +1258,6 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
         </div>
 
         {goal.description && (
-          <p className="text-sm mb-6 text-slate-600">{goal.description}</p>
           <p className="text-sm mb-6 text-slate-600 dark:text-slate-300">
             {goal.description}
           </p>
@@ -1378,11 +1271,9 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
         />
 
         <div className="flex items-center justify-between mt-2 mb-7 text-sm font-medium">
-          <span className="text-slate-900">
           <span className="text-slate-900 dark:text-white">
             {formatCurrency(current)} saved
           </span>
-          <span className="text-slate-500">
           <span className="text-slate-500 dark:text-slate-400">
             {isCompleted
               ? "Target Reached! 🚀"
@@ -1390,7 +1281,6 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
                 ? `${formatCurrency(remaining)} remaining (Missed)`
                 : `${formatCurrency(remaining)} left`}
           </span>
-          <span className="text-slate-900">
           <span className="text-slate-900 dark:text-white">
             {formatCurrency(target)} target
           </span>
@@ -1408,7 +1298,6 @@ function SavingGoalDetail({ goal, onBack, onDeposit, onEdit, onDelete }) {
               </PrimaryButton>
             </>
           ) : (
-            <div className="flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-500">
             <div className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
               <Lock size={14} /> History Mode (Read-Only)
             </div>
