@@ -10,7 +10,7 @@ import {
   Pie,
   Tooltip,
 } from "recharts";
-import { ChevronDown, ChevronUp, RefreshCw, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import FinanceSummaryCard from "./FinanceSummaryCard";
 import { useTheme } from "../../../context/ThemeContext";
 

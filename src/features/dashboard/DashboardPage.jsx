@@ -142,13 +142,13 @@ export default function DashboardPage() {
   const activeProjects =
     dashboardData?.activeGoals ||
     projectGoals.filter(
-      (g) => g.status !== "COMPLETED" && g.status !== "MISSED"
+      (g) => g.status !== "COMPLETED" && g.status !== "MISSED",
     );
 
   const activeSavings =
     dashboardData?.activeSavingGoals ||
     savingGoals.filter(
-      (g) => g.status !== "COMPLETED" && g.status !== "MISSED"
+      (g) => g.status !== "COMPLETED" && g.status !== "MISSED",
     );
 
   const activeTripsCount = tripCounts?.ACTIVE || 0;

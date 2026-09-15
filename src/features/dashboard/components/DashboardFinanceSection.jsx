@@ -4,7 +4,6 @@ import {
   Wallet,
   PiggyBank,
   TrendingDown,
-  AlertCircle,
   Plus,
   RefreshCw,
   Search,
@@ -14,14 +13,12 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Calendar,
   Layers,
   Star,
   Lock,
   PlusCircle,
   History,
   CheckCircle2,
-  TrendingUp,
 } from "lucide-react";
 import {
   BarChart,
@@ -106,7 +103,6 @@ export default function DashboardFinanceSection({ onDataChanged }) {
   const [pagedExpenses, setPagedExpenses] = useState([]);
   const [totalExpensesCount, setTotalExpensesCount] = useState(0);
   const [expensesLoading, setExpensesLoading] = useState(false);
-  const [expensesError, setExpensesError] = useState(null);
 
   // Core finance hooks
   const {
@@ -134,7 +130,6 @@ export default function DashboardFinanceSection({ onDataChanged }) {
     budgets,
     totalLimit: totalBudgetLimit,
     totalSpent: totalBudgetSpent,
-    totalRemaining: totalBudgetRemaining,
     overbudgetCount,
     loading: budgetsLoading,
     reload: reloadBudgets,
@@ -168,7 +163,6 @@ export default function DashboardFinanceSection({ onDataChanged }) {
   // Fetch paginated expenses
   const fetchExpensesList = useCallback(async () => {
     setExpensesLoading(true);
-    setExpensesError(null);
     try {
       const res = await getExpenses({
         year: selectedYear,
@@ -182,22 +176,21 @@ export default function DashboardFinanceSection({ onDataChanged }) {
         const list = Array.isArray(res)
           ? res
           : Array.isArray(res.expenses)
-          ? res.expenses
-          : Array.isArray(res.content)
-          ? res.content
-          : [];
+            ? res.expenses
+            : Array.isArray(res.content)
+              ? res.content
+              : [];
         setPagedExpenses(list);
         const total =
           res.totalElements !== undefined
             ? res.totalElements
             : res.total !== undefined
-            ? res.total
-            : list.length;
+              ? res.total
+              : list.length;
         setTotalExpensesCount(total);
       }
     } catch (err) {
       console.error("Failed to load expenses:", err);
-      setExpensesError(err?.message || "Failed to load expenses list");
     } finally {
       setExpensesLoading(false);
     }
@@ -217,7 +210,14 @@ export default function DashboardFinanceSection({ onDataChanged }) {
       fetchExpensesList?.(),
     ]);
     onDataChanged?.();
-  }, [reloadOverview, reloadWallets, reloadBudgets, reloadSavings, fetchExpensesList, onDataChanged]);
+  }, [
+    reloadOverview,
+    reloadWallets,
+    reloadBudgets,
+    reloadSavings,
+    fetchExpensesList,
+    onDataChanged,
+  ]);
 
   // Handle Expense Add with full refresh
   const handleAddExpenseSubmit = async (formData) => {
@@ -397,22 +397,31 @@ export default function DashboardFinanceSection({ onDataChanged }) {
         e.title?.toLowerCase().includes(q) ||
         e.category?.toLowerCase().includes(q) ||
         e.note?.toLowerCase().includes(q) ||
-        e.walletName?.toLowerCase().includes(q)
+        e.walletName?.toLowerCase().includes(q),
     );
   }, [pagedExpenses, searchQuery]);
 
   // Aggregate metrics
   const totalSavedSavings = useMemo(() => {
-    return savingGoals.reduce((sum, g) => sum + (Number(g.currentAmount) || 0), 0);
+    return savingGoals.reduce(
+      (sum, g) => sum + (Number(g.currentAmount) || 0),
+      0,
+    );
   }, [savingGoals]);
 
   const totalTargetSavings = useMemo(() => {
-    return savingGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0);
+    return savingGoals.reduce(
+      (sum, g) => sum + (Number(g.targetAmount) || 0),
+      0,
+    );
   }, [savingGoals]);
 
   const savingProgressPercent =
     totalTargetSavings > 0
-      ? Math.min(100, Math.round((totalSavedSavings / totalTargetSavings) * 100))
+      ? Math.min(
+          100,
+          Math.round((totalSavedSavings / totalTargetSavings) * 100),
+        )
       : 0;
 
   const budgetUsagePercent =
@@ -451,7 +460,10 @@ export default function DashboardFinanceSection({ onDataChanged }) {
             <RefreshCw
               size={15}
               className={
-                overviewLoading || walletsLoading || budgetsLoading || savingsLoading
+                overviewLoading ||
+                walletsLoading ||
+                budgetsLoading ||
+                savingsLoading
                   ? "animate-spin text-[#6C63FF]"
                   : ""
               }
@@ -497,7 +509,11 @@ export default function DashboardFinanceSection({ onDataChanged }) {
           </div>
           <div className="mt-2">
             <p className="text-2xl font-black text-slate-900 dark:text-white tabular-nums">
-              ${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {totalBalance.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
             <div className="flex items-center justify-between mt-1 text-[11px]">
               <span className="text-slate-400">
@@ -532,11 +548,17 @@ export default function DashboardFinanceSection({ onDataChanged }) {
           </div>
           <div className="mt-2">
             <p className="text-2xl font-black text-rose-500 dark:text-rose-400 tabular-nums">
-              ${overviewTotalSpent.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $
+              {overviewTotalSpent.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
             <div className="flex items-center justify-between mt-1 text-[11px]">
               <span className="text-slate-400">Recorded spending</span>
-              <span className="font-semibold text-rose-500">{totalExpensesCount} items</span>
+              <span className="font-semibold text-rose-500">
+                {totalExpensesCount} items
+              </span>
             </div>
           </div>
         </div>
@@ -628,10 +650,22 @@ export default function DashboardFinanceSection({ onDataChanged }) {
       <div className="flex items-center gap-2 border-b border-slate-100 dark:border-[#242430] pb-2 overflow-x-auto no-scrollbar">
         {[
           { id: "overview", label: "Overview & Charts", icon: Layers },
-          { id: "expenses", label: `Recent Expenses (${totalExpensesCount})`, icon: TrendingDown },
+          {
+            id: "expenses",
+            label: `Recent Expenses (${totalExpensesCount})`,
+            icon: TrendingDown,
+          },
           { id: "wallets", label: `Wallets (${wallets.length})`, icon: Wallet },
-          { id: "budgets", label: `Budgets (${budgets.length})`, icon: PiggyBank },
-          { id: "savings", label: `Saving Goals (${savingGoals.length})`, icon: CheckCircle2 },
+          {
+            id: "budgets",
+            label: `Budgets (${budgets.length})`,
+            icon: PiggyBank,
+          },
+          {
+            id: "savings",
+            label: `Saving Goals (${savingGoals.length})`,
+            icon: CheckCircle2,
+          },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = subView === tab.id;
@@ -665,7 +699,8 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                   Monthly Expense Breakdown
                 </h3>
                 <p className="text-[11px] text-slate-400">
-                  {selectedYear} Annual Trend • Total: ${overviewTotalSpent.toFixed(2)}
+                  {selectedYear} Annual Trend • Total: $
+                  {overviewTotalSpent.toFixed(2)}
                 </p>
               </div>
 
@@ -677,7 +712,11 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                   className="appearance-none pl-2.5 pr-6 py-1 rounded-lg text-xs font-bold bg-[#EDE9FE] dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF] border-none outline-none cursor-pointer"
                 >
                   {YEARS.map((y) => (
-                    <option key={y} value={y} className="bg-white dark:bg-[#1A1A24] text-slate-800 dark:text-white">
+                    <option
+                      key={y}
+                      value={y}
+                      className="bg-white dark:bg-[#1A1A24] text-slate-800 dark:text-white"
+                    >
                       {y}
                     </option>
                   ))}
@@ -700,18 +739,26 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                     dataKey="month"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: isDark ? "#818898" : "#94A3B8", fontSize: 10 }}
+                    tick={{
+                      fill: isDark ? "#818898" : "#94A3B8",
+                      fontSize: 10,
+                    }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(v) => `$${v}`}
-                    tick={{ fill: isDark ? "#818898" : "#94A3B8", fontSize: 10 }}
+                    tick={{
+                      fill: isDark ? "#818898" : "#94A3B8",
+                      fontSize: 10,
+                    }}
                   />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 10,
-                      border: isDark ? "1px solid #2B2A3D" : "1px solid #ECEBF5",
+                      border: isDark
+                        ? "1px solid #2B2A3D"
+                        : "1px solid #ECEBF5",
                       backgroundColor: isDark ? "#17171F" : "#ffffff",
                       color: isDark ? "#ffffff" : "#111827",
                       fontSize: 12,
@@ -722,7 +769,13 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                     {monthlyData.map((entry, index) => (
                       <Cell
                         key={`bar-${index}`}
-                        fill={entry.amount > 0 ? "#6C63FF" : isDark ? "#1E1B2E" : "#EDE9FE"}
+                        fill={
+                          entry.amount > 0
+                            ? "#6C63FF"
+                            : isDark
+                              ? "#1E1B2E"
+                              : "#EDE9FE"
+                        }
                       />
                     ))}
                   </Bar>
@@ -742,7 +795,9 @@ export default function DashboardFinanceSection({ onDataChanged }) {
               </p>
             </div>
 
-            {!categoryData || categoryData.length === 0 || overviewTotalSpent === 0 ? (
+            {!categoryData ||
+            categoryData.length === 0 ||
+            overviewTotalSpent === 0 ? (
               <div className="py-8 text-center text-slate-400 text-xs">
                 No expense data recorded for {selectedYear}
               </div>
@@ -761,7 +816,11 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                         dataKey="value"
                       >
                         {categoryData.map((entry, i) => (
-                          <Cell key={i} fill={entry.color || "#6C63FF"} stroke="none" />
+                          <Cell
+                            key={i}
+                            fill={entry.color || "#6C63FF"}
+                            stroke="none"
+                          />
                         ))}
                       </Pie>
                     </PieChart>
@@ -775,9 +834,15 @@ export default function DashboardFinanceSection({ onDataChanged }) {
 
                 <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto pr-1">
                   {categoryData.slice(0, 5).map((c) => (
-                    <div key={c.name} className="flex items-center justify-between text-xs">
+                    <div
+                      key={c.name}
+                      className="flex items-center justify-between text-xs"
+                    >
                       <div className="flex items-center gap-1.5 truncate">
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: c.color || "#6C63FF" }} />
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ background: c.color || "#6C63FF" }}
+                        />
                         <span className="text-slate-700 dark:text-slate-300 truncate font-medium">
                           {c.icon || "💸"} {c.name}
                         </span>
@@ -801,7 +866,10 @@ export default function DashboardFinanceSection({ onDataChanged }) {
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search Input */}
             <div className="relative flex-1 max-w-sm">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
               <input
                 type="text"
                 placeholder="Search description, category..."
@@ -811,7 +879,7 @@ export default function DashboardFinanceSection({ onDataChanged }) {
               />
             </div>
 
-            {/* Filter Pills / Selectors */}
+            {/* Filter Selectors */}
             <div className="flex items-center gap-2 flex-wrap">
               {/* Category selector */}
               <select
@@ -947,7 +1015,8 @@ export default function DashboardFinanceSection({ onDataChanged }) {
           {totalExpensesCount > pageSize && (
             <div className="flex items-center justify-between text-xs pt-1 text-slate-500">
               <span>
-                Showing page {page + 1} of {totalPages} ({totalExpensesCount} total items)
+                Showing page {page + 1} of {totalPages} ({totalExpensesCount}{" "}
+                total items)
               </span>
               <div className="flex items-center gap-1.5">
                 <button
@@ -1005,7 +1074,10 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                         <div className="flex items-center gap-2.5">
                           <div
                             className="w-9 h-9 rounded-xl flex items-center justify-center text-xs"
-                            style={{ backgroundColor: `${w.color || "#6C63FF"}20`, color: w.color || "#6C63FF" }}
+                            style={{
+                              backgroundColor: `${w.color || "#6C63FF"}20`,
+                              color: w.color || "#6C63FF",
+                            }}
                           >
                             <Wallet size={18} />
                           </div>
@@ -1020,7 +1092,9 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                                 </span>
                               )}
                             </div>
-                            <p className="text-[10px] text-slate-400">{w.type}</p>
+                            <p className="text-[10px] text-slate-400">
+                              {w.type}
+                            </p>
                           </div>
                         </div>
 
@@ -1037,13 +1111,19 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                             title={hasFunds ? "Locked (has funds)" : "Delete"}
                             className={`p-1 rounded-lg ${hasFunds ? "text-slate-300 dark:text-slate-600" : "text-slate-400 hover:text-rose-500"}`}
                           >
-                            {hasFunds ? <Lock size={12} /> : <Trash2 size={12} />}
+                            {hasFunds ? (
+                              <Lock size={12} />
+                            ) : (
+                              <Trash2 size={12} />
+                            )}
                           </button>
                         </div>
                       </div>
 
                       <div className="mt-3">
-                        <span className="text-[10px] text-slate-400 font-medium">Balance</span>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          Balance
+                        </span>
                         <p className="text-xl font-black text-slate-900 dark:text-white tabular-nums">
                           ${bal.toFixed(2)}
                         </p>
@@ -1089,7 +1169,10 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                 const limit = Number(b.limitAmount || 0);
                 const spent = Number(b.spentAmount || 0);
                 const remaining = Math.max(0, limit - spent);
-                const pct = limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
+                const pct =
+                  limit > 0
+                    ? Math.min(100, Math.round((spent / limit) * 100))
+                    : 0;
                 const isOver = spent > limit;
                 const isNear = !isOver && pct >= 80;
 
@@ -1097,7 +1180,9 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                   <div
                     key={b.id}
                     className="p-4 rounded-2xl border border-slate-200/80 dark:border-[#242430] bg-slate-50/50 dark:bg-[#12121A] flex flex-col justify-between"
-                    style={{ borderTop: `3px solid ${isOver ? "#EF4444" : isNear ? "#F59E0B" : b.color || "#6C63FF"}` }}
+                    style={{
+                      borderTop: `3px solid ${isOver ? "#EF4444" : isNear ? "#F59E0B" : b.color || "#6C63FF"}`,
+                    }}
                   >
                     <div>
                       <div className="flex items-start justify-between">
@@ -1107,7 +1192,9 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                             <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">
                               {b.category || b.name}
                             </h4>
-                            <p className="text-[10px] text-slate-400">{b.period || "Monthly"}</p>
+                            <p className="text-[10px] text-slate-400">
+                              {b.period || "Monthly"}
+                            </p>
                           </div>
                         </div>
 
@@ -1132,7 +1219,9 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                           <span className="text-slate-500">
                             ${spent.toFixed(2)} / ${limit.toFixed(2)}
                           </span>
-                          <span className={`font-bold ${isOver ? "text-rose-500" : "text-slate-700 dark:text-slate-300"}`}>
+                          <span
+                            className={`font-bold ${isOver ? "text-rose-500" : "text-slate-700 dark:text-slate-300"}`}
+                          >
                             {pct}%
                           </span>
                         </div>
@@ -1147,8 +1236,12 @@ export default function DashboardFinanceSection({ onDataChanged }) {
 
                     <div className="mt-3 pt-2 border-t border-slate-200/50 dark:border-[#242430] flex items-center justify-between text-[11px]">
                       <span className="text-slate-400">Remaining</span>
-                      <span className={`font-bold ${isOver ? "text-rose-500" : "text-emerald-600"}`}>
-                        {isOver ? `-$${(spent - limit).toFixed(2)}` : `$${remaining.toFixed(2)}`}
+                      <span
+                        className={`font-bold ${isOver ? "text-rose-500" : "text-emerald-600"}`}
+                      >
+                        {isOver
+                          ? `-$${(spent - limit).toFixed(2)}`
+                          : `$${remaining.toFixed(2)}`}
                       </span>
                     </div>
                   </div>
@@ -1184,7 +1277,8 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                 const cur = Number(g.currentAmount || 0);
                 const tar = Number(g.targetAmount || 0);
                 const rem = Math.max(0, tar - cur);
-                const pct = tar > 0 ? Math.min(100, Math.round((cur / tar) * 100)) : 0;
+                const pct =
+                  tar > 0 ? Math.min(100, Math.round((cur / tar) * 100)) : 0;
 
                 return (
                   <div
@@ -1200,7 +1294,8 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                               {g.title}
                             </h4>
                             <p className="text-[10px] text-slate-400">
-                              Deadline: {g.deadline ? g.deadline.slice(0, 10) : "Open"}
+                              Deadline:{" "}
+                              {g.deadline ? g.deadline.slice(0, 10) : "Open"}
                             </p>
                           </div>
                         </div>
@@ -1233,10 +1328,15 @@ export default function DashboardFinanceSection({ onDataChanged }) {
                           <span className="text-slate-500">
                             ${cur.toFixed(0)} / ${tar.toFixed(0)}
                           </span>
-                          <span className="font-bold text-emerald-600">{pct}%</span>
+                          <span className="font-bold text-emerald-600">
+                            {pct}%
+                          </span>
                         </div>
                         <div className="w-full h-1.5 bg-slate-200 dark:bg-[#242430] rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pct}%` }} />
+                          <div
+                            className="h-full bg-emerald-500 rounded-full"
+                            style={{ width: `${pct}%` }}
+                          />
                         </div>
                       </div>
                     </div>

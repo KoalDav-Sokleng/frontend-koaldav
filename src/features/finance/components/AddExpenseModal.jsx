@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, Wallet, Loader2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
 import { getWallets, getBudgets } from "../api/financeApi";
 
@@ -36,7 +36,6 @@ export default function AddExpenseModal({
 }) {
   const [wallets, setWallets] = useState(initialWallets || []);
   const [budgets, setBudgets] = useState(initialBudgets || []);
-  const [loadingOptions, setLoadingOptions] = useState(false);
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -53,7 +52,6 @@ export default function AddExpenseModal({
     let mounted = true;
     async function load() {
       if (!initialWallets || initialWallets.length === 0) {
-        setLoadingOptions(true);
         try {
           const [wList, bList] = await Promise.all([
             getWallets(),
@@ -69,8 +67,6 @@ export default function AddExpenseModal({
           }
         } catch (err) {
           console.error("Failed to load options", err);
-        } finally {
-          if (mounted) setLoadingOptions(false);
         }
       } else {
         const defW =

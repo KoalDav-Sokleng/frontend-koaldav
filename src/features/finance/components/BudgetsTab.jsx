@@ -16,7 +16,6 @@ export default function BudgetsTab() {
   const {
     budgets,
     loading,
-    error,
     totalLimit,
     totalSpent,
     totalRemaining,

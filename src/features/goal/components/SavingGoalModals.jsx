@@ -114,7 +114,10 @@ export function CreateSavingGoalModal({ open, onClose, onSubmit }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 flex flex-col gap-4 overflow-y-auto"
+        >
           {error && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-xs text-rose-600 dark:text-rose-400 font-medium">
               {error}
@@ -312,7 +315,10 @@ export function EditSavingGoalModal({ open, goal, onClose, onSubmit }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 flex flex-col gap-4 overflow-y-auto"
+        >
           {error && (
             <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-xs text-rose-600 dark:text-rose-400 font-medium">
               {error}
@@ -451,7 +457,9 @@ export function DepositSavingGoalModal({ open, goal, onClose, onSubmit }) {
       return;
     }
     if (depositNum > remaining) {
-      setError(`Deposit cannot exceed remaining target of ${formatCurrency(remaining)}`);
+      setError(
+        `Deposit cannot exceed remaining target of ${formatCurrency(remaining)}`,
+      );
       return;
     }
 
@@ -610,7 +618,10 @@ export function SavingGoalHistoryModal({ open, goal, onClose }) {
   const deposits = goal.deposits || [];
   const percent =
     goal.targetAmount > 0
-      ? Math.min(100, Math.round(((goal.currentAmount || 0) / goal.targetAmount) * 100))
+      ? Math.min(
+          100,
+          Math.round(((goal.currentAmount || 0) / goal.targetAmount) * 100),
+        )
       : 0;
 
   return (
@@ -628,7 +639,8 @@ export function SavingGoalHistoryModal({ open, goal, onClose }) {
               {goal.title} — Deposit History
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              {formatCurrency(goal.currentAmount)} of {formatCurrency(goal.targetAmount)} ({percent}%)
+              {formatCurrency(goal.currentAmount)} of{" "}
+              {formatCurrency(goal.targetAmount)} ({percent}%)
             </p>
           </div>
           <button

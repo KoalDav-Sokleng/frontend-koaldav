@@ -1,10 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  useOutletContext,
-  useParams,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import React, { useState } from "react";
+import { useOutletContext, useParams, useNavigate } from "react-router-dom";
 import {
   Plus,
   RefreshCw,
@@ -34,7 +29,6 @@ const TABS = [
 export default function FinancePage() {
   const { tab: paramTab } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const outletContext = useOutletContext();
 
   // Determine active tab from URL (/finance/:tab) or default to "overview"

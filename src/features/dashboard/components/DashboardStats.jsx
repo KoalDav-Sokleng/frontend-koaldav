@@ -37,13 +37,17 @@ export default function DashboardStats({
       value: loading
         ? "..."
         : `$${Number(totalWalletBalance || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      subValue: defaultWalletName ? `Default: ${defaultWalletName}` : `${walletsCount} active wallets`,
+      subValue: defaultWalletName
+        ? `Default: ${defaultWalletName}`
+        : `${walletsCount} active wallets`,
       icon: Wallet,
-      iconBg: "bg-purple-50 dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF]",
+      iconBg:
+        "bg-purple-50 dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF]",
       link: "/finance/wallets",
       progress: null,
       badge: "Live Funds",
-      badgeColor: "bg-purple-100 dark:bg-purple-950/60 text-[#6C63FF] dark:text-[#A49DFF]",
+      badgeColor:
+        "bg-purple-100 dark:bg-purple-950/60 text-[#6C63FF] dark:text-[#A49DFF]",
     },
     // 2. Total Expenses
     {
@@ -57,7 +61,8 @@ export default function DashboardStats({
       link: "/finance/expenses",
       progress: null,
       badge: "Spending",
-      badgeColor: "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300",
+      badgeColor:
+        "bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300",
     },
     // 3. Budget Usage
     {
@@ -65,18 +70,23 @@ export default function DashboardStats({
       value: loading
         ? "..."
         : `$${Number(totalBudgetSpent || 0).toFixed(0)} / $${Number(totalBudgetLimit || 0).toFixed(0)}`,
-      subValue: overbudgetCount > 0 ? `${overbudgetCount} Over Budget!` : `${budgetUsagePercent}% of cap used`,
+      subValue:
+        overbudgetCount > 0
+          ? `${overbudgetCount} Over Budget!`
+          : `${budgetUsagePercent}% of cap used`,
       icon: PiggyBank,
-      iconBg: overbudgetCount > 0
-        ? "bg-rose-50 dark:bg-rose-950/40 text-rose-500"
-        : "bg-indigo-50 dark:bg-[#1E1B2E] text-indigo-600 dark:text-[#A49DFF]",
+      iconBg:
+        overbudgetCount > 0
+          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-500"
+          : "bg-indigo-50 dark:bg-[#1E1B2E] text-indigo-600 dark:text-[#A49DFF]",
       link: "/finance/budgets",
       progress: budgetUsagePercent,
       progressColor: overbudgetCount > 0 ? "bg-rose-500" : "bg-[#6C63FF]",
       badge: overbudgetCount > 0 ? "Alert ⚠️" : "On Track",
-      badgeColor: overbudgetCount > 0
-        ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 font-bold"
-        : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600",
+      badgeColor:
+        overbudgetCount > 0
+          ? "bg-rose-100 dark:bg-rose-950/60 text-rose-600 font-bold"
+          : "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600",
     },
     // 4. Saving-Goal Progress
     {
@@ -86,12 +96,14 @@ export default function DashboardStats({
         : `$${Number(totalSaved || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
       subValue: `of $${Number(totalTarget || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })} target`,
       icon: CheckCircle2,
-      iconBg: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 dark:text-emerald-400",
+      iconBg:
+        "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-500 dark:text-emerald-400",
       link: "/goal/saving",
       progress: savingPercent,
       progressColor: "bg-emerald-500",
       badge: `${savingPercent}% Saved`,
-      badgeColor: "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300",
+      badgeColor:
+        "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300",
     },
   ];
 
@@ -129,7 +141,9 @@ export default function DashboardStats({
             {card.progress !== null ? (
               <div className="mt-2 space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                  <span className="truncate max-w-[150px]">{card.subValue}</span>
+                  <span className="truncate max-w-[150px]">
+                    {card.subValue}
+                  </span>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">
                     {card.progress}%
                   </span>
