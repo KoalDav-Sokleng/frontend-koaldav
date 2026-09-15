@@ -36,7 +36,7 @@ function AppRoutes() {
           <Route path="saving" element={<SavingTab />} />
         </Route>
 
-        {/* Alias routes for direct deep-linking */}
+        {/* Goal alias routes for deep-linking */}
         <Route path="goals" element={<Navigate to="/goal" replace />} />
         <Route path="goals/:id" element={<GoalRedirect baseRoute="/goal" />} />
         <Route
@@ -53,7 +53,22 @@ function AppRoutes() {
           element={<GoalRedirect baseRoute="/goal/trip" />}
         />
 
+        {/* Finance routes & sub-tabs */}
         <Route path="finance" element={<FinancePage />} />
+        <Route path="finance/:tab" element={<FinancePage />} />
+        <Route
+          path="wallets"
+          element={<Navigate to="/finance/wallets" replace />}
+        />
+        <Route
+          path="budgets"
+          element={<Navigate to="/finance/budgets" replace />}
+        />
+        <Route
+          path="expenses"
+          element={<Navigate to="/finance/expenses" replace />}
+        />
+
         <Route path="habit" element={<HabitPage />} />
         <Route path="notification" element={<NotificationPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

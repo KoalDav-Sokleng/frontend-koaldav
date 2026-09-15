@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -9,18 +9,22 @@ import {
   X,
   AlertTriangle,
   ExternalLink,
+  Wallet,
 } from "lucide-react";
 import { useAuth } from "../auth/hooks/useAuth";
 import { useDashboard } from "./hook/useDashboard";
 import { useProjectGoals } from "../goal/hooks/useProjectGoals";
 import { useSavingGoals } from "../goal/hooks/useSavingGoals";
 import { useTripGoals } from "../goal/hooks/useTripGoals";
+import { useWallets } from "../finance/hooks/useWallets";
+import { useBudgets } from "../finance/hooks/useBudgets";
+import { useFinanceOverview } from "../finance/hooks/useFinanceOverview";
 
 import DashboardStats from "./components/DashboardStats";
 import ActiveGoalsWidget from "./components/ActiveGoalsWidget";
 import HabitsWidget from "./components/HabitsWidget";
-import FinanceMiniWidget from "./components/FinanceMiniWidget";
 import UpcomingDeadlinesWidget from "./components/UpcomingDeadlinesWidget";
+import DashboardFinanceSection from "./components/DashboardFinanceSection";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -56,7 +60,7 @@ export default function DashboardPage() {
     dismissToast,
   } = useDashboard(userId);
 
-  // Fallback / Granular Goal hooks for direct CRUD updates
+  // Goal Hooks
   const {
     allGoals: projectGoals,
     counts: projectCounts,
@@ -78,8 +82,36 @@ export default function DashboardPage() {
     refresh: refreshTrips,
   } = useTripGoals("ACTIVE");
 
+  // Finance Hooks
+  const currentYear = new Date().getFullYear();
+  const {
+    monthlyData,
+    categoryData,
+    expenses: overviewExpenses,
+    totalAmount: financeTotalSpent,
+    loading: overviewLoading,
+    reload: refreshFinanceOverview,
+  } = useFinanceOverview(currentYear, "All");
+
+  const {
+    wallets,
+    totalBalance: totalWalletBalance,
+    defaultWallet,
+    loading: walletsLoading,
+    reload: refreshWallets,
+  } = useWallets();
+
+  const {
+    budgets,
+    totalLimit: totalBudgetLimit,
+    totalSpent: totalBudgetSpent,
+    overbudgetCount,
+    loading: budgetsLoading,
+    reload: refreshBudgets,
+  } = useBudgets();
+
   // Unified refresh handler
-  const handleRefreshAll = async () => {
+  const handleRefreshAll = useCallback(async () => {
     setRefreshing(true);
     try {
       await Promise.allSettled([
@@ -87,25 +119,36 @@ export default function DashboardPage() {
         refreshProjects?.(),
         refreshSavings?.(),
         refreshTrips?.(),
+        refreshFinanceOverview?.(),
+        refreshWallets?.(),
+        refreshBudgets?.(),
       ]);
     } catch (err) {
       console.error("Error refreshing dashboard data", err);
     } finally {
       setTimeout(() => setRefreshing(false), 400);
     }
-  };
+  }, [
+    refreshDashboard,
+    refreshProjects,
+    refreshSavings,
+    refreshTrips,
+    refreshFinanceOverview,
+    refreshWallets,
+    refreshBudgets,
+  ]);
 
-  // Derive consolidated metrics
+  // Consolidated goal metrics
   const activeProjects =
     dashboardData?.activeGoals ||
     projectGoals.filter(
-      (g) => g.status !== "COMPLETED" && g.status !== "MISSED",
+      (g) => g.status !== "COMPLETED" && g.status !== "MISSED"
     );
 
   const activeSavings =
     dashboardData?.activeSavingGoals ||
     savingGoals.filter(
-      (g) => g.status !== "COMPLETED" && g.status !== "MISSED",
+      (g) => g.status !== "COMPLETED" && g.status !== "MISSED"
     );
 
   const activeTripsCount = tripCounts?.ACTIVE || 0;
@@ -131,22 +174,13 @@ export default function DashboardPage() {
     freezes: 0,
   };
 
-  const financeOverview = dashboardData?.financeOverview || {
-    totalAmount: 0,
-    monthlyData: [],
-    categoryData: [],
-    recentExpenses: [],
-  };
-
   const totalSaved =
-    dashboardData?.totalSavedAmount ??
     savingGoals.reduce((sum, g) => sum + (Number(g.currentAmount) || 0), 0) +
-      tripGoals.reduce((sum, g) => sum + (Number(g.saved) || 0), 0);
+    tripGoals.reduce((sum, g) => sum + (Number(g.saved) || 0), 0);
 
   const totalTarget =
-    dashboardData?.totalTargetSavings ??
     savingGoals.reduce((sum, g) => sum + (Number(g.targetAmount) || 0), 0) +
-      tripGoals.reduce((sum, g) => sum + (Number(g.target) || 0), 0);
+    tripGoals.reduce((sum, g) => sum + (Number(g.target) || 0), 0);
 
   const unreadNotifications = dashboardData?.unreadNotifications || [];
   const unreadCount =
@@ -199,7 +233,6 @@ export default function DashboardPage() {
 
       {/* ── 1. Hero Greeting Banner ── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#6C63FF] via-[#5D54F3] to-[#453DB5] p-6 sm:p-8 text-white shadow-lg">
-        {/* Decorative background shapes */}
         <div className="absolute -right-12 -top-12 h-52 w-52 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="absolute -left-12 -bottom-12 h-52 w-52 rounded-full bg-indigo-900/30 blur-2xl pointer-events-none" />
 
@@ -228,12 +261,16 @@ export default function DashboardPage() {
               You have{" "}
               <span className="font-bold underline decoration-amber-300">
                 {totalActiveGoals} active goals
-              </span>{" "}
-              and{" "}
+              </span>
+              ,{" "}
               <span className="font-bold underline decoration-orange-300">
                 {habitsTotalCount - habitsDoneCount} habits remaining
-              </span>{" "}
-              today.
+              </span>
+              , and{" "}
+              <span className="font-bold underline decoration-emerald-300">
+                ${totalWalletBalance.toFixed(0)} total balance
+              </span>
+              .
             </p>
           </div>
 
@@ -259,22 +296,28 @@ export default function DashboardPage() {
               onClick={() => navigate("/finance")}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs sm:text-sm backdrop-blur-md border border-white/20 active:scale-95 transition-all cursor-pointer"
             >
-              <CreditCard className="w-4 h-4" />
-              <span>Add Expense</span>
+              <Wallet className="w-4 h-4" />
+              <span>Manage Finance</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── 2. Top Summary KPI Stats ── */}
+      {/* ── 2. Top Summary KPI Stats (Wallets, Expenses, Budgets, Saving Goals) ── */}
       <DashboardStats
         activeGoalsCount={totalActiveGoals}
         completedGoalsCount={totalCompletedGoals}
         habitsCompletedCount={habitsDoneCount}
         habitsTotalCount={habitsTotalCount}
         streakDays={garden?.streak || 0}
-        monthlySpend={financeOverview.totalAmount || 0}
-        expenseCount={financeOverview.recentExpenses?.length || 0}
+        totalWalletBalance={totalWalletBalance}
+        defaultWalletName={defaultWallet?.name || ""}
+        walletsCount={wallets.length}
+        monthlySpend={financeTotalSpent}
+        expenseCount={overviewExpenses?.length || 0}
+        totalBudgetLimit={totalBudgetLimit}
+        totalBudgetSpent={totalBudgetSpent}
+        overbudgetCount={overbudgetCount}
         totalSaved={totalSaved}
         totalTarget={totalTarget}
         loading={isLoading}
@@ -282,7 +325,7 @@ export default function DashboardPage() {
 
       {/* ── 3. Main Dashboard Grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Ongoing Goals & Finance Analysis (7 cols on lg) */}
+        {/* Left Column: Active Goals (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-6">
           <ActiveGoalsWidget
             projectGoals={projectGoals}
@@ -290,16 +333,9 @@ export default function DashboardPage() {
             tripGoals={tripGoals}
             loading={projectLoading || savingLoading || tripLoading}
           />
-          <FinanceMiniWidget
-            monthlyData={financeOverview.monthlyData}
-            categoryData={financeOverview.categoryData}
-            expenses={financeOverview.recentExpenses}
-            totalAmount={financeOverview.totalAmount}
-            loading={isLoading}
-          />
         </div>
 
-        {/* Right Column: Daily Habits & Upcoming Deadlines (5 cols on lg) */}
+        {/* Right Column: Daily Habits & Upcoming Deadlines (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-6">
           <HabitsWidget
             habits={habits}
@@ -316,6 +352,9 @@ export default function DashboardPage() {
           />
         </div>
       </div>
+
+      {/* ── 4. Comprehensive Full Dashboard Finance Section ── */}
+      <DashboardFinanceSection onDataChanged={handleRefreshAll} />
     </div>
   );
 }

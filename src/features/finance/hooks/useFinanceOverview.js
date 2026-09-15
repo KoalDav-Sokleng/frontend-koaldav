@@ -45,10 +45,16 @@ export function useFinanceOverview(year = 2026, categoryFilter = "All") {
       }
 
       if (expensesRes) {
-        setExpenses(Array.isArray(expensesRes.expenses) ? expensesRes.expenses : (Array.isArray(expensesRes) ? expensesRes : []));
+        setExpenses(
+          Array.isArray(expensesRes.expenses)
+            ? expensesRes.expenses
+            : Array.isArray(expensesRes)
+            ? expensesRes
+            : []
+        );
       }
     } catch (err) {
-      console.error("Failed to load finance data:", err);
+      console.error("Failed to load finance overview:", err);
       setError(err?.message || "Failed to load finance data");
     } finally {
       setLoading(false);
@@ -59,24 +65,32 @@ export function useFinanceOverview(year = 2026, categoryFilter = "All") {
     loadData();
   }, [loadData]);
 
-  const addExpense = useCallback(async (form) => {
-    const payload = {
-      title: form.title,
-      amount: parseFloat(form.amount) || 0,
-      category: form.category,
-      date: form.date,
-      note: form.description || form.note || "",
-    };
+  const addExpense = useCallback(
+    async (form) => {
+      const payload = {
+        title: form.title,
+        amount: parseFloat(form.amount) || 0,
+        category: form.category,
+        date: form.date,
+        note: form.description || form.note || "",
+        ...(form.walletId ? { walletId: Number(form.walletId) } : {}),
+        ...(form.budgetId ? { budgetId: Number(form.budgetId) } : {}),
+      };
 
-    const created = await createExpenseApi(payload);
-    await loadData();
-    return created;
-  }, [loadData]);
+      const created = await createExpenseApi(payload);
+      await loadData();
+      return created;
+    },
+    [loadData]
+  );
 
-  const removeExpense = useCallback(async (id) => {
-    await deleteExpenseApi(id);
-    await loadData();
-  }, [loadData]);
+  const removeExpense = useCallback(
+    async (id) => {
+      await deleteExpenseApi(id);
+      await loadData();
+    },
+    [loadData]
+  );
 
   return {
     expenses,
