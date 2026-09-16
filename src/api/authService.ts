@@ -27,6 +27,7 @@ export const authService = {
     publicPost<ForgotPasswordRequest, string>("/api/auth/forgot-password", body),
   resetPassword: (body: ResetPasswordRequest) =>
     publicPost<ResetPasswordRequest, string>("/api/auth/reset-password", body),
+  getMe: () => apiFetch<AuthResponse>("/api/auth/me"),
 };
 
 export default authService;

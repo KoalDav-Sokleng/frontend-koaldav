@@ -45,12 +45,12 @@ export function useLogin() {
           password: form.password,
         });
 
-        if (result?.otpRequired) {
+        if (result?.token) {
+          navigate("/", { replace: true });
+        } else {
           navigate("/verify-otp", {
             state: { email: normalizedEmail, flow: "login" },
           });
-        } else {
-          navigate("/", { replace: true });
         }
       } catch (err) {
         setError(

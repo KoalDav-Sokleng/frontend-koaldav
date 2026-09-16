@@ -16,17 +16,23 @@ export class ApiError extends Error {
   }
 }
 
-function getToken(): string | null {
-  const token = localStorage.getItem("accessToken");
+export function getToken(): string | null {
+  const token = localStorage.getItem("token") || localStorage.getItem("accessToken");
   if (!token || token === "undefined" || token === "null" || token === "mock-token") {
     return null;
   }
   return token;
 }
 
-function handleUnauthorized(): void {
+export function handleUnauthorized(): void {
+  localStorage.removeItem("token");
   localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
   localStorage.removeItem("authUser");
+  const publicPaths = ["/login", "/register", "/forgot-password", "/reset-password", "/verify-otp"];
+  if (!publicPaths.includes(window.location.pathname)) {
+    window.location.assign("/login");
+  }
 }
 
 export async function apiFetch<T = any>(

@@ -6,10 +6,9 @@ export function useProfile() {
   const { user: authUser, updateUser } = useAuth();
 
   const [profile, setProfile] = useState({
-    fullName: "",
+    firstName: "",
     lastName: "",
     email: "",
-    gender: "",
     avatar: "",
     createdAt: "",
   });
@@ -27,21 +26,41 @@ export function useProfile() {
       const data = await getProfile();
       const res = data?.data ?? data?.user ?? data;
       setProfile({
-        fullName: res?.fullName || res?.name || authUser?.fullName || authUser?.name || "",
-        lastName: res?.lastName || authUser?.lastName || "",
+        firstName:
+          res?.firstName ||
+          res?.fullName?.split(" ")[0] ||
+          authUser?.firstName ||
+          authUser?.name?.split(" ")[0] ||
+          "",
+        lastName:
+          res?.lastName ||
+          (res?.fullName?.split(" ").length > 1
+            ? res?.fullName?.split(" ").slice(1).join(" ")
+            : "") ||
+          authUser?.lastName ||
+          (authUser?.name?.split(" ").length > 1
+            ? authUser?.name?.split(" ").slice(1).join(" ")
+            : "") ||
+          "",
         email: res?.email || authUser?.email || "",
-        gender: res?.gender || authUser?.gender || "prefer_not_to_say",
         avatar: res?.avatar || authUser?.avatar || "",
         createdAt: res?.createdAt || authUser?.createdAt || new Date().toISOString(),
       });
     } catch (err) {
-      console.warn("Could not fetch /api/profile, using current auth user state:", err?.message);
+      console.warn("Using local auth user state for profile:", err?.message);
       // Graceful fallback from AuthContext
       setProfile({
-        fullName: authUser?.fullName || authUser?.name || "",
-        lastName: authUser?.lastName || "",
+        firstName:
+          authUser?.firstName ||
+          authUser?.name?.split(" ")[0] ||
+          "",
+        lastName:
+          authUser?.lastName ||
+          (authUser?.name?.split(" ").length > 1
+            ? authUser?.name?.split(" ").slice(1).join(" ")
+            : "") ||
+          "",
         email: authUser?.email || "",
-        gender: authUser?.gender || "prefer_not_to_say",
         avatar: authUser?.avatar || "",
         createdAt: authUser?.createdAt || new Date().toISOString(),
       });
@@ -73,11 +92,10 @@ export function useProfile() {
         setProfile(merged);
         if (updateUser) {
           updateUser({
-            name: `${merged.fullName} ${merged.lastName}`.trim() || merged.fullName,
-            fullName: merged.fullName,
+            firstName: merged.firstName,
             lastName: merged.lastName,
+            name: `${merged.firstName} ${merged.lastName}`.trim() || merged.firstName,
             email: merged.email,
-            gender: merged.gender,
             avatar: merged.avatar,
           });
         }

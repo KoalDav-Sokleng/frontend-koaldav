@@ -1,7 +1,20 @@
 import authService from "../../../api/authService";
+import { apiFetch } from "../../../api/client";
 
-function toUser({ email, firstName, lastName }) {
-  return { email, firstName, lastName };
+function toUser(res) {
+  if (!res) return null;
+  return {
+    id: res.id,
+    email: res.email,
+    firstName: res.firstName,
+    lastName: res.lastName,
+    name:
+      res.firstName && res.lastName
+        ? `${res.firstName} ${res.lastName}`
+        : res.firstName || res.name || res.email?.split("@")[0],
+    avatar: res.avatar,
+    createdAt: res.createdAt,
+  };
 }
 
 export async function login(credentials) {
@@ -27,9 +40,35 @@ export const forgotPassword = (email) => authService.forgotPassword({ email });
 
 export const resetPassword = (payload) => authService.resetPassword(payload);
 
-export function getCurrentUser() {
-  const storedUser = localStorage.getItem("authUser");
-  return Promise.resolve(storedUser ? { user: JSON.parse(storedUser) } : null);
+export async function getCurrentUser() {
+  try {
+    const data = await authService.getMe();
+    const user = toUser(data?.user ?? data);
+    if (user) {
+      localStorage.setItem("authUser", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
+      return { user };
+    }
+  } catch (err) {
+    // If /api/auth/me fails, try /api/profile as fallback
+    try {
+      const prof = await apiFetch("/profile");
+      const user = toUser(prof?.data ?? prof?.user ?? prof);
+      if (user) {
+        localStorage.setItem("authUser", JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
+        return { user };
+      }
+    } catch {
+      // If network fails or offline, read cached user from localStorage
+      const stored = localStorage.getItem("authUser") || localStorage.getItem("user");
+      if (stored) {
+        return { user: JSON.parse(stored) };
+      }
+      throw err;
+    }
+  }
+  return null;
 }
 
 export function logout() {

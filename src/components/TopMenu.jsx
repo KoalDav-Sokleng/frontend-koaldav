@@ -2,6 +2,7 @@ import { Menu } from "lucide-react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import NotificationBell from "../features/notification/components/NotificationBell";
 import { useAuth } from "../features/auth/hooks/useAuth";
+import UserAvatar from "./UserAvatar";
 
 const GOAL_SUB_LINKS = [
   { to: "/goal", label: "Project", end: true },
@@ -56,18 +57,14 @@ export default function TopMenu({ onMenuClick }) {
           <NotificationBell />
           <Link
             to="/profile"
-            className={`flex items-center gap-2 p-1 rounded-full ring-2 transition-all ${
+            className={`flex items-center gap-2 p-0.5 rounded-full ring-2 transition-all ${
               isProfileActive
                 ? "ring-[#6C63FF] shadow-sm shadow-[#6C63FF]/20"
                 : "ring-transparent hover:ring-[#6C63FF]/40"
             }`}
             title="Go to Profile"
           >
-            <img
-              src={user?.avatar || "https://i.pravatar.cc/40"}
-              alt="Profile"
-              className="w-8 h-8 rounded-full object-cover"
-            />
+            <UserAvatar user={user} className="w-8 h-8 text-xs rounded-full" />
           </Link>
         </div>
       </div>

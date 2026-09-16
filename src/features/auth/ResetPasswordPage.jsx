@@ -12,13 +12,15 @@ import {
 import AuthLayout from "./AuthLayout";
 import OtpInput from "./components/OtpInput";
 import PasswordStrengthMeter from "./components/PasswordStrengthMeter";
-import { resetPassword, resendOtp } from "./api/authApi";
+import { resetPassword, resendOtp, login } from "./api/authApi";
 import { isValidGmail, validatePassword } from "./utils/authValidation";
 import AuthThemeToggle from "./components/AuthThemeToggle";
+import { useAuthContext } from "../../context/AuthContext";
 
 export default function ResetPasswordPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { setUser } = useAuthContext();
 
   const [email] = useState(
     location.state?.email || sessionStorage.getItem("resetEmail") || "",
@@ -95,14 +97,61 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     try {
-      await resetPassword({
+      const res = await resetPassword({
         email: normalizedEmail,
         otpCode: otpCode.trim(),
         newPassword,
       });
+
+      // Clear reset session storage
       sessionStorage.removeItem("resetEmail");
-      window.alert("Password reset successfully! You can now log in.");
-      navigate("/login", { replace: true });
+      sessionStorage.removeItem("otpEmail");
+      sessionStorage.removeItem("otpFlow");
+
+      // Extract token if returned by backend reset-password endpoint
+      const token =
+        res?.token ||
+        res?.accessToken ||
+        (typeof res === "object" && res?.data?.token);
+
+      const userData = res?.user ||
+        (typeof res === "object" && res?.data?.user) || {
+          email: normalizedEmail,
+        };
+
+      if (token) {
+        localStorage.setItem("accessToken", token);
+        localStorage.setItem("token", token);
+        localStorage.setItem("authUser", JSON.stringify(userData));
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+      } else {
+        // Fallback: auto-login with the newly created password
+        try {
+          const loginData = await login({
+            email: normalizedEmail,
+            password: newPassword,
+          });
+          const loginToken =
+            loginData?.token ||
+            loginData?.accessToken ||
+            loginData?.data?.token;
+          if (loginToken) {
+            localStorage.setItem("accessToken", loginToken);
+            localStorage.setItem("token", loginToken);
+            const user = loginData.user || loginData.data?.user || userData;
+            localStorage.setItem("authUser", JSON.stringify(user));
+            localStorage.setItem("user", JSON.stringify(user));
+            setUser(user);
+          }
+        } catch {
+          // If login requires anything else, fallback user state
+          setUser(userData);
+        }
+      }
+
+      // Direct redirection to dashboard without requiring another OTP
+      navigate("/", { replace: true });
     } catch (requestError) {
       setError(
         requestError.message ||

@@ -5,6 +5,7 @@ import { CiHome, CiTrophy, CiCalendar, CiUser } from "react-icons/ci";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import ThemeToggle from "./ThemeToggle";
+import UserAvatar from "./UserAvatar";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: CiHome, end: true },
@@ -109,12 +110,15 @@ export default function SideBar({ onNavigate }) {
         </button>
 
         <div className="flex items-center gap-3 mt-6 p-2 rounded-2xl hover:bg-purple-100/50 dark:hover:bg-[#1E1B2E] transition-colors cursor-pointer group">
-          <img
-            src={user?.avatar || "https://i.pravatar.cc/40"}
-            alt="User avatar"
+          <div
             onClick={handleProfileClick}
-            className="w-10 h-10 rounded-full object-cover ring-2 ring-[#6C63FF]/30 group-hover:scale-105 transition-transform"
-          />
+            className="group-hover:scale-105 transition-transform"
+          >
+            <UserAvatar
+              user={user}
+              className="w-10 h-10 text-sm rounded-full ring-2 ring-[#6C63FF]/30"
+            />
+          </div>
           <div className="min-w-0 flex-1" onClick={handleProfileClick}>
             <h3 className="font-semibold text-sm truncate dark:text-white group-hover:text-[#6C63FF] transition-colors">
               {userDisplayName}

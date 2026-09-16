@@ -30,7 +30,9 @@ export default function ForgotPasswordPage() {
 
     try {
       await forgotPassword(normalizedEmail);
-      navigate("/reset-password", { state: { email: normalizedEmail } });
+      navigate("/verify-otp", {
+        state: { email: normalizedEmail, flow: "forgot-password" },
+      });
     } catch (requestError) {
       setError(requestError.message || "Unable to send a reset code.");
     } finally {
