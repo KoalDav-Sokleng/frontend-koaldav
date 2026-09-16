@@ -11,7 +11,13 @@ const http = axios.create({
 // Attach JWT token automatically
 http.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
-  if (token && config.requiresAuth !== false) {
+  if (
+    token &&
+    token !== "undefined" &&
+    token !== "null" &&
+    token !== "mock-token" &&
+    config.requiresAuth !== false
+  ) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   // If config.url starts with /api/, strip it since baseURL already includes /api
@@ -23,15 +29,18 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
-// Centralized error + 401 handling
+// Centralized error + 401/403 handling
 http.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 || error.response?.status === 403) {
       localStorage.removeItem("accessToken");
     }
     const message =
-      error.response?.data?.message || error.message || "Request failed";
+      error.response?.data?.message ||
+      (error.response?.status === 403
+        ? "Access forbidden (403): You may need to log in or your session has expired."
+        : error.message || "Request failed");
     return Promise.reject(new Error(message));
   }
 );

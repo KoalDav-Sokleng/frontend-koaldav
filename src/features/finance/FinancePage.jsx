@@ -177,14 +177,24 @@ export default function FinancePage() {
 
       {/* ── Error Banner ── */}
       {overviewError && (
-        <div className="mx-4 sm:mx-8 mt-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 text-xs text-rose-600 dark:text-rose-400 flex items-center justify-between">
+        <div className="mx-4 sm:mx-8 mt-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 text-xs text-rose-600 dark:text-rose-400 flex items-center justify-between gap-3">
           <span>Connection notice: {String(overviewError)}</span>
-          <button
-            onClick={handleRefreshAll}
-            className="font-semibold underline ml-2 cursor-pointer"
-          >
-            Retry
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            {String(overviewError).includes("403") && (
+              <button
+                onClick={() => navigate("/login")}
+                className="font-bold underline text-[#6C63FF] dark:text-[#A49DFF] cursor-pointer"
+              >
+                Sign In
+              </button>
+            )}
+            <button
+              onClick={handleRefreshAll}
+              className="font-semibold underline cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       )}
 

@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import NotificationBell from "../features/notification/components/NotificationBell";
+import { useAuth } from "../features/auth/hooks/useAuth";
 
 const GOAL_SUB_LINKS = [
   { to: "/goal", label: "Project", end: true },
@@ -16,8 +17,10 @@ const subLinkClass = ({ isActive }) =>
   }`;
 
 export default function TopMenu({ onMenuClick }) {
+  const { user } = useAuth();
   const location = useLocation();
   const isGoalSection = location.pathname.startsWith("/goal");
+  const isProfileActive = location.pathname.startsWith("/profile");
 
   return (
     <div className="flex w-full flex-col bg-white shadow-sm transition-colors border-b border-gray-100 dark:border-[#242430] dark:bg-[#0F0F14]">
@@ -48,9 +51,24 @@ export default function TopMenu({ onMenuClick }) {
           )}
         </div>
 
-        {/* Right side utilities: Notification Bell anchored on far right */}
+        {/* Right side utilities: Notification Bell & Profile Avatar */}
         <div className="flex items-center gap-3 ml-auto">
           <NotificationBell />
+          <Link
+            to="/profile"
+            className={`flex items-center gap-2 p-1 rounded-full ring-2 transition-all ${
+              isProfileActive
+                ? "ring-[#6C63FF] shadow-sm shadow-[#6C63FF]/20"
+                : "ring-transparent hover:ring-[#6C63FF]/40"
+            }`}
+            title="Go to Profile"
+          >
+            <img
+              src={user?.avatar || "https://i.pravatar.cc/40"}
+              alt="Profile"
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          </Link>
         </div>
       </div>
 

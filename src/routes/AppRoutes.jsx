@@ -13,6 +13,7 @@ import SavingTab from "../features/goal/components/SavingTab";
 import FinancePage from "../features/finance/FinancePage";
 import HabitPage from "../features/habit/components/HabitPage";
 import NotificationPage from "../features/notification/NotificationPage";
+import ProfilePage from "../features/profile/ProfilePage";
 
 function GoalRedirect({ baseRoute }) {
   const { id } = useParams();
@@ -71,6 +72,7 @@ function AppRoutes() {
 
         <Route path="habit" element={<HabitPage />} />
         <Route path="notification" element={<NotificationPage />} />
+        <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
