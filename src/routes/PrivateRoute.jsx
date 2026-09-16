@@ -6,7 +6,7 @@ export default function PrivateRoute() {
 
   if (loading) {
     return (
-      <div className="w-full h-screen flex items-center justify-center text-gray-400 text-sm">
+      <div className="flex h-screen w-full items-center justify-center text-sm text-slate-400">
         Loading...
       </div>
     );

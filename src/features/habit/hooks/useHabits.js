@@ -30,8 +30,7 @@ export function todayStr() {
 /**
  * Owns all habit + garden data for the page: fetches on mount,
  * exposes mutation helpers that call the API and then reconcile
- * local state from the server's response. No streak/growth math
- * happens in this hook — it only ever stores what the backend sends.
+ * local state from the server's response.
  */
 export function useHabits() {
   const [habits, setHabits] = useState([]);
@@ -43,11 +42,18 @@ export function useHabits() {
     setLoading(true);
     setError(null);
     try {
-      const [habitsRes, gardenRes] = await Promise.all([getHabits(), getGarden()]);
-      setHabits(Array.isArray(habitsRes) ? habitsRes : []);
-      setGarden(gardenRes ?? DEFAULT_GARDEN);
+      const [habitsRes, gardenRes] = await Promise.allSettled([
+        getHabits(),
+        getGarden(),
+      ]);
+      if (habitsRes.status === "fulfilled") {
+        setHabits(Array.isArray(habitsRes.value) ? habitsRes.value : []);
+      }
+      if (gardenRes.status === "fulfilled") {
+        setGarden(gardenRes.value ?? DEFAULT_GARDEN);
+      }
     } catch (err) {
-      setError(err);
+      setError(err?.message || "Failed to load habits");
     } finally {
       setLoading(false);
     }
@@ -74,18 +80,17 @@ export function useHabits() {
     setHabits((prev) => prev.filter((h) => h.id !== id));
   }, []);
 
-  /**
-   * Toggles a habit for today and reconciles BOTH the habit and the
-   * garden from the server's response. Returns the full response so
-   * the calling component can decide whether to fire confetti/the
-   * celebration modal (via `justReachedPerfectDay`) without having
-   * to recompute anything itself.
-   */
-  const toggleHabit = useCallback(async (id) => {
-    const date = todayStr();
+  const toggleHabit = useCallback(async (id, optionalDate) => {
+    const date = optionalDate || todayStr();
     const res = await toggleHabitDone(id, date);
-    setHabits((prev) => prev.map((h) => (h.id === id ? res.habit : h)));
-    if (res.garden) setGarden(res.garden);
+    if (res?.habit) {
+      setHabits((prev) => prev.map((h) => (h.id === id ? res.habit : h)));
+    } else if (res) {
+      setHabits((prev) => prev.map((h) => (h.id === id ? res : h)));
+    }
+    if (res?.garden) {
+      setGarden(res.garden);
+    }
     return res;
   }, []);
 
@@ -102,6 +107,7 @@ export function useHabits() {
     loading,
     error,
     reload: loadAll,
+    refresh: loadAll,
     addHabit,
     editHabit,
     removeHabit,
@@ -109,3 +115,5 @@ export function useHabits() {
     useFreezeToday,
   };
 }
+
+export default useHabits;

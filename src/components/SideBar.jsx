@@ -1,4 +1,5 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import Logo from "../assets/Koaldavpic.png";
 import { CiHome, CiTrophy, CiCalendar, CiUser } from "react-icons/ci";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
@@ -28,6 +29,35 @@ export default function SideBar({ onNavigate }) {
     onNavigate?.();
     navigate("/profile");
   };
+
+  const handleLogout = async (e) => {
+    e?.stopPropagation();
+    const result = await Swal.fire({
+      title: "Log out?",
+      text: "Are you sure you want to sign out?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, log out",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#6C63FF",
+      cancelButtonColor: "#d1d5db",
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      logout();
+      navigate("/login");
+    }
+  };
+
+  const userDisplayName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.fullName ||
+        user?.name ||
+        user?.username ||
+        user?.email?.split("@")[0] ||
+        "User";
 
   return (
     <aside className="w-full h-full bg-[#F4F2FF] dark:bg-[#0F0F14] flex flex-col justify-between p-5 overflow-y-auto transition-colors">
@@ -87,17 +117,14 @@ export default function SideBar({ onNavigate }) {
           />
           <div className="min-w-0 flex-1" onClick={handleProfileClick}>
             <h3 className="font-semibold text-sm truncate dark:text-white group-hover:text-[#6C63FF] transition-colors">
-              {user?.name || user?.username || "Guest"}
+              {userDisplayName}
             </h3>
             <span className="text-[11px] text-[#6C63FF] dark:text-[#A49DFF] font-medium">
               View Profile
             </span>
           </div>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              logout();
-            }}
+            onClick={handleLogout}
             title="Log out"
             className="text-xs text-gray-400 hover:text-rose-500 transition-colors cursor-pointer p-1"
           >

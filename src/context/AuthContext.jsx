@@ -23,13 +23,19 @@ export function AuthProvider({ children }) {
     }
     authApi
       .getCurrentUser()
-      .then((data) => setUser(data.user ?? data))
-      .catch(() => localStorage.removeItem("accessToken"))
+      .then((data) => setUser(data?.user ?? data))
+      .catch(() => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("authUser");
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const login = useCallback(async (credentials) => {
     const data = await authApi.login(credentials);
+    if (data?.otpRequired) {
+      return data;
+    }
     const token =
       data?.token ||
       data?.accessToken ||
@@ -40,7 +46,29 @@ export function AuthProvider({ children }) {
       localStorage.setItem("accessToken", token);
     }
     const userData = data?.user || data?.data?.user || data;
-    setUser(userData);
+    if (userData && token) {
+      localStorage.setItem("authUser", JSON.stringify(userData));
+      setUser(userData);
+    }
+    return data;
+  }, []);
+
+  const verifyLoginOtp = useCallback(async (payload) => {
+    const data = await authApi.verifyLoginOtp(payload);
+    const token =
+      data?.token ||
+      data?.accessToken ||
+      data?.jwt ||
+      data?.data?.token ||
+      data?.data?.accessToken;
+    if (token) {
+      localStorage.setItem("accessToken", token);
+    }
+    const userData = data?.user || data?.data?.user || data;
+    if (userData) {
+      localStorage.setItem("authUser", JSON.stringify(userData));
+      setUser(userData);
+    }
     return userData;
   }, []);
 
@@ -56,8 +84,11 @@ export function AuthProvider({ children }) {
       localStorage.setItem("accessToken", token);
     }
     const userData = data?.user || data?.data?.user || data;
-    setUser(userData);
-    return userData;
+    if (userData && token) {
+      localStorage.setItem("authUser", JSON.stringify(userData));
+      setUser(userData);
+    }
+    return data;
   }, []);
 
   const logout = useCallback(async () => {
@@ -65,12 +96,17 @@ export function AuthProvider({ children }) {
       await authApi.logout();
     } finally {
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("authUser");
       setUser(null);
     }
   }, []);
 
   const updateUser = useCallback((updatedData) => {
-    setUser((prev) => (prev ? { ...prev, ...updatedData } : updatedData));
+    setUser((prev) => {
+      const next = prev ? { ...prev, ...updatedData } : updatedData;
+      localStorage.setItem("authUser", JSON.stringify(next));
+      return next;
+    });
   }, []);
 
   const value = {
@@ -80,6 +116,7 @@ export function AuthProvider({ children }) {
     loading,
     isAuthenticated: !!user,
     login,
+    verifyLoginOtp,
     register,
     logout,
   };
