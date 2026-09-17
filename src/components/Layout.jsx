@@ -27,8 +27,8 @@ export default function Layout() {
               className="absolute inset-0 bg-black/40"
               onClick={() => setMobileOpen(false)}
             />
-            <div className="absolute inset-y-0 left-0 w-[80%] max-w-[300px] h-full shadow-xl">
-              <div className="flex justify-end p-3 bg-[#F4F2FF] dark:bg-[#0F0F14] transition-colors">
+            <div className="absolute inset-y-0 left-0 w-[80%] max-w-[300px] h-full shadow-2xl flex flex-col bg-[#F4F2FF] dark:bg-[#0F0F14]">
+              <div className="flex justify-end p-3 bg-[#F4F2FF] dark:bg-[#0F0F14] transition-colors shrink-0">
                 <button
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close menu"
@@ -37,7 +37,9 @@ export default function Layout() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <SideBar onNavigate={() => setMobileOpen(false)} />
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <SideBar onNavigate={() => setMobileOpen(false)} />
+              </div>
             </div>
           </div>
         )}

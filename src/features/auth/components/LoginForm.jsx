@@ -7,6 +7,7 @@ export default function LoginForm() {
   const {
     form,
     error,
+    successMessage,
     loading,
     showPassword,
     handleChange,
@@ -133,6 +134,14 @@ export default function LoginForm() {
             Forgot password?
           </Link>
         </div>
+
+        {successMessage && (
+          <div className="animate-fade-in-up rounded-2xl border border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/40 px-4 py-3 shadow-sm">
+            <p className="text-xs sm:text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+              {successMessage}
+            </p>
+          </div>
+        )}
 
         {error && (
           <div className="animate-fade-in-up rounded-2xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/40 px-4 py-3 shadow-sm">

@@ -129,15 +129,14 @@ function ProgressBar({
 }) {
   return (
     <div
-      className="w-full rounded-full overflow-hidden"
-      style={{
-        height,
-        backgroundColor: isMissed
-          ? "#FDEAE8"
+      className={`w-full rounded-full overflow-hidden ${
+        isMissed
+          ? "bg-[#FDEAE8] dark:bg-rose-950/40"
           : isCompleted
-            ? "#E7F8F0"
-            : "#EDEAFB",
-      }}
+            ? "bg-[#E7F8F0] dark:bg-emerald-950/40"
+            : "bg-[#EDEAFB] dark:bg-[#242430]"
+      }`}
+      style={{ height }}
     >
       <div
         className="h-full rounded-full transition-all duration-700 ease-out"
@@ -385,14 +384,13 @@ function SavingGoalCard({ goal, onOpen, index }) {
         {/* Left */}
         <div className="flex items-center gap-4 md:w-64 shrink-0">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: isMissed
-                ? "#FDEAE8"
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+              isMissed
+                ? "bg-[#FDEAE8] dark:bg-rose-950/50"
                 : isCompleted
-                  ? "#E7F8F0"
-                  : "#EFEAFF",
-            }}
+                  ? "bg-[#E7F8F0] dark:bg-emerald-950/50"
+                  : "bg-[#EFEAFF] dark:bg-[#242430]"
+            }`}
           >
             <GoalIcon
               type={goal.icon}
@@ -409,12 +407,14 @@ function SavingGoalCard({ goal, onOpen, index }) {
             <p className="font-semibold truncate text-slate-900 dark:text-white">
               {goal.title}
             </p>
-            <p className="text-xs mt-0.5 text-slate-500">
+            <p className="text-xs mt-0.5 text-slate-500 dark:text-slate-400">
               Target {formatCurrency(goal.targetAmount)}
             </p>
             <p
               className={`text-xs flex items-center gap-1 mt-0.5 ${
-                isMissed ? "font-medium text-rose-600" : "text-slate-400"
+                isMissed
+                  ? "font-medium text-rose-600 dark:text-rose-400"
+                  : "text-slate-400 dark:text-slate-400"
               }`}
             >
               <Calendar size={11} /> {formatDate(goal.deadline)}
@@ -426,21 +426,21 @@ function SavingGoalCard({ goal, onOpen, index }) {
         {/* Middle */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1.5 text-xs font-medium">
-            <span className="text-slate-500">
+            <span className="text-slate-500 dark:text-slate-400">
               Current {formatCurrency(goal.currentAmount)}
             </span>
             <span
               className={`font-semibold ${
                 isMissed
-                  ? "text-rose-600"
+                  ? "text-rose-600 dark:text-rose-400"
                   : isCompleted
-                    ? "text-emerald-600"
-                    : "text-indigo-600"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-indigo-600 dark:text-[#A49DFF]"
               }`}
             >
               {Math.round(percent)}%
             </span>
-            <span className="text-slate-500">
+            <span className="text-slate-500 dark:text-slate-400">
               Target {formatCurrency(goal.targetAmount)}
             </span>
           </div>
@@ -459,7 +459,7 @@ function SavingGoalCard({ goal, onOpen, index }) {
               e.stopPropagation();
               onOpen(goal.id);
             }}
-            className="inline-flex items-center gap-1 text-sm font-semibold transition-transform duration-150 hover:translate-x-0.5 text-indigo-600"
+            className="inline-flex items-center gap-1 text-sm font-semibold transition-transform duration-150 hover:translate-x-0.5 text-indigo-600 dark:text-[#A49DFF]"
           >
             View Details <ChevronRight size={15} />
           </button>
@@ -1418,7 +1418,7 @@ export default function SavingsPage() {
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
                   Savings Goals
                 </h1>
-                <p className="text-sm mt-1 text-slate-500">
+                <p className="text-sm mt-1 text-slate-500 dark:text-slate-400">
                   Track your personal saving targets and monitor deposit
                   progress.
                 </p>
@@ -1431,7 +1431,7 @@ export default function SavingsPage() {
             </div>
 
             {/* 3-Tab Status Navigation */}
-            <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+            <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
               {STATUS_TABS.map((tab) => {
                 const isActive = status === tab.id;
                 const Icon = tab.icon;
@@ -1459,8 +1459,8 @@ export default function SavingsPage() {
                         isActive
                           ? "bg-white/20 text-white"
                           : isMissedTab && count > 0
-                            ? "bg-rose-100 text-rose-700"
-                            : "bg-slate-100 text-slate-600"
+                            ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+                            : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                       }`}
                     >
                       {count}
@@ -1477,7 +1477,7 @@ export default function SavingsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search saving goal title..."
-                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white"
+                className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white dark:placeholder:text-slate-500"
               />
             </div>
 
@@ -1486,20 +1486,18 @@ export default function SavingsPage() {
             {/* List / Loading / Empty */}
             {loading ? (
               <div
-                className="bg-white rounded-3xl dark:bg-[#17171F]"
+                className="bg-white rounded-3xl dark:bg-[#17171F] dark:border dark:border-slate-700"
                 style={{
                   boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
-                  border: `1px solid ${COLORS.border}`,
                 }}
               >
                 <LoadingState />
               </div>
             ) : filteredGoals.length === 0 ? (
               <div
-                className="bg-white rounded-3xl dark:bg-[#17171F]"
+                className="bg-white rounded-3xl dark:bg-[#17171F] dark:border dark:border-slate-700"
                 style={{
                   boxShadow: "0 2px 18px -6px rgba(76,60,140,0.10)",
-                  border: `1px solid ${COLORS.border}`,
                 }}
               >
                 <EmptyState

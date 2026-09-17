@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     setError("");
     setMessage("");
-    const normalizedEmail = email.trim();
+    const normalizedEmail = email.trim().toLowerCase();
 
     if (!isValidGmail(normalizedEmail)) {
       setError(

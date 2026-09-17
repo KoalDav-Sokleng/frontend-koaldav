@@ -52,7 +52,8 @@ export default function VerifyOtpPage() {
       return;
     }
 
-    if (!email) {
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    if (!normalizedEmail) {
       setError("Email address missing. Please start again.");
       return;
     }
@@ -61,15 +62,24 @@ export default function VerifyOtpPage() {
     try {
       if (flow === "login") {
         // Verify login 2FA OTP and log user in
-        await verifyLoginOtp({ email, otpCode });
+        await verifyLoginOtp({
+          email: normalizedEmail,
+          otpCode: otpCode.trim(),
+        });
         sessionStorage.removeItem("otpEmail");
         sessionStorage.removeItem("otpFlow");
         navigate("/", { replace: true });
       } else {
         // Forgot password flow: Verify OTP then proceed to Reset Password screen
-        await verifyOtp({ email, otpCode });
+        await verifyOtp({ email: normalizedEmail, otpCode: otpCode.trim() });
+        sessionStorage.setItem("resetEmail", normalizedEmail);
+        sessionStorage.setItem("resetOtpCode", otpCode.trim());
         navigate("/reset-password", {
-          state: { email, otpCode, verified: true },
+          state: {
+            email: normalizedEmail,
+            otpCode: otpCode.trim(),
+            verified: true,
+          },
           replace: true,
         });
       }

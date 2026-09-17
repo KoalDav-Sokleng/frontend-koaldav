@@ -1,8 +1,12 @@
 import type { ApiErrorResponse } from "./types";
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, "").replace(/\/api$/, "") ||
-  "http://localhost:8081";
+export const API_BASE_URL = (() => {
+  const envUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "").replace(/\/api$/, "");
+  if (envUrl && !envUrl.includes("8080")) {
+    return envUrl;
+  }
+  return "http://localhost:8081";
+})();
 
 export class ApiError extends Error {
   status: number;
@@ -82,13 +86,26 @@ export async function apiFetch<T = any>(
 
   if (!response.ok) {
     const details = typeof data === "object" && data !== null ? data : undefined;
+    let validationMsg = "";
+    if (details?.errors && typeof details.errors === "object") {
+      const errorValues = Object.values(details.errors);
+      if (errorValues.length > 0) {
+        validationMsg = errorValues
+          .map((v) => (typeof v === "object" && v !== null ? JSON.stringify(v) : String(v)))
+          .join(". ");
+      }
+    }
+
     const message =
       (typeof data === "string" && data.trim()) ||
+      validationMsg ||
       details?.message ||
       details?.error ||
-      (response.status === 403
-        ? "Access forbidden (403): You may need to log in or your session has expired."
-        : `Request failed with status ${response.status}`);
+      details?.msg ||
+      details?.errorMessage ||
+      details?.detail ||
+      details?.title ||
+      `Request failed with status ${response.status}`;
     throw new ApiError(message, response.status, details);
   }
 

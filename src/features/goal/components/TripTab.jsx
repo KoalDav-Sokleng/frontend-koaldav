@@ -79,7 +79,9 @@ function ProgressBar({ percent, size = "md" }) {
   const h = size === "lg" ? "h-3" : "h-2";
   const capped = Math.min(100, Math.max(0, percent || 0));
   return (
-    <div className={`w-full bg-slate-100 rounded-full ${h} overflow-hidden`}>
+    <div
+      className={`w-full bg-slate-100 dark:bg-slate-700 rounded-full ${h} overflow-hidden`}
+    >
       <div
         className={`bg-gradient-to-r from-indigo-500 to-blue-500 ${h} rounded-full transition-all duration-500`}
         style={{ width: `${capped}%` }}
@@ -874,7 +876,7 @@ export default function TripTab() {
   return (
     <div className="min-h-full bg-slate-50 p-6 sm:p-10 dark:bg-[#0F0F14]">
       {error && (
-        <div className="max-w-5xl mx-auto mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-sm">
+        <div className="max-w-5xl mx-auto mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 dark:bg-rose-950/40 dark:border-rose-900/50 dark:text-rose-400 text-sm">
           {error}
         </div>
       )}
@@ -883,7 +885,7 @@ export default function TripTab() {
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <p className="text-xs font-semibold text-indigo-600 tracking-wide flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-indigo-600 dark:text-[#A49DFF] tracking-wide flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> ADVENTURE AWAITS
               </p>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1 dark:text-white">
@@ -892,14 +894,14 @@ export default function TripTab() {
             </div>
             <button
               onClick={openCreate}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shrink-0 self-start md:self-auto"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors shrink-0 self-start md:self-auto shadow-md"
             >
               <Plus className="w-4 h-4" /> Create Trip Goal
             </button>
           </div>
 
           {/* 3-Tab Status Navigation */}
-          <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+          <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
             {STATUS_TABS.map((tab) => {
               const isActive = status === tab.id;
               const Icon = tab.icon;
@@ -924,8 +926,8 @@ export default function TripTab() {
                       isActive
                         ? "bg-white/20 text-white"
                         : isMissedTab && count > 0
-                          ? "bg-rose-100 text-rose-700"
-                          : "bg-slate-100 text-slate-600"
+                          ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+                          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                     }`}
                   >
                     {count}

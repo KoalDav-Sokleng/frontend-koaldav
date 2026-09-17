@@ -29,7 +29,7 @@ export default function RegisterForm() {
     e.preventDefault();
     setError("");
 
-    const normalizedEmail = form.email.trim();
+    const normalizedEmail = form.email.trim().toLowerCase();
     if (!isValidGmail(normalizedEmail)) {
       setError(
         "Email must be a valid @gmail.com address (e.g. example@gmail.com).",

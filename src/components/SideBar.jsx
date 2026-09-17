@@ -1,7 +1,7 @@
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Logo from "../assets/Koaldavpic.png";
-import { CiHome, CiTrophy, CiCalendar, CiUser } from "react-icons/ci";
+import { CiHome, CiTrophy, CiCalendar } from "react-icons/ci";
 import { HiOutlineCurrencyDollar } from "react-icons/hi2";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import ThemeToggle from "./ThemeToggle";
@@ -12,7 +12,6 @@ const NAV_ITEMS = [
   { to: "/goal", label: "Goal", icon: CiTrophy },
   { to: "/finance", label: "Finance Overview", icon: HiOutlineCurrencyDollar },
   { to: "/habit", label: "Habit", icon: CiCalendar },
-  { to: "/profile", label: "Profile", icon: CiUser },
 ];
 
 const linkClass = ({ isActive }) =>
@@ -61,7 +60,7 @@ export default function SideBar({ onNavigate }) {
         "User";
 
   return (
-    <aside className="w-full h-full bg-[#F4F2FF] dark:bg-[#0F0F14] flex flex-col justify-between p-5 overflow-y-auto transition-colors">
+    <aside className="w-full h-full bg-[#F4F2FF] dark:bg-[#0F0F14] flex flex-col justify-between p-5 pb-12 sm:pb-6 overflow-y-auto transition-colors">
       <div>
         <div className="flex items-center justify-between mb-10">
           <Link to="/" className="flex items-center">
@@ -101,18 +100,11 @@ export default function SideBar({ onNavigate }) {
         </nav>
       </div>
 
-      <div>
-        <button
-          onClick={() => navigate("/goal")}
-          className="w-full bg-[#6C63FF] text-white py-3 rounded-xl font-medium hover:bg-[#5B52E6] dark:hover:bg-[#7C73FF] transition-colors cursor-pointer"
-        >
-          Start Sprint
-        </button>
-
-        <div className="flex items-center gap-3 mt-6 p-2 rounded-2xl hover:bg-purple-100/50 dark:hover:bg-[#1E1B2E] transition-colors cursor-pointer group">
+      <div className="pt-6 mb-2 sm:mb-0">
+        <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-white/60 dark:bg-[#151520] hover:bg-purple-100/50 dark:hover:bg-[#1E1B2E] transition-colors cursor-pointer group shadow-xs border border-purple-100/40 dark:border-white/5">
           <div
             onClick={handleProfileClick}
-            className="group-hover:scale-105 transition-transform"
+            className="group-hover:scale-105 transition-transform shrink-0"
           >
             <UserAvatar
               user={user}
@@ -130,7 +122,7 @@ export default function SideBar({ onNavigate }) {
           <button
             onClick={handleLogout}
             title="Log out"
-            className="text-xs text-gray-400 hover:text-rose-500 transition-colors cursor-pointer p-1"
+            className="text-xs text-gray-400 hover:text-rose-500 transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 shrink-0"
           >
             Log out
           </button>

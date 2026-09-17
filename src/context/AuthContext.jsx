@@ -20,7 +20,14 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    const token =
+      localStorage.getItem("accessToken") || localStorage.getItem("token");
+    const stored =
+      localStorage.getItem("authUser") || localStorage.getItem("user");
+    if (!token || token === "undefined" || token === "null") return false;
+    return !stored;
+  });
 
   // On first load, if we have a token, fetch the current user from backend
   useEffect(() => {
@@ -40,12 +47,14 @@ export function AuthProvider({ children }) {
           localStorage.setItem("user", JSON.stringify(data.user));
         }
       })
-      .catch(() => {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("token");
-        localStorage.removeItem("authUser");
-        localStorage.removeItem("user");
-        setUser(null);
+      .catch((err) => {
+        if (err?.status === 401 || err?.status === 403) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("token");
+          localStorage.removeItem("authUser");
+          localStorage.removeItem("user");
+          setUser(null);
+        }
       })
       .finally(() => setLoading(false));
   }, []);

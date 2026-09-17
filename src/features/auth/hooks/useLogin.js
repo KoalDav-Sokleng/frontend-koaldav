@@ -1,16 +1,32 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import { isValidGmail } from "../utils/authValidation";
 
 export function useLogin() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({
+    email: location.state?.email || "",
+    password: "",
+  });
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState(
+    location.state?.successMessage || "",
+  );
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.email) {
+      setForm((prev) => ({ ...prev, email: location.state.email }));
+    }
+    if (location.state?.successMessage) {
+      setSuccessMessage(location.state.successMessage);
+    }
+  }, [location.state]);
 
   const handleChange = useCallback((e) => {
     setForm((prev) => ({
@@ -18,6 +34,7 @@ export function useLogin() {
       [e.target.name]: e.target.value,
     }));
     setError("");
+    setSuccessMessage("");
   }, []);
 
   const handleSubmit = useCallback(
@@ -25,9 +42,11 @@ export function useLogin() {
       e.preventDefault();
       if (loading) return;
 
-      const normalizedEmail = form.email.trim();
+      const normalizedEmail = form.email.trim().toLowerCase();
       if (!isValidGmail(normalizedEmail)) {
-        setError("Please enter a valid @gmail.com address (e.g. example@gmail.com).");
+        setError(
+          "Please enter a valid @gmail.com address (e.g. example@gmail.com).",
+        );
         return;
       }
 
@@ -37,6 +56,7 @@ export function useLogin() {
       }
 
       setError("");
+      setSuccessMessage("");
       setLoading(true);
 
       try {
@@ -53,19 +73,23 @@ export function useLogin() {
           });
         }
       } catch (err) {
-        setError(
-          err?.message || "Invalid email or password."
-        );
+        const backendMessage =
+          err?.details?.message ||
+          err?.details?.error ||
+          err?.details?.msg ||
+          err?.message;
+        setError(backendMessage || "Invalid email or password.");
       } finally {
         setLoading(false);
       }
     },
-    [login, loading, form, navigate]
+    [login, loading, form, navigate],
   );
 
   return {
     form,
     error,
+    successMessage,
     loading,
     showPassword,
     handleChange,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export function getInitials(firstName, lastName, fallbackText = "U") {
   const f = (firstName || "").trim();
@@ -29,6 +29,7 @@ export default function UserAvatar({
   className = "w-10 h-10 text-sm",
   textClassName = "",
   rounded = "rounded-full",
+  onClick,
 }) {
   const [imageError, setImageError] = useState(false);
 
@@ -41,16 +42,22 @@ export default function UserAvatar({
       ? user?.fullName?.split(" ").slice(1).join(" ")
       : "") ||
     "";
-  const mail = email || user?.email || "";
-  const avatarUrl = avatar !== undefined ? avatar : user?.avatar;
+  const avatarUrl =
+    avatar !== undefined ? avatar : user?.profileImageUrl || user?.avatar || "";
 
-  const initials = getInitials(fName, lName, mail || "User");
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarUrl]);
+
+  const initials = getInitials(fName, lName, email || user?.email || "User");
 
   if (avatarUrl && !imageError) {
     return (
       <img
         src={avatarUrl}
         alt={alt}
+        referrerPolicy="no-referrer"
+        onClick={onClick}
         onError={() => setImageError(true)}
         className={`${rounded} object-cover shrink-0 ${className}`}
       />
@@ -59,6 +66,7 @@ export default function UserAvatar({
 
   return (
     <div
+      onClick={onClick}
       className={`${rounded} bg-gradient-to-tr from-[#5B52E6] to-[#8B7CFF] text-white font-extrabold flex items-center justify-center shrink-0 shadow-xs select-none ${className}`}
       aria-label={alt}
     >

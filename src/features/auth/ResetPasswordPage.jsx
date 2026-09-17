@@ -12,7 +12,7 @@ import {
 import AuthLayout from "./AuthLayout";
 import OtpInput from "./components/OtpInput";
 import PasswordStrengthMeter from "./components/PasswordStrengthMeter";
-import { resetPassword, resendOtp, login } from "./api/authApi";
+import { resetPassword, resendOtp, verifyOtp } from "./api/authApi";
 import { isValidGmail, validatePassword } from "./utils/authValidation";
 import AuthThemeToggle from "./components/AuthThemeToggle";
 import { useAuthContext } from "../../context/AuthContext";
@@ -25,9 +25,15 @@ export default function ResetPasswordPage() {
   const [email] = useState(
     location.state?.email || sessionStorage.getItem("resetEmail") || "",
   );
-  const [otpCode, setOtpCode] = useState(location.state?.otpCode || "");
+  const [otpCode, setOtpCode] = useState(
+    location.state?.otpCode || sessionStorage.getItem("resetOtpCode") || "",
+  );
   const [otpVerified, setOtpVerified] = useState(
-    location.state?.verified || false,
+    Boolean(
+      location.state?.verified ||
+      (sessionStorage.getItem("resetOtpCode") &&
+        sessionStorage.getItem("resetOtpCode").length === 6),
+    ),
   );
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,9 +47,12 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (email) {
-      sessionStorage.setItem("resetEmail", email);
+      sessionStorage.setItem("resetEmail", email.trim());
     }
-  }, [email]);
+    if (otpCode) {
+      sessionStorage.setItem("resetOtpCode", otpCode.trim());
+    }
+  }, [email, otpCode]);
 
   useEffect(() => {
     let timer;
@@ -55,11 +64,12 @@ export default function ResetPasswordPage() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const handleOtpVerify = (e) => {
+  const handleOtpVerify = async (e) => {
     if (e) e.preventDefault();
     setError("");
 
-    if (!isValidGmail(email.trim())) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!isValidGmail(normalizedEmail)) {
       setError("Please enter a valid @gmail.com address.");
       return;
     }
@@ -69,18 +79,42 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setOtpVerified(true);
+    setLoading(true);
+    try {
+      await verifyOtp({ email: normalizedEmail, otpCode: otpCode.trim() });
+      sessionStorage.setItem("resetEmail", normalizedEmail);
+      sessionStorage.setItem("resetOtpCode", otpCode.trim());
+      setOtpVerified(true);
+    } catch (err) {
+      setError(
+        err?.message || "Invalid or expired OTP code. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setError("");
 
-    const normalizedEmail = email.trim();
+    const normalizedEmail = email.trim().toLowerCase();
     if (!isValidGmail(normalizedEmail)) {
       setError(
         "Email must be a valid @gmail.com address (e.g. example@gmail.com).",
       );
+      return;
+    }
+
+    const currentOtp = (
+      otpCode ||
+      sessionStorage.getItem("resetOtpCode") ||
+      ""
+    ).trim();
+
+    if (!currentOtp || currentOtp.length !== 6) {
+      setError("6-digit OTP is missing or expired. Please re-enter your code.");
+      setOtpVerified(false);
       return;
     }
 
@@ -99,12 +133,13 @@ export default function ResetPasswordPage() {
     try {
       const res = await resetPassword({
         email: normalizedEmail,
-        otpCode: otpCode.trim(),
+        otpCode: currentOtp,
         newPassword,
       });
 
-      // Clear reset session storage
+      // Clear reset session storage on success
       sessionStorage.removeItem("resetEmail");
+      sessionStorage.removeItem("resetOtpCode");
       sessionStorage.removeItem("otpEmail");
       sessionStorage.removeItem("otpFlow");
 
@@ -125,39 +160,27 @@ export default function ResetPasswordPage() {
         localStorage.setItem("authUser", JSON.stringify(userData));
         localStorage.setItem("user", JSON.stringify(userData));
         setUser(userData);
+        navigate("/", { replace: true });
       } else {
-        // Fallback: auto-login with the newly created password
-        try {
-          const loginData = await login({
+        // Redirect to login page with success notification and prefilled email
+        navigate("/login", {
+          replace: true,
+          state: {
+            successMessage:
+              "Password reset successfully! Please log in with your new password.",
             email: normalizedEmail,
-            password: newPassword,
-          });
-          const loginToken =
-            loginData?.token ||
-            loginData?.accessToken ||
-            loginData?.data?.token;
-          if (loginToken) {
-            localStorage.setItem("accessToken", loginToken);
-            localStorage.setItem("token", loginToken);
-            const user = loginData.user || loginData.data?.user || userData;
-            localStorage.setItem("authUser", JSON.stringify(user));
-            localStorage.setItem("user", JSON.stringify(user));
-            setUser(user);
-          }
-        } catch {
-          // If login requires anything else, fallback user state
-          setUser(userData);
-        }
+          },
+        });
       }
-
-      // Direct redirection to dashboard without requiring another OTP
-      navigate("/", { replace: true });
     } catch (requestError) {
       setError(
         requestError.message ||
           "Unable to reset your password. Please verify the OTP code.",
       );
-      if (requestError.message?.toLowerCase().includes("otp")) {
+      if (
+        requestError.message?.toLowerCase().includes("otp") ||
+        requestError.message?.toLowerCase().includes("code")
+      ) {
         setOtpVerified(false);
       }
     } finally {
@@ -248,10 +271,10 @@ export default function ResetPasswordPage() {
               {/* Verify Button */}
               <button
                 type="submit"
-                disabled={otpCode.length !== 6}
+                disabled={loading || otpCode.length !== 6}
                 className="w-full rounded-2xl bg-[#6C63FF] hover:bg-[#5B52E6] py-3.5 sm:py-4 font-bold text-white shadow-[0_12px_28px_rgba(108,99,255,0.35)] dark:shadow-[0_12px_28px_rgba(108,99,255,0.2)] transition-all duration-300 hover:shadow-[0_16px_32px_rgba(108,99,255,0.45)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                <span>Verify</span>
+                <span>{loading ? "Verifying..." : "Verify"}</span>
                 <ArrowRight size={18} strokeWidth={2.5} />
               </button>
 
@@ -403,7 +426,7 @@ export default function ResetPasswordPage() {
               disabled={loading}
               className="w-full rounded-2xl bg-[#6C63FF] hover:bg-[#5B52E6] py-3.5 font-bold text-white shadow-[0_12px_28px_rgba(108,99,255,0.35)] dark:shadow-[0_12px_28px_rgba(108,99,255,0.2)] transition-all duration-300 hover:shadow-[0_16px_32px_rgba(108,99,255,0.45)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer text-sm"
             >
-              {loading ? "Resetting..." : "Reset Password & Login"}
+              {loading ? "Resetting..." : "Reset Password"}
             </button>
 
             <p className="pt-2 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">

@@ -1,9 +1,94 @@
 const express = require('express');
 const cors = require('cors');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// A small on-disk user store for this Express development server. Passwords
+// are salted and hashed; neither the password nor its hash is ever returned.
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const TOKEN_SECRET = process.env.AUTH_SECRET || 'change-this-development-secret-before-production';
+
+function readUsers() {
+  try { return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8')); }
+  catch (error) { if (error.code === 'ENOENT') return []; throw error; }
+}
+
+function saveUsers(users) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+}
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  return `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`;
+}
+
+function passwordMatches(password, storedHash) {
+  const [salt, expectedHash] = String(storedHash).split(':');
+  if (!salt || !expectedHash) return false;
+  const actualHash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return crypto.timingSafeEqual(Buffer.from(actualHash, 'hex'), Buffer.from(expectedHash, 'hex'));
+}
+
+function signToken(userId) {
+  const payload = Buffer.from(JSON.stringify({ sub: userId, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 })).toString('base64url');
+  const signature = crypto.createHmac('sha256', TOKEN_SECRET).update(payload).digest('base64url');
+  return `${payload}.${signature}`;
+}
+
+function getTokenUser(req) {
+  const token = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+  if (!token) return null;
+  const [payload, signature] = token.split('.');
+  const expected = crypto.createHmac('sha256', TOKEN_SECRET).update(payload || '').digest('base64url');
+  if (!signature || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  try {
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return decoded.exp >= Date.now() ? readUsers().find((user) => user.id === decoded.sub) || null : null;
+  } catch { return null; }
+}
+
+function publicUser(user) {
+  const { passwordHash, ...safeUser } = user;
+  return safeUser;
+}
+
+function authResponse(user) {
+  return { token: signToken(user.id), user: publicUser(user), ...publicUser(user) };
+}
+
+app.post('/api/auth/register', (req, res) => {
+  const { firstName, lastName, email, password } = req.body || {};
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!firstName?.trim() || !lastName?.trim() || !normalizedEmail || !password) {
+    return res.status(400).json({ message: 'First name, last name, email, and password are required.' });
+  }
+  if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters long.' });
+  const users = readUsers();
+  if (users.some((user) => user.email === normalizedEmail)) return res.status(409).json({ message: 'An account with this email already exists.' });
+  const user = { id: crypto.randomUUID(), firstName: firstName.trim(), lastName: lastName.trim(), email: normalizedEmail, passwordHash: hashPassword(password), createdAt: new Date().toISOString() };
+  users.push(user);
+  saveUsers(users);
+  return res.status(201).json(authResponse(user));
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const user = readUsers().find((candidate) => candidate.email === String(email || '').trim().toLowerCase());
+  if (!user || !password || !passwordMatches(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email or password.' });
+  return res.json(authResponse(user));
+});
+
+app.get('/api/auth/me', (req, res) => {
+  const user = getTokenUser(req);
+  if (!user) return res.status(401).json({ message: 'Your session is invalid or has expired.' });
+  return res.json({ user: publicUser(user) });
+});
 
 // Mock database for goals and milestones
 let goals = [

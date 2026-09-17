@@ -84,9 +84,9 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
     <div
       className={`w-full rounded-2xl border p-5 text-left shadow-sm transition-all hover:shadow-md ${
         isMissed
-          ? "border-rose-200 bg-rose-50/20 hover:border-rose-300"
+          ? "border-rose-200 bg-rose-50/20 hover:border-rose-300 dark:border-rose-900/40 dark:bg-rose-950/20 dark:hover:border-rose-800"
           : isCompleted
-            ? "border-slate-200 bg-white hover:border-emerald-200"
+            ? "border-slate-200 bg-white hover:border-emerald-200 dark:border-slate-700 dark:bg-[#17171F] dark:hover:border-emerald-400"
             : "border-slate-200 bg-white hover:border-indigo-200 dark:border-slate-700 dark:bg-[#17171F] dark:hover:border-indigo-400"
       }`}
     >
@@ -95,10 +95,10 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isCompleted
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800"
                 : isMissed
-                  ? "bg-rose-50 text-rose-700 border border-rose-200"
-                  : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                  ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800"
+                  : "bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800"
             }`}
           >
             {isMissed && <AlertCircle className="h-3 w-3" />}
@@ -109,7 +109,7 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
             {goal.title}
           </h3>
           <div className="mt-4 flex items-center gap-3">
-            <span className="flex items-center gap-1 text-xs text-slate-400">
+            <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-400">
               <ListChecks className="h-3.5 w-3.5" />
               {milestoneCount === 0
                 ? "No milestones yet"
@@ -117,7 +117,9 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
             </span>
             <span
               className={`flex items-center gap-1 text-xs ${
-                isMissed ? "font-medium text-rose-600" : "text-slate-400"
+                isMissed
+                  ? "font-medium text-rose-600 dark:text-rose-400"
+                  : "text-slate-400 dark:text-slate-400"
               }`}
             >
               <Calendar className="h-3.5 w-3.5" />
@@ -131,18 +133,18 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
             <button
               onClick={() => setMenuOpen((open) => !open)}
               aria-label="Goal actions"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <MoreVertical className="h-4 w-4" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-slate-100 bg-white py-1 shadow-lg">
+              <div className="absolute right-0 z-10 mt-1 w-32 rounded-lg border border-slate-100 bg-white py-1 shadow-lg dark:border-slate-700 dark:bg-[#1E1B2E]">
                 <button
                   onClick={() => {
                     setMenuOpen(false);
                     onEdit();
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   <Pencil className="h-3.5 w-3.5" /> Edit
                 </button>
@@ -151,26 +153,28 @@ function GoalCard({ goal, onClick, onEdit, onDelete }) {
                     setMenuOpen(false);
                     onDelete();
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> Delete
                 </button>
               </div>
             )}
           </div>
-          <span className="mb-2 text-xs text-slate-400">Overall Progress</span>
+          <span className="mb-2 text-xs text-slate-400 dark:text-slate-400">
+            Overall Progress
+          </span>
           <span
             className={`text-lg font-semibold ${
               isCompleted
-                ? "text-emerald-600"
+                ? "text-emerald-600 dark:text-emerald-400"
                 : isMissed
-                  ? "text-rose-600"
-                  : "text-indigo-600"
+                  ? "text-rose-600 dark:text-rose-400"
+                  : "text-indigo-600 dark:text-[#A49DFF]"
             }`}
           >
             {progress}%
           </span>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
             <div
               className={`h-full rounded-full ${
                 isCompleted
@@ -225,13 +229,13 @@ function NewGoalModal({ onClose, onSave, goal }) {
         className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white shadow-xl dark:bg-[#17171F]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 pt-5 pb-4 dark:border-slate-700 dark:bg-[#17171F]">
+        <div className="sticky top-0 z-10 border-b border-slate-100 bg-white px-6 pt-5 pb-4 dark:border-slate-800 dark:bg-[#17171F]">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 {goal ? "Edit Goal" : "Create Goal"}
               </h2>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-400">
                 {goal
                   ? "Update your goal details."
                   : "Define your vision, then add milestones next."}
@@ -239,7 +243,7 @@ function NewGoalModal({ onClose, onSave, goal }) {
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -249,7 +253,7 @@ function NewGoalModal({ onClose, onSave, goal }) {
 
         <div className="space-y-4 px-6 py-5">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Goal Name
             </label>
             <input
@@ -260,15 +264,17 @@ function NewGoalModal({ onClose, onSave, goal }) {
                 if (titleError) setTitleError("");
               }}
               placeholder="e.g. Master React & Tailwind"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#242430] dark:text-white dark:placeholder:text-slate-500"
             />
             {titleError && (
-              <p className="mt-1 text-xs text-rose-500">{titleError}</p>
+              <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">
+                {titleError}
+              </p>
             )}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Target Date
             </label>
             <input
@@ -278,42 +284,48 @@ function NewGoalModal({ onClose, onSave, goal }) {
                 setDeadline(e.target.value);
                 if (dateError) setDateError("");
               }}
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 ${
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-slate-900 dark:text-white dark:bg-[#242430] focus:outline-none focus:ring-2 ${
                 dateError
-                  ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100"
-                  : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"
+                  ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100 dark:border-rose-800"
+                  : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100 dark:border-slate-700"
               }`}
             />
             {dateError && (
-              <p className="mt-1 text-xs text-rose-500">{dateError}</p>
+              <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">
+                {dateError}
+              </p>
             )}
           </div>
 
-          <div className="flex items-start gap-2 rounded-lg bg-indigo-50 px-3 py-2.5">
-            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
-            <p className="text-xs text-indigo-700">
+          <div className="flex items-start gap-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 px-3 py-2.5">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500 dark:text-indigo-400" />
+            <p className="text-xs text-indigo-700 dark:text-indigo-300">
               Specific, measurable, time-bound goals keep momentum and are
               easiest to track.
             </p>
           </div>
 
           {goal?.status === "MISSED" && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-              <p className="text-xs text-amber-800">
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <p className="text-xs text-amber-800 dark:text-amber-300">
                 Extending this goal's deadline to a future date will
                 automatically reactivate it back into your Active goals.
               </p>
             </div>
           )}
 
-          {saveError && <p className="text-xs text-rose-500">{saveError}</p>}
+          {saveError && (
+            <p className="text-xs text-rose-500 dark:text-rose-400">
+              {saveError}
+            </p>
+          )}
         </div>
 
-        <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4 dark:border-slate-700 dark:bg-[#17171F]">
+        <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4 dark:border-slate-800 dark:bg-[#17171F]">
           <button
             onClick={onClose}
-            className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700"
+            className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             <ArrowLeft className="h-4 w-4" /> Cancel
           </button>
@@ -380,13 +392,13 @@ function AddMilestoneModal({
         className="w-full max-w-sm rounded-2xl bg-white shadow-xl dark:bg-[#17171F]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between border-b border-slate-100 px-6 pt-5 pb-4">
-          <h2 className="text-lg font-semibold text-slate-900">
+        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 px-6 pt-5 pb-4">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
             {milestone ? "Edit Milestone" : "Add Milestone"}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -394,7 +406,7 @@ function AddMilestoneModal({
         </div>
         <div className="space-y-4 px-6 py-5">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Milestone Title
             </label>
             <input
@@ -409,15 +421,19 @@ function AddMilestoneModal({
                 if (e.key === "Enter") handleSave();
               }}
               placeholder="e.g. Wireframe & Prototype Design"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#242430] dark:text-white dark:placeholder:text-slate-500"
             />
-            {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
+            {error && (
+              <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">
+                {error}
+              </p>
+            )}
           </div>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 px-6 py-4">
           <button
             onClick={onClose}
-            className="text-sm font-medium text-slate-500 hover:text-slate-700"
+            className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             Cancel
           </button>
@@ -480,18 +496,18 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
         className="w-full max-w-sm rounded-2xl bg-white shadow-xl dark:bg-[#17171F]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between border-b border-slate-100 px-6 pt-5 pb-4">
+        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 px-6 pt-5 pb-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               Set Focus Duration
             </h2>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-400">
               How long do you want to focus on {milestoneTitle}?
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -505,8 +521,8 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
                 onClick={() => selectPreset(p)}
                 className={`rounded-full border px-3.5 py-1.5 text-sm font-medium ${
                   minutes === p
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                    : "border-slate-200 text-slate-600 hover:border-slate-300"
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-[#A49DFF] dark:border-indigo-500"
+                    : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600"
                 }`}
               >
                 {p}m
@@ -514,7 +530,7 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
             ))}
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-600">
+            <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-slate-300">
               Or set a custom duration (minutes)
             </label>
             <input
@@ -526,20 +542,24 @@ function FocusDurationModal({ milestoneTitle, onClose, onStart }) {
               value={customMinutes}
               onChange={(event) => handleCustomMinutes(event.target.value)}
               placeholder="e.g. 90"
-              className={`w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 ${error ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100"}`}
+              className={`w-full rounded-xl border bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 dark:bg-[#242430] dark:text-white dark:placeholder:text-slate-500 ${error ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100 dark:border-rose-800" : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-100 dark:border-slate-700"}`}
             />
-            {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
+            {error && (
+              <p className="mt-1 text-xs text-rose-500 dark:text-rose-400">
+                {error}
+              </p>
+            )}
           </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50 py-3 text-center">
-            <span className="text-2xl font-semibold tabular-nums text-slate-900">
+          <div className="rounded-xl border border-slate-100 bg-slate-50 py-3 text-center dark:border-slate-800 dark:bg-[#242430]">
+            <span className="text-2xl font-semibold tabular-nums text-slate-900 dark:text-white">
               {formatClock(minutes * 60)}
             </span>
           </div>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 px-6 py-4">
           <button
             onClick={onClose}
-            className="text-sm font-medium text-slate-500 hover:text-slate-700"
+            className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             Cancel
           </button>
@@ -694,18 +714,21 @@ function CongratsModal({ minutes, milestoneTitle, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl"
+        className="w-full max-w-sm rounded-2xl bg-white dark:bg-[#17171F] p-6 text-center shadow-xl dark:border dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-          <PartyPopper className="h-7 w-7 text-emerald-500" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/50">
+          <PartyPopper className="h-7 w-7 text-emerald-500 dark:text-emerald-400" />
         </div>
-        <h2 className="mt-4 text-lg font-semibold text-slate-900">
+        <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
           Nice work!
         </h2>
-        <p className="mt-1.5 text-sm text-slate-500">
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
           You completed {minutes} minute{minutes === 1 ? "" : "s"} of focus on{" "}
-          <span className="font-medium text-slate-700">{milestoneTitle}</span>.
+          <span className="font-medium text-slate-700 dark:text-slate-200">
+            {milestoneTitle}
+          </span>
+          .
         </p>
         <button
           onClick={onClose}
@@ -742,23 +765,23 @@ function GoalDetailPage({
       <div className="mx-auto max-w-3xl">
         <button
           onClick={onBack}
-          className="mb-6 flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700"
+          className="mb-6 flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Goals
         </button>
 
         {isMissed && (
-          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/70 p-4 sm:p-5">
+          <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50/70 dark:border-rose-900/40 dark:bg-rose-950/30 p-4 sm:p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
-                <div className="rounded-xl bg-rose-100 p-2 text-rose-600">
+                <div className="rounded-xl bg-rose-100 dark:bg-rose-900/60 p-2 text-rose-600 dark:text-rose-400">
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-rose-900">
+                  <h3 className="text-sm font-semibold text-rose-900 dark:text-rose-200">
                     Goal Deadline Passed (Missed)
                   </h3>
-                  <p className="mt-0.5 text-xs text-rose-700">
+                  <p className="mt-0.5 text-xs text-rose-700 dark:text-rose-400">
                     This goal is locked because its target date has passed.
                     Focus sessions and milestone completions are disabled.
                     Extend the deadline to a future date to reactivate this
@@ -777,16 +800,16 @@ function GoalDetailPage({
         )}
 
         {isCompleted && (
-          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 sm:p-5">
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-900/40 dark:bg-emerald-950/30 p-4 sm:p-5">
             <div className="flex items-start gap-3">
-              <div className="rounded-xl bg-emerald-100 p-2 text-emerald-600">
+              <div className="rounded-xl bg-emerald-100 dark:bg-emerald-900/60 p-2 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-emerald-900">
+                <h3 className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
                   Goal Completed! 🎉
                 </h3>
-                <p className="mt-0.5 text-xs text-emerald-700">
+                <p className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-400">
                   Congratulations! All milestones have been completed. This goal
                   is preserved in read-only history mode.
                 </p>
@@ -800,22 +823,24 @@ function GoalDetailPage({
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                 isCompleted
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800"
                   : isMissed
-                    ? "bg-rose-50 text-rose-700 border border-rose-200"
-                    : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                    ? "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800"
+                    : "bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800"
               }`}
             >
               {isMissed && <AlertCircle className="h-3 w-3" />}
               {isCompleted && <CheckCircle2 className="h-3 w-3" />}
               {status}
             </span>
-            <h1 className="mt-2 text-2xl font-semibold text-slate-900">
+            <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
               {goal.title}
             </h1>
             <p
               className={`mt-1 text-sm ${
-                isMissed ? "font-medium text-rose-600" : "text-slate-500"
+                isMissed
+                  ? "font-medium text-rose-600 dark:text-rose-400"
+                  : "text-slate-500 dark:text-slate-400"
               }`}
             >
               {formatDueDate(goal.deadline)}
@@ -826,15 +851,16 @@ function GoalDetailPage({
             <button
               disabled
               title="Goal is completed."
-              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 cursor-not-allowed"
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-950/50 dark:border-emerald-800 dark:text-emerald-300 cursor-not-allowed"
             >
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Completed
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />{" "}
+              Completed
             </button>
           ) : isMissed ? (
             <button
               disabled
               title="Goal deadline has passed. Extend deadline to add milestones."
-              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-400 cursor-not-allowed"
+              className="flex shrink-0 items-center gap-1.5 rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
             >
               <Lock className="h-4 w-4" /> Add Milestone
             </button>
@@ -854,26 +880,28 @@ function GoalDetailPage({
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search milestone title..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white dark:placeholder:text-slate-500"
           />
         </div>
 
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-[#17171F]">
           <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-medium text-slate-700">Overall Progress</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">
+              Overall Progress
+            </span>
             <span
               className={`font-semibold ${
                 isCompleted
-                  ? "text-emerald-600"
+                  ? "text-emerald-600 dark:text-emerald-400"
                   : isMissed
-                    ? "text-rose-600"
-                    : "text-indigo-600"
+                    ? "text-rose-600 dark:text-rose-400"
+                    : "text-indigo-600 dark:text-[#A49DFF]"
               }`}
             >
               {progress}%
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
             <div
               className={`h-full rounded-full ${
                 isCompleted
@@ -887,14 +915,14 @@ function GoalDetailPage({
           </div>
         </div>
 
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
           Milestones
         </h2>
 
         {goal.milestones.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center">
-            <ListChecks className="mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-14 text-center dark:border-slate-700 dark:bg-[#17171F]">
+            <ListChecks className="mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
               {searchTerm ? "No matching milestones" : "No milestones yet"}
             </p>
             {!searchTerm && !isMissed && !isCompleted && (
@@ -1263,7 +1291,7 @@ export default function ProjectGoalTab() {
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
               Your Goals
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Track, focus, and manage your progress across active, completed,
               and missed goals.
             </p>
@@ -1280,7 +1308,7 @@ export default function ProjectGoalTab() {
         </div>
 
         {/* 3-Tab Status Navigation (Microsoft Teams style) */}
-        <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+        <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
           {STATUS_TABS.map((tab) => {
             const isActive = status === tab.id;
             const Icon = tab.icon;
@@ -1308,8 +1336,8 @@ export default function ProjectGoalTab() {
                     isActive
                       ? "bg-white/20 text-white"
                       : isMissedTab && count > 0
-                        ? "bg-rose-100 text-rose-700"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                   }`}
                 >
                   {count}
@@ -1325,18 +1353,18 @@ export default function ProjectGoalTab() {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search goal title..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-[#17171F] dark:text-white dark:placeholder:text-slate-500"
           />
         </div>
 
         {filteredGoals.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center dark:border-slate-700 dark:bg-[#17171F]">
             {status === "MISSED" ? (
-              <CalendarX className="mb-3 h-8 w-8 text-rose-300" />
+              <CalendarX className="mb-3 h-8 w-8 text-rose-300 dark:text-rose-500" />
             ) : (
-              <CheckCircle2 className="mb-3 h-8 w-8 text-slate-300" />
+              <CheckCircle2 className="mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
             )}
-            <p className="text-sm font-medium text-slate-600">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
               {searchTerm
                 ? "No matching goals"
                 : status === "IN_PROGRESS"
@@ -1345,7 +1373,7 @@ export default function ProjectGoalTab() {
                     ? "No completed goals yet"
                     : "No missed goals"}
             </p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
               {searchTerm
                 ? "Try changing your search keywords."
                 : status === "IN_PROGRESS"

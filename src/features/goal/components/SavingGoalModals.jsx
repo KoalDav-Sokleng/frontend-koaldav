@@ -153,8 +153,8 @@ export function CreateSavingGoalModal({ open, onClose, onSubmit }) {
                     onClick={() => setIcon(opt.id)}
                     className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? "border-[#6C63FF] bg-[#F4F2FF] dark:bg-[#1E1B2E] text-[#6C63FF]"
-                        : "border-slate-200 dark:border-[#2A2A38] text-slate-500 hover:text-slate-900"
+                        ? "border-[#6C63FF] bg-[#F4F2FF] dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF]"
+                        : "border-slate-200 dark:border-[#2A2A38] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1A1A24]"
                     }`}
                   >
                     <IconComp size={20} />
@@ -353,8 +353,8 @@ export function EditSavingGoalModal({ open, goal, onClose, onSubmit }) {
                     onClick={() => setIcon(opt.id)}
                     className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
-                        ? "border-[#6C63FF] bg-[#F4F2FF] dark:bg-[#1E1B2E] text-[#6C63FF]"
-                        : "border-slate-200 dark:border-[#2A2A38] text-slate-500"
+                        ? "border-[#6C63FF] bg-[#F4F2FF] dark:bg-[#1E1B2E] text-[#6C63FF] dark:text-[#A49DFF]"
+                        : "border-slate-200 dark:border-[#2A2A38] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#1A1A24]"
                     }`}
                   >
                     <IconComp size={20} />

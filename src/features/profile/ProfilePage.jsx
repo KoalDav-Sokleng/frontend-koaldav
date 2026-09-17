@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useOutletContext, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
-  Menu,
   RefreshCw,
   User,
   Mail,
@@ -10,89 +9,138 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  Camera,
-  Upload,
   Link as LinkIcon,
   Trash2,
   Save,
   RotateCcw,
-  Sparkles,
+  Lock,
+  ExternalLink,
+  ClipboardPaste,
+  Upload,
+  Camera,
+  Image as ImageIcon,
 } from "lucide-react";
 import useProfile from "./hooks/useProfile";
 import UserAvatar from "../../components/UserAvatar";
 
 export default function ProfilePage() {
-  const outletContext = useOutletContext();
   const fileInputRef = useRef(null);
 
   const {
     profile,
     loading,
     saving,
+    uploadingImage,
     error,
     successMessage,
     clearMessages,
     refresh,
     updateProfile,
+    uploadImage,
+    deleteImage,
   } = useProfile();
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    avatar: "",
-  });
+  const [formData, setFormData] = useState(() => ({
+    firstName: profile?.firstName || "",
+    lastName: profile?.lastName || "",
+    email: profile?.email || "",
+    avatar: profile?.profileImageUrl || profile?.avatar || "",
+  }));
 
-  const [avatarMode, setAvatarMode] = useState("device"); // 'device' | 'url'
+  const [avatarTab, setAvatarTab] = useState("url"); // 'url' | 'device'
 
   // Sync loaded profile into form state
   useEffect(() => {
     if (profile) {
-      setFormData({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        email: profile.email || "",
-        avatar: profile.avatar || "",
-      });
+      setFormData((prev) => ({
+        firstName: profile.firstName ?? prev.firstName,
+        lastName: profile.lastName ?? prev.lastName,
+        email: profile.email ?? prev.email,
+        avatar:
+          profile.profileImageUrl !== undefined
+            ? profile.profileImageUrl
+            : profile.avatar !== undefined
+              ? profile.avatar
+              : prev.avatar,
+      }));
     }
   }, [profile]);
 
   const handleChange = (e) => {
     clearMessages();
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
-  // Handle local image file upload from device
-  const handleFileUpload = (e) => {
+  const handlePasteClipboard = async () => {
+    try {
+      if (navigator?.clipboard?.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && text.trim().startsWith("http")) {
+          clearMessages();
+          setFormData((prev) => ({
+            ...prev,
+            avatar: text.trim(),
+          }));
+        }
+      }
+    } catch {
+      // Ignore clipboard permission errors
+    }
+  };
+
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check size limit (e.g. 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be less than 5MB");
+      alert("Image size must be less than 5MB");
       return;
     }
 
     clearMessages();
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({
-        ...prev,
-        avatar: reader.result, // base64 string
-      }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const newAvatarUrl = await uploadImage(file);
+      if (newAvatarUrl) {
+        setFormData((prev) => ({
+          ...prev,
+          avatar: newAvatarUrl,
+        }));
+      }
+    } catch {
+      // Handled by hook
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
-  const handleRemoveAvatar = () => {
+  const handleDeleteImage = async () => {
     clearMessages();
-    setFormData((prev) => ({ ...prev, avatar: "" }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    try {
+      await deleteImage();
+      setFormData((prev) => ({
+        ...prev,
+        avatar: "",
+      }));
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch {
+      // Handled by hook
     }
+  };
+
+  const handleClearAvatar = () => {
+    clearMessages();
+    setFormData((prev) => ({
+      ...prev,
+      avatar: "",
+    }));
   };
 
   const handleReset = () => {
@@ -102,7 +150,7 @@ export default function ProfilePage() {
         firstName: profile.firstName || "",
         lastName: profile.lastName || "",
         email: profile.email || "",
-        avatar: profile.avatar || "",
+        avatar: profile.profileImageUrl || profile.avatar || "",
       });
     }
     if (fileInputRef.current) {
@@ -113,9 +161,13 @@ export default function ProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateProfile(formData);
-    } catch (err) {
-      // Error handled by hook
+      await updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        avatar: formData.avatar,
+      });
+    } catch {
+      // Handled by hook
     }
   };
 
@@ -140,15 +192,6 @@ export default function ProfilePage() {
       {/* ── Top Navigation Bar ── */}
       <div className="flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4 shrink-0 bg-white/80 dark:bg-[#12121A]/90 backdrop-blur-md gap-3 border-b border-[#ECEBF5] dark:border-[#1E1B2E] transition-colors sticky top-0 z-20">
         <div className="flex items-center gap-3 min-w-0">
-          {outletContext?.onMenuClick && (
-            <button
-              onClick={outletContext.onMenuClick}
-              className="lg:hidden p-2 rounded-xl bg-purple-50 dark:bg-[#1E1B2E] text-[#6C63FF] hover:bg-purple-100 dark:hover:bg-[#25223A] transition-colors shrink-0"
-              title="Open menu"
-            >
-              <Menu size={18} />
-            </button>
-          )}
           <div>
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <Link to="/" className="hover:text-[#6C63FF] transition-colors">
@@ -170,7 +213,8 @@ export default function ProfilePage() {
           <button
             onClick={refresh}
             title="Refresh profile"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl flex items-center gap-2 transition-all hover:bg-purple-50 dark:hover:bg-[#1E1B2E] bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A38] text-slate-600 dark:text-slate-300 hover:text-[#6C63FF] cursor-pointer text-xs font-semibold"
+            disabled={loading}
+            className="p-2 sm:px-3 sm:py-2 rounded-xl flex items-center gap-2 transition-all hover:bg-purple-50 dark:hover:bg-[#1E1B2E] bg-white dark:bg-[#1A1A24] border border-slate-200 dark:border-[#2A2A38] text-slate-600 dark:text-slate-300 hover:text-[#6C63FF] cursor-pointer text-xs font-semibold disabled:opacity-50"
           >
             <RefreshCw
               size={14}
@@ -185,7 +229,7 @@ export default function ProfilePage() {
       <div className="flex-1 p-4 sm:p-6 lg:p-8 max-w-4xl w-full mx-auto flex flex-col gap-6">
         {/* Success Alert */}
         {successMessage && (
-          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-3 text-emerald-800 dark:text-emerald-300 text-sm animate-fadeIn">
+          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-3 text-emerald-800 dark:text-emerald-300 text-sm animate-fadeIn shadow-xs">
             <CheckCircle2 size={20} className="shrink-0 text-emerald-500" />
             <span className="font-medium">{successMessage}</span>
           </div>
@@ -193,7 +237,7 @@ export default function ProfilePage() {
 
         {/* Error Alert */}
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-center gap-3 text-rose-800 dark:text-rose-300 text-sm">
+          <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 flex items-center gap-3 text-rose-800 dark:text-rose-300 text-sm shadow-xs">
             <AlertCircle size={20} className="shrink-0 text-rose-500" />
             <span className="font-medium">{String(error)}</span>
           </div>
@@ -209,24 +253,15 @@ export default function ProfilePage() {
           {/* Profile Info Row */}
           <div className="px-6 pb-6 pt-0 sm:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 mb-4">
-              {/* Avatar with click-to-upload */}
+              {/* Avatar Live Preview */}
               <div className="relative group self-start">
                 <UserAvatar
                   firstName={formData.firstName}
                   lastName={formData.lastName}
                   email={formData.email}
                   avatar={formData.avatar}
-                  className="w-24 h-24 sm:w-28 sm:h-28 text-3xl sm:text-4xl rounded-2xl ring-4 ring-white dark:ring-[#12121A] shadow-md cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
+                  className="w-24 h-24 sm:w-28 sm:h-28 text-3xl sm:text-4xl rounded-2xl ring-4 ring-white dark:ring-[#12121A] shadow-md"
                 />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-1 right-1 p-2 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] text-white shadow-lg transition-transform active:scale-95 cursor-pointer ring-2 ring-white dark:ring-[#12121A]"
-                  title="Upload avatar photo"
-                >
-                  <Camera size={14} />
-                </button>
               </div>
 
               {/* Status Badges */}
@@ -270,7 +305,7 @@ export default function ProfilePage() {
                 Personal Information
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Update your first name, last name, and profile picture.
+                Update your first name, last name, and profile photo.
               </p>
             </div>
           </div>
@@ -290,7 +325,7 @@ export default function ProfilePage() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    placeholder="e.g. Emily"
+                    placeholder="e.g. John"
                     className="w-full rounded-xl border border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#1A1A24] px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 transition-all font-medium"
                   />
                 </div>
@@ -308,66 +343,157 @@ export default function ProfilePage() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    placeholder="e.g. Rivera"
+                    placeholder="e.g. Doe"
                     className="w-full rounded-xl border border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#1A1A24] px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 transition-all font-medium"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Email Address */}
+            {/* Email Address (Read-only / Disabled from account) */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                Email Address
-              </label>
-              <div className="relative">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Email Address
+                </label>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500">
+                  <Lock size={11} />
+                  Read-only
+                </span>
+              </div>
+              <div className="relative flex items-center">
                 <input
                   type="email"
                   name="email"
-                  required
+                  readOnly
+                  disabled
+                  tabIndex={-1}
                   value={formData.email}
-                  onChange={handleChange}
-                  placeholder="you@gmail.com"
-                  className="w-full rounded-xl border border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#1A1A24] px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 transition-all font-medium"
+                  className="w-full rounded-xl border border-slate-200/80 dark:border-[#2A2A38] bg-slate-100/80 dark:bg-[#151520] px-4 py-2.5 text-sm text-slate-500 dark:text-slate-400 outline-none cursor-not-allowed font-medium select-none"
                 />
+                <div className="absolute right-3 text-slate-400 dark:text-slate-600 pointer-events-none">
+                  <Lock size={14} />
+                </div>
               </div>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                Your email is linked to your account security and cannot be
+                changed here.
+              </p>
             </div>
 
-            {/* Profile Avatar Options */}
+            {/* ── Profile Avatar Options (Dual Mode: Paste URL & Device Upload) ── */}
             <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Profile Avatar
+                  Profile Photo
                 </label>
-                <div className="flex items-center gap-2">
+                {/* Tab Switcher: Paste URL vs Upload Device */}
+                <div className="flex items-center bg-slate-100 dark:bg-[#1A1A24] p-1 rounded-xl border border-slate-200 dark:border-[#2A2A38]">
                   <button
                     type="button"
-                    onClick={() => setAvatarMode("device")}
-                    className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-                      avatarMode === "device"
-                        ? "bg-purple-100 dark:bg-[#1E1B2E] text-[#6C63FF]"
-                        : "text-slate-400 hover:text-slate-600"
+                    onClick={() => setAvatarTab("url")}
+                    className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                      avatarTab === "url"
+                        ? "bg-[#6C63FF] text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    Upload from device
+                    <LinkIcon size={12} />
+                    Paste Image URL
                   </button>
                   <button
                     type="button"
-                    onClick={() => setAvatarMode("url")}
-                    className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-                      avatarMode === "url"
-                        ? "bg-purple-100 dark:bg-[#1E1B2E] text-[#6C63FF]"
-                        : "text-slate-400 hover:text-slate-600"
+                    onClick={() => setAvatarTab("device")}
+                    className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+                      avatarTab === "device"
+                        ? "bg-[#6C63FF] text-white shadow-xs"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    Image URL
+                    <Upload size={12} />
+                    Upload from Device
                   </button>
                 </div>
               </div>
 
-              {avatarMode === "device" ? (
-                /* Device File Upload */
-                <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#15151E] flex flex-col sm:flex-row items-center gap-4">
+              {/* TAB 1: Paste Image URL */}
+              {avatarTab === "url" && (
+                <div className="p-4 rounded-2xl border border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#15151E] flex flex-col gap-3 animate-fadeIn">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    {/* Live Preview Avatar */}
+                    <div className="relative shrink-0">
+                      <UserAvatar
+                        firstName={formData.firstName}
+                        lastName={formData.lastName}
+                        email={formData.email}
+                        avatar={formData.avatar}
+                        className="w-14 h-14 text-lg rounded-2xl shadow-xs ring-2 ring-[#6C63FF]/20"
+                      />
+                    </div>
+
+                    {/* Input field with icon and paste button */}
+                    <div className="flex-1 w-full flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <LinkIcon size={14} />
+                        </div>
+                        <input
+                          type="url"
+                          name="avatar"
+                          value={formData.avatar}
+                          onChange={handleChange}
+                          placeholder="Paste image address: https://i.pinimg.com/... or https://..."
+                          className="w-full rounded-xl border border-slate-200 dark:border-[#2A2A38] bg-white dark:bg-[#1A1A24] pl-9 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 transition-all font-medium placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handlePasteClipboard}
+                        title="Paste from clipboard"
+                        className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A2A38] bg-white dark:bg-[#1A1A24] text-slate-600 dark:text-slate-300 hover:text-[#6C63FF] hover:border-[#6C63FF]/40 text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs"
+                      >
+                        <ClipboardPaste size={13} />
+                        <span className="hidden sm:inline">Paste</span>
+                      </button>
+
+                      {formData.avatar && (
+                        <button
+                          type="button"
+                          onClick={handleClearAvatar}
+                          title="Remove photo & use initials"
+                          className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-white dark:bg-[#1A1A24] text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold transition-colors shrink-0 cursor-pointer shadow-2xs"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Helper / Example note */}
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 px-1 pt-1 border-t border-slate-200/50 dark:border-[#242432]">
+                    <span className="truncate">
+                      Tip: Right-click any photo online, click &ldquo;Copy image
+                      address&rdquo;, then paste it above and click Save
+                      Changes.
+                    </span>
+                    {formData.avatar && (
+                      <a
+                        href={formData.avatar}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[#6C63FF] dark:text-[#818CF8] hover:underline font-medium shrink-0 ml-2"
+                      >
+                        Test link <ExternalLink size={10} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: Upload from Device */}
+              {avatarTab === "device" && (
+                <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#15151E] flex flex-col sm:flex-row items-center gap-4 animate-fadeIn">
                   <UserAvatar
                     firstName={formData.firstName}
                     lastName={formData.lastName}
@@ -378,11 +504,11 @@ export default function ProfilePage() {
                   <div className="flex-1 text-center sm:text-left">
                     <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                       {formData.avatar
-                        ? "Custom photo uploaded"
-                        : "Using purple initials avatar"}
+                        ? "Custom photo active"
+                        : "Using initials avatar"}
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      JPG, PNG, GIF or WEBP (Max 5MB)
+                      JPG, PNG, GIF, or WEBP (Max 5MB)
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -395,50 +521,34 @@ export default function ProfilePage() {
                     />
                     <button
                       type="button"
+                      disabled={uploadingImage}
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-4 py-2 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
-                      <Upload size={13} />
-                      Choose File
+                      {uploadingImage ? (
+                        <>
+                          <RefreshCw size={13} className="animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={13} />
+                          Upload from Device
+                        </>
+                      )}
                     </button>
                     {formData.avatar && (
                       <button
                         type="button"
-                        onClick={handleRemoveAvatar}
-                        className="p-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                        title="Remove photo & use initials"
+                        onClick={handleDeleteImage}
+                        disabled={saving}
+                        className="p-2 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Delete photo & use initials"
                       >
                         <Trash2 size={14} />
                       </button>
                     )}
                   </div>
-                </div>
-              ) : (
-                /* URL Input */
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                      <LinkIcon size={14} />
-                    </div>
-                    <input
-                      type="url"
-                      name="avatar"
-                      value={formData.avatar}
-                      onChange={handleChange}
-                      placeholder="https://example.com/photo.jpg"
-                      className="w-full rounded-xl border border-slate-200 dark:border-[#2A2A38] bg-slate-50/50 dark:bg-[#1A1A24] pl-9 pr-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-[#6C63FF] focus:ring-2 focus:ring-[#6C63FF]/20 transition-all font-medium"
-                    />
-                  </div>
-                  {formData.avatar && (
-                    <button
-                      type="button"
-                      onClick={handleRemoveAvatar}
-                      className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A2A38] text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1"
-                    >
-                      <Trash2 size={13} />
-                      Clear
-                    </button>
-                  )}
                 </div>
               )}
             </div>
@@ -448,7 +558,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={handleReset}
-                disabled={saving}
+                disabled={saving || loading}
                 className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-[#2A2A38] text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E1B2E] text-sm font-semibold transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
               >
                 <RotateCcw size={14} />
@@ -457,7 +567,7 @@ export default function ProfilePage() {
 
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || loading}
                 className="px-6 py-2.5 rounded-xl bg-[#6C63FF] hover:bg-[#5B52E6] text-white text-sm font-bold shadow-md shadow-[#6C63FF]/20 active:scale-95 transition-all cursor-pointer flex items-center gap-2 disabled:opacity-60"
               >
                 {saving ? (
